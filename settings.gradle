@@ -1,6 +1,6 @@
 rootProject.name = 'Craft-Creator'
 
-include("common")
+include("core")
 
 include("forge")
 include("forge:forge-1.18")
