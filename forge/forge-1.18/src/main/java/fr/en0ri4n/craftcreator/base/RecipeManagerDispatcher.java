@@ -1,11 +1,11 @@
 package fr.en0ri4n.craftcreator.base;
 
+import fr.en0ri4n.craftcreator.api.recipe.utils.RecipeInfos;
 import fr.en0ri4n.craftcreator.recipes.base.ModRecipeSerializer;
 import fr.en0ri4n.craftcreator.recipes.managers.BotaniaRecipesManager;
 import fr.en0ri4n.craftcreator.recipes.managers.CreateRecipesManager;
 import fr.en0ri4n.craftcreator.recipes.managers.MinecraftRecipeManager;
 import fr.en0ri4n.craftcreator.recipes.managers.ThermalRecipesManager;
-import fr.en0ri4n.craftcreator.recipes.utils.RecipeInfos;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.block.entity.BlockEntity;
 

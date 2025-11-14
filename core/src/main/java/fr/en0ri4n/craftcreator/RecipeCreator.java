@@ -1,6 +1,7 @@
 package fr.en0ri4n.craftcreator;
 
 
+import fr.en0ri4n.craftcreator.api.mod.SupportedMods;
 import fr.en0ri4n.craftcreator.container.slot.PositionnedSlot;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.Getter;

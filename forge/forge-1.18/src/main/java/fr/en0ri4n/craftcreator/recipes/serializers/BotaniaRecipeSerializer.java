@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.base.SupportedMods;
 import fr.en0ri4n.craftcreator.recipes.base.ModRecipeSerializer;
 import fr.en0ri4n.craftcreator.recipes.utils.CraftIngredients;
-import fr.en0ri4n.craftcreator.recipes.utils.RecipeEntry;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.block.Blocks;
 import vazkii.botania.api.BotaniaAPI;

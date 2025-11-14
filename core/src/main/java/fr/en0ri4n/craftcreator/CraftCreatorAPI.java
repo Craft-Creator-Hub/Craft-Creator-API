@@ -1,5 +1,11 @@
 package fr.en0ri4n.craftcreator;
 
+import fr.en0ri4n.craftcreator.api.platform.Platform;
+import fr.en0ri4n.craftcreator.api.recipe.model.Recipe;
+import fr.en0ri4n.craftcreator.api.recipe.serialize.CraftingTableRecipeSerializer;
+import fr.en0ri4n.craftcreator.api.recipe.utils.RecipeInfos;
+import fr.en0ri4n.craftcreator.api.recipe.serialize.RecipeInfosSerializer;
+import fr.en0ri4n.craftcreator.serialize.SerializerRegistry;
 import fr.en0ri4n.craftcreator.init.InitBlocks;
 import fr.en0ri4n.craftcreator.init.InitItemBase;
 import fr.en0ri4n.craftcreator.utils.CraftCreatorException;
@@ -7,19 +13,13 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.log4j.Logger;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 @Setter
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class CraftCreatorAPI
-{
-    @Getter
-    private static final Logger logger = Logger.getLogger(CraftCreatorAPI.class);
+public class CraftCreatorAPI {
 
     @Getter
     private static final CraftCreatorAPI instance = new CraftCreatorAPI();
@@ -28,19 +28,25 @@ public class CraftCreatorAPI
     @Getter
     private static final String kubeJsModId = "kubejs";
 
+    private Platform platform;
+
     private ReferenceBase references;
-    private SupportedModsBase supportedModsBase;
     private InitBlocks initBlocks;
     private InitItemBase initItemBase;
 
-    private final List<Object> required = Arrays.asList(supportedModsBase);
-
-    public void initialize() throws CraftCreatorException
-    {
-        if(initialized)
+    public void initialize(Platform platform, ReferenceBase references) throws CraftCreatorException {
+        if (initialized) {
             throw new CraftCreatorException("CraftCreatorAPI has already been initialized !");
+        }
         initialized = true;
 
+        Objects.requireNonNull(platform, "Platform must not be null");
+        this.platform = platform;
 
+        Objects.requireNonNull(references, "References must not be null");
+        this.references = references;
+
+        // register serializers
+        SerializerRegistry.register(RecipeInfos.class, new RecipeInfosSerializer());
     }
 }

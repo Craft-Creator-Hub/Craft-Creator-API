@@ -1,179 +1,156 @@
 package fr.en0ri4n.craftcreator.api.recipe.utils;
 
-import fr.en0ri4n.craftcreator.impl.block.CCBlock;
-import fr.en0ri4n.craftcreator.impl.fluid.CCFluid;
-import fr.en0ri4n.craftcreator.utils.HasRegistryName;
 import fr.en0ri4n.craftcreator.utils.Identifier;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+/**
+ * Pure data representation of a single recipe entry (item/block/fluid/tag).
+ */
 @Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class RecipeEntry
-{
-    private final boolean isTag;
-    private final Identifier registryName;
+@AllArgsConstructor
+public final class RecipeEntry {
+
+    /** true if this is a tag reference ("forge:ingots/iron"), false for a concrete registry entry. */
+    private final boolean tag;
+
+    /** Registry name or tag id, e.g. "minecraft:iron_ingot" or "forge:ingots/iron". */
+    private final Identifier id;
+
+    /** Amount / count. For fluids, you interpret this as amount in mB, etc. */
     private final int count;
 
-    public boolean hasLuck()
-    {
-        return false;
+    /** 0.0–1.0; mostly used on outputs. 1.0 = guaranteed. */
+    private final double chance;
+
+    /** True if the referenced thing is a block (used e.g. in some Botania/Thermal datapacks). */
+    private final boolean block;
+
+    /** True if the referenced thing is a fluid. */
+    private final boolean fluid;
+
+    /* -------------------------------------------------------------------------
+     * Convenience queries
+     * ---------------------------------------------------------------------- */
+
+    public boolean hasLuck() {
+        return chance != 1.0D;
     }
 
-    public boolean isBlock()
-    {
-        return false;
+    /* -------------------------------------------------------------------------
+     * Static factories (for readability)
+     * ---------------------------------------------------------------------- */
+
+    // Items
+
+    public static RecipeEntry item(Identifier id, int count) {
+        return new RecipeEntry(false, id, count, 1.0D, false, false);
     }
 
-    public static abstract class InputBase<T extends HasRegistryName> extends RecipeEntry
-    {
-        public InputBase(boolean isTag, Identifier registryName, int count)
-        {
-            super(isTag, registryName, count);
-        }
-
-        public abstract T getItem();
+    public static RecipeEntry item(Identifier id, int count, double chance) {
+        return new RecipeEntry(false, id, count, chance, false, false);
     }
 
-    public static abstract class FluidInputBase<Fluid extends CCFluid> extends InputBase<Fluid>
-    {
-        public FluidInputBase(Fluid fluid, int amount)
-        {
-            super(false, fluid.getRegistryName(), amount);
-        }
-
-        public abstract Fluid getFluid();
-
-        public int getAmount()
-        {
-            return getCount();
-        }
+    public static RecipeEntry itemTag(Identifier tagId, int count) {
+        return new RecipeEntry(true, tagId, count, 1.0D, false, false);
     }
 
-    public static abstract class BlockInputBase<Block extends CCBlock> extends InputBase<Block>
-    {
-        public BlockInputBase(Identifier registryName)
-        {
-            super(false, registryName, 1);
-        }
-
-        @Override
-        public boolean isBlock()
-        {
-            return true;
-        }
-
-        public abstract Block getBlock();
+    public static RecipeEntry itemTag(Identifier tagId, int count, double chance) {
+        return new RecipeEntry(true, tagId, count, chance, false, false);
     }
 
-    public static abstract class Output<T extends HasRegistryName> extends RecipeEntry
-    {
-        public Output(Identifier registryName, int count)
-        {
-            super(false, registryName, count);
-        }
+    // Blocks
 
-        public abstract T getItem();
+    public static RecipeEntry block(Identifier id) {
+        return new RecipeEntry(false, id, 1, 1.0D, true, false);
     }
 
-    public static abstract class FluidOutputBase<Fluid extends CCFluid> extends Output<Fluid>
-    {
-        public FluidOutputBase(Fluid fluid, int amount)
-        {
-            super(fluid.getRegistryName(), amount);
-        }
-
-        public abstract Fluid getFluid();
-
-        public int getAmount()
-        {
-            return getCount();
-        }
+    public static RecipeEntry block(Identifier id, int count) {
+        return new RecipeEntry(false, id, count, 1.0D, true, false);
     }
 
-    public static abstract class BlockOutput<Block extends CCBlock> extends Output<Block>
-    {
-        public BlockOutput(Identifier registryName)
-        {
-            super(registryName, 1);
-        }
+    // Fluids
 
-        public abstract Block getBlock();
+    public static RecipeEntry fluid(Identifier id, int amount) {
+        return new RecipeEntry(false, id, amount, 1.0D, false, true);
     }
 
-    public static abstract class LuckedOutputBase<Item extends HasRegistryName> extends Output<Item>
-    {
-        @Getter
-        private final double chance;
+    public static RecipeEntry fluid(Identifier id, int amount, double chance) {
+        return new RecipeEntry(false, id, amount, chance, false, true);
+    }
 
-        public LuckedOutputBase(Identifier registryName, int count, double chance)
-        {
-            super(registryName, count);
-            this.chance = chance;
+    /* -------------------------------------------------------------------------
+     * Multi-input / multi-output containers
+     * ---------------------------------------------------------------------- */
+
+    @Getter
+    public static final class MultiInput {
+        private final List<RecipeEntry> entries = new ArrayList<>();
+
+        public MultiInput add(RecipeEntry entry) {
+            if (entry != null) entries.add(entry);
+            return this;
         }
 
-        @Override
-        public boolean hasLuck()
-        {
-            return true;
+        public MultiInput addAll(List<RecipeEntry> entries) {
+            if (entries != null) this.entries.addAll(entries);
+            return this;
+        }
+
+        public RecipeEntry get(int index) {
+            return entries.get(index);
+        }
+
+        public int size() {
+            return entries.size();
+        }
+
+        public boolean isEmpty() {
+            return entries.isEmpty();
+        }
+
+        public List<RecipeEntry> asList() {
+            return Collections.unmodifiableList(entries);
         }
     }
 
     @Getter
-    public static class MultiEntry<Recipe extends RecipeEntry>
-    {
-        private final List<Recipe> entries;
+    public static final class MultiOutput {
+        private final List<RecipeEntry> entries = new ArrayList<>();
 
-        public MultiEntry()
-        {
-            this.entries = new ArrayList<>();
-        }
-
-        public MultiEntry<Recipe> add(Recipe entry)
-        {
-            this.entries.add(entry);
+        public MultiOutput add(RecipeEntry entry) {
+            if (entry != null) entries.add(entry);
             return this;
         }
 
-        public Recipe get(int index)
-        {
+        public MultiOutput addAll(List<RecipeEntry> entries) {
+            if (entries != null) this.entries.addAll(entries);
+            return this;
+        }
+
+        public RecipeEntry get(int index) {
             return entries.get(index);
         }
 
-        public int size()
-        {
+        public int size() {
             return entries.size();
         }
 
-        public boolean isEmpty()
-        {
-            return size() <= 0;
+        public boolean isEmpty() {
+            return entries.isEmpty();
         }
 
-    }
-
-    public static class MultiInput<Item extends HasRegistryName> extends MultiEntry<InputBase<Item>>
-    {
-        public List<InputBase<Item>> getInputs()
-        {
-            return this.getEntries();
-        }
-    }
-
-    public static class MultiOutput<Item extends HasRegistryName> extends MultiEntry<Output<Item>>
-    {
-        public List<Output<Item>> getOutputs()
-        {
-            return getEntries();
+        public List<RecipeEntry> asList() {
+            return Collections.unmodifiableList(entries);
         }
 
-        public Output<Item> getOneOutput()
-        {
-            return this.getOutputs().stream().findFirst().orElse(null);
+        /** Convenience for serializers that only support a single output. */
+        public RecipeEntry getOneOutput() {
+            return entries.isEmpty() ? null : entries.get(0);
         }
     }
 }

@@ -1,18 +1,11 @@
-package fr.en0ri4n.craftcreator.api.recipe.manager;
+package fr.en0ri4n.craftcreator.api.recipe;
 
 //import fr.en0ri4n.craftcreator.AbstractRecipeCreator;
-import fr.en0ri4n.craftcreator.container.slot.CCSlot;
-import fr.en0ri4n.craftcreator.api.serializer.ModRecipeManager;
-import fr.en0ri4n.craftcreator.api.recipe.utils.RecipeEntry;
-import fr.en0ri4n.craftcreator.api.recipe.utils.RecipeInfos;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-import java.util.Map;
-
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class RecipeManagerBase
+public abstract class   RecipeManager
 {
 //    /**
 //     * Main method to create a recipe called by the {@link fr.en0ri4n.craftcreator.base.RecipeManagerDispatcher}

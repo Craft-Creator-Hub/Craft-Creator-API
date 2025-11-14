@@ -6,7 +6,6 @@ import fr.en0ri4n.craftcreator.References;
 import fr.en0ri4n.craftcreator.base.ModRecipeCreators;
 import fr.en0ri4n.craftcreator.container.CreateRecipeCreatorContainer;
 import fr.en0ri4n.craftcreator.container.slot.utils.PositionnedSlot;
-import fr.en0ri4n.craftcreator.recipes.utils.RecipeInfos;
 import fr.en0ri4n.craftcreator.screen.container.base.MultiScreenModRecipeCreatorScreen;
 import fr.en0ri4n.craftcreator.screen.widgets.RecipeEntryWidget;
 import fr.en0ri4n.craftcreator.utils.PairValues;

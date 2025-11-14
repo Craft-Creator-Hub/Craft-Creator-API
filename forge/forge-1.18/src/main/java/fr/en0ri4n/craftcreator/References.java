@@ -1,6 +1,7 @@
 package fr.en0ri4n.craftcreator;
 
 
+import fr.en0ri4n.craftcreator.utils.Identifier;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -10,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
  * <p>
  * This class contains all the references of the mod.
  */
-public class References
+public class References implements ReferenceBase
 {
     /**
      * The mod id
@@ -46,5 +47,25 @@ public class References
     public static ResourceLocation getLoc(String path)
     {
         return new ResourceLocation(MOD_ID, path);
+    }
+
+    @Override
+    public String getModId() {
+        return MOD_ID;
+    }
+
+    @Override
+    public String getModName() {
+        return MOD_NAME;
+    }
+
+    @Override
+    public String getModVersion() {
+        return VERSION;
+    }
+
+    @Override
+    public Identifier getTranslation(String key) {
+        return null;
     }
 }

@@ -10,7 +10,6 @@ import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.base.SupportedMods;
 import fr.en0ri4n.craftcreator.recipes.base.ModRecipeSerializer;
 import fr.en0ri4n.craftcreator.recipes.utils.CraftIngredients;
-import fr.en0ri4n.craftcreator.recipes.utils.RecipeEntry;
 import fr.en0ri4n.craftcreator.utils.Utils;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;

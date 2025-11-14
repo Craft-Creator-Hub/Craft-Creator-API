@@ -3,26 +3,21 @@ package fr.en0ri4n.craftcreator;
 import fr.en0ri4n.craftcreator.api.ClientUtils;
 import fr.en0ri4n.craftcreator.commands.TestRecipesCommand;
 import fr.en0ri4n.craftcreator.init.*;
-import fr.en0ri4n.craftcreator.recipes.kubejs.KubeJSManager;
+import fr.en0ri4n.craftcreator.platform.ForgePlatform;
 import fr.en0ri4n.craftcreator.screen.container.BotaniaRecipeCreatorScreen;
 import fr.en0ri4n.craftcreator.screen.container.CreateRecipeCreatorScreen;
 import fr.en0ri4n.craftcreator.screen.container.MinecraftRecipeCreatorScreen;
 import fr.en0ri4n.craftcreator.screen.container.ThermalRecipeCreatorScreen;
-import fr.en0ri4n.craftcreator.utils.ClientDispatcher;
+import fr.en0ri4n.craftcreator.utils.CraftCreatorException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ClientRegistry;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,23 +28,12 @@ public class CraftCreator
 
     public static MinecraftServer SERVER;
 
-    public CraftCreator()
-    {
-        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+    private ForgePlatform platform;
 
-        bus.addListener(this::clientSetup);
+    public CraftCreator() throws CraftCreatorException {
+        platform = new ForgePlatform();
 
-        DistExecutor.safeRunWhenOn(Dist.CLIENT, ClientDispatcher::get);
-
-        MinecraftForge.EVENT_BUS.register(this);
-
-        InitBlocks.BLOCKS.register(bus);
-        InitContainers.CONTAINERS.register(bus);
-        InitItems.ITEMS.register(bus);
-        InitTileEntities.TILE_ENTITIES.register(bus);
-
-        InitPackets.initNetwork();
-        KubeJSManager.initialize();
+        CraftCreatorAPI.getInstance().initialize(platform, new References());
     }
 
     public void clientSetup(FMLClientSetupEvent event)

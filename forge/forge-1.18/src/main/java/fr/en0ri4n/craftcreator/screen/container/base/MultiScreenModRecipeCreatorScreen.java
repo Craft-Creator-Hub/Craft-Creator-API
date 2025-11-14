@@ -14,7 +14,6 @@ import fr.en0ri4n.craftcreator.packets.CreateRecipePacket;
 import fr.en0ri4n.craftcreator.packets.RetrieveRecipeCreatorTileDataServerPacket;
 import fr.en0ri4n.craftcreator.packets.UpdateRecipeCreatorTileDataServerPacket;
 import fr.en0ri4n.craftcreator.recipes.base.ModRecipeSerializer;
-import fr.en0ri4n.craftcreator.recipes.utils.RecipeInfos;
 import fr.en0ri4n.craftcreator.screen.widgets.ButtonGrid;
 import fr.en0ri4n.craftcreator.screen.widgets.NumberDataFieldWidget;
 import fr.en0ri4n.craftcreator.screen.widgets.buttons.ExecuteButton;

@@ -8,7 +8,6 @@ import com.simibubi.create.content.processing.recipe.ProcessingOutput;
 import fr.en0ri4n.craftcreator.base.SupportedMods;
 import fr.en0ri4n.craftcreator.recipes.base.ModRecipeSerializer;
 import fr.en0ri4n.craftcreator.recipes.utils.CraftIngredients;
-import fr.en0ri4n.craftcreator.recipes.utils.RecipeEntry;
 import net.minecraft.world.item.crafting.Recipe;
 
 // TODO: add support for fixed size recipes in RecipeEntryWidget to prevent the user from adding more than one ingredient

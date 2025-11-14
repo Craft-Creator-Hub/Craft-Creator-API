@@ -9,7 +9,6 @@ import fr.en0ri4n.craftcreator.recipes.kubejs.KubeJSHelper;
 import fr.en0ri4n.craftcreator.recipes.kubejs.KubeJSModifiedRecipe;
 import fr.en0ri4n.craftcreator.recipes.utils.CraftIngredients;
 import fr.en0ri4n.craftcreator.recipes.utils.DatapackHelper;
-import fr.en0ri4n.craftcreator.recipes.utils.RecipeEntry;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;

@@ -4,8 +4,6 @@ import fr.en0ri4n.craftcreator.base.RecipeCreator;
 import fr.en0ri4n.craftcreator.recipes.base.BaseRecipesManager;
 import fr.en0ri4n.craftcreator.recipes.base.ModRecipeSerializer;
 import fr.en0ri4n.craftcreator.recipes.serializers.CreateRecipeSerializer;
-import fr.en0ri4n.craftcreator.recipes.utils.RecipeEntry;
-import fr.en0ri4n.craftcreator.recipes.utils.RecipeInfos;
 import fr.en0ri4n.craftcreator.screen.widgets.RecipeEntryWidget;
 import fr.en0ri4n.craftcreator.tileentity.CreateRecipeCreatorTile;
 import net.minecraft.world.inventory.Slot;

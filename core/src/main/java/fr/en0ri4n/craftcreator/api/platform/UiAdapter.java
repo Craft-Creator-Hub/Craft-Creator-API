@@ -1,0 +1,34 @@
+package fr.en0ri4n.craftcreator.api.platform;
+
+import fr.en0ri4n.craftcreator.api.ui.ClickContext;
+import fr.en0ri4n.craftcreator.api.ui.ScreenRenderer;
+
+/**
+ * Platform-side helper for wiring core click actions to actual UI events.
+ * Core never calls this directly to add buttons; loaders use it.
+ *
+ * <{@code
+ * // Example: hook a vanilla button to a core click action
+ * @Override
+ * protected void init() {
+ *     super.init();
+ *     this.addRenderableWidget(new Button(this.width / 2 - 50, this.height / 2, 100, 20,
+ *             new TextComponent("Export Recipes"),
+ *             btn -> {
+ *                 var platform = CraftCreatorAPI.getInstance().getPlatform();
+ *                 var ui = platform.getUiAdapter();
+ *                 var ctx = ui.buildContext(* pass e.g. this or player *);
+ *                 var action = CraftCreatorGuiActions.runDatapackExport();
+ *                 ui.schedule(action, ctx);
+ *             }));
+ * }
+ * }
+ */
+public interface UiAdapter {
+
+    void openScreen(ScreenRenderer renderer);
+
+    ClickContext buildContext(Object rawEventOrScreen); // platform decides what this is
+
+    void schedule(ClickContext.ClickActionWithContext action, ClickContext ctx);
+}

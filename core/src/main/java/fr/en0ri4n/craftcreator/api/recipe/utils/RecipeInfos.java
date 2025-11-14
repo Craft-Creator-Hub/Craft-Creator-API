@@ -1,248 +1,203 @@
 package fr.en0ri4n.craftcreator.api.recipe.utils;
 
-import com.google.gson.*;
 import fr.en0ri4n.craftcreator.utils.Identifier;
-import fr.en0ri4n.craftcreator.utils.JsonSerializable;
 import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public class RecipeInfos implements JsonSerializable
-{
+/**
+ * Loader-agnostic container for extra recipe parameters (time, energy, flags, etc.).
+ * <p/>
+ * JSON (de)serialization is handled by RecipeInfosSerializer via JsonSerializer/SerializerRegistry.
+ */
+public class RecipeInfos {
+
     @Getter
     private final List<RecipeParameter> parameters;
 
-    private RecipeInfos()
-    {
+    private RecipeInfos() {
         this.parameters = new ArrayList<>();
     }
 
-    public static RecipeInfos create()
-    {
+    public static RecipeInfos create() {
         return new RecipeInfos();
     }
 
-    public void addParameter(RecipeParameter parameter)
-    {
+    /* -------------------------------------------------------------------------
+     * Parameter management
+     * ---------------------------------------------------------------------- */
+
+    public void addParameter(RecipeParameter parameter) {
+        Objects.requireNonNull(parameter, "parameter");
+        removeParameter(parameter.getName());
         this.parameters.add(parameter);
     }
 
-    public RecipeParameter getRecipeParameter(String name)
-    {
-        return this.parameters.stream().filter(p -> p.getName().equals(name)).findFirst().orElse(RecipeParameter.EMPTY);
+    public void removeParameter(String name) {
+        parameters.removeIf(p -> Objects.equals(p.getName(), name));
     }
 
-    public Number getValue(String name)
-    {
-        RecipeParameter parameter = this.getRecipeParameter(name);
-        return parameter instanceof RecipeParameterNumber ? ((RecipeParameterNumber) parameter).getNumberValue() : -1;
+    public RecipeParameter getRecipeParameter(String name) {
+        return this.parameters.stream()
+                .filter(p -> p.getName().equals(name))
+                .findFirst()
+                .orElse(RecipeParameter.EMPTY);
     }
 
-    public boolean getBoolean(String name)
-    {
-        RecipeParameter parameter = this.getRecipeParameter(name);
-        return parameter instanceof RecipeParameterBoolean && ((RecipeParameterBoolean) parameter).getBoolean();
+    public boolean contains(String name) {
+        return getRecipeParameter(name) != RecipeParameter.EMPTY;
     }
 
-    public Map<Integer, Identifier> getMap(String name)
-    {
-        RecipeParameter parameter = this.getRecipeParameter(name);
-        return parameter instanceof RecipeParameterMap ? ((RecipeParameterMap) parameter).getMap() : new HashMap<>();
+    /* -------------------------------------------------------------------------
+     * Type-safe getters
+     * ---------------------------------------------------------------------- */
+
+    public Number getNumber(String name, Number def) {
+        RecipeParameter p = getRecipeParameter(name);
+        return p instanceof RecipeParameterNumber ? ((RecipeParameterNumber) p).getNumberValue() : def;
     }
 
-    public List<Integer> getList(String name)
-    {
-        RecipeParameter parameter = this.getRecipeParameter(name);
-        return parameter instanceof RecipeParameterIntList ? ((RecipeParameterIntList) parameter).getList() : new ArrayList<>();
+    public int getInt(String name, int def) {
+        Number n = getNumber(name, def);
+        return n == null ? def : n.intValue();
     }
 
-    public boolean contains(String name)
-    {
-        return this.getRecipeParameter(name) != null;
+    public double getDouble(String name, double def) {
+        Number n = getNumber(name, def);
+        return n == null ? def : n.doubleValue();
     }
 
-    @Override
-    public void deserialize(JsonObject jsonObject)
-    {
-
+    public boolean getBoolean(String name, boolean def) {
+        RecipeParameter p = getRecipeParameter(name);
+        return p instanceof RecipeParameterBoolean ? ((RecipeParameterBoolean) p).getBoolean() : def;
     }
 
-    @Override
-    public JsonObject serialize()
-    {
-        JsonObject jsonObject = new JsonObject();
-
-        for(RecipeParameter parameter : this.parameters)
-        {
-            JsonObject parameterObj = new JsonObject();
-            parameterObj.addProperty("type", parameter.getType().name());
-
-            switch(parameter.getType())
-            {
-                case NUMBER:
-                    RecipeParameterNumber number = (RecipeParameterNumber) parameter;
-                    parameterObj.addProperty("is_double", number.isDouble());
-                    parameterObj.addProperty("value", number.isDouble() ? number.getNumberValue().doubleValue() : number.getNumberValue().intValue());
-                    break;
-                case BOOLEAN:
-                    RecipeParameterBoolean bool = (RecipeParameterBoolean) parameter;
-                    parameterObj.addProperty("value", bool.getBoolean());
-                    break;
-                case INT_LIST:
-                    RecipeParameterIntList intList = (RecipeParameterIntList) parameter;
-                    JsonArray jsonArray = new JsonArray();
-                    intList.getList().forEach(jsonArray::add);
-                    parameterObj.add("value", jsonArray);
-                    break;
-                case MAP:
-                    RecipeParameterMap map = (RecipeParameterMap) parameter;
-                    JsonObject obj = new JsonObject();
-                    for(Map.Entry<Integer, Identifier> entry : map.getMap().entrySet())
-                        obj.addProperty(entry.getKey().toString(), entry.getValue().toString());
-                    parameterObj.add("value", obj);
-                    break;
-            }
-
-            jsonObject.add(parameter.getName(), parameterObj);
-        }
-        return jsonObject;
+    public Map<Integer, Identifier> getMap(String name) {
+        RecipeParameter p = getRecipeParameter(name);
+        return p instanceof RecipeParameterMap ? ((RecipeParameterMap) p).getMap() : Collections.emptyMap();
     }
 
-    public static RecipeInfos deserialize(String json)
-    {
-        RecipeInfos recipeInfos = RecipeInfos.create();
-
-        final Gson gson = new GsonBuilder().setStrictness(Strictness.LENIENT).create();
-        JsonObject jsonObject = gson.fromJson(json, JsonObject.class);
-
-        for(String keys : jsonObject.entrySet().stream().map(Map.Entry::getKey).toList())
-        {
-            JsonObject parameterCompound = jsonObject.get(keys).getAsJsonObject();
-            RecipeParameterType type = RecipeParameterType.valueOf(parameterCompound.get("type").getAsString());
-
-            switch(type)
-            {
-                case NUMBER:
-                    boolean isDouble = parameterCompound.get("is_double").getAsBoolean();
-                    Number value = isDouble ? parameterCompound.get("value").getAsDouble() : parameterCompound.get("value").getAsInt();
-                    recipeInfos.addParameter(new RecipeParameterNumber(keys, value, isDouble));
-                    break;
-                case BOOLEAN:
-                    recipeInfos.addParameter(new RecipeParameterBoolean(keys, parameterCompound.get("value").getAsBoolean()));
-                    break;
-                case INT_LIST:
-                    JsonArray arrayNBT = parameterCompound.get("value").getAsJsonArray();
-                    List<Integer> list = new ArrayList<>();
-                    for(JsonElement i : arrayNBT)
-                        list.add(i.getAsInt());
-                    recipeInfos.addParameter(new RecipeParameterIntList(keys, list));
-                    break;
-                case MAP:
-                    JsonObject obj = parameterCompound.get("value").getAsJsonObject();
-                    Map<Integer, Identifier> map = new HashMap<>();
-//                    for(String key : obj.entrySet().stream().map(Map.Entry::getKey).toList())
-//                        map.put(Integer.valueOf(key), CommonUtils.parse(obj.get(key).getAsString()));
-                    recipeInfos.addParameter(new RecipeParameterMap(keys, map));
-                    break;
-            }
-        }
-
-        return recipeInfos;
+    public List<Integer> getList(String name) {
+        RecipeParameter p = getRecipeParameter(name);
+        return p instanceof RecipeParameterIntList ? ((RecipeParameterIntList) p).getList() : Collections.emptyList();
     }
+
+    /* -------------------------------------------------------------------------
+     * Type-safe setters
+     * ---------------------------------------------------------------------- */
+
+    public RecipeInfos setInt(String name, int value) {
+        addParameter(new RecipeParameterNumber(name, value, false));
+        return this;
+    }
+
+    public RecipeInfos setDouble(String name, double value) {
+        addParameter(new RecipeParameterNumber(name, value, true));
+        return this;
+    }
+
+    public RecipeInfos setNumber(String name, Number value, boolean isDouble) {
+        addParameter(new RecipeParameterNumber(name, value, isDouble));
+        return this;
+    }
+
+    public RecipeInfos setBoolean(String name, boolean value) {
+        addParameter(new RecipeParameterBoolean(name, value));
+        return this;
+    }
+
+    public RecipeInfos setMap(String name, Map<Integer, Identifier> map) {
+        addParameter(new RecipeParameterMap(name, new HashMap<>(map)));
+        return this;
+    }
+
+    public RecipeInfos setList(String name, List<Integer> list) {
+        addParameter(new RecipeParameterIntList(name, new ArrayList<>(list)));
+        return this;
+    }
+
+    /* -------------------------------------------------------------------------
+     * Parameter types
+     * ---------------------------------------------------------------------- */
 
     @Getter
-    public static class RecipeParameter
-    {
+    public static class RecipeParameter {
         public static final RecipeParameter EMPTY = new RecipeParameter(RecipeParameterType.EMPTY, "empty");
+
         private final RecipeParameterType type;
         private final String name;
 
-        public RecipeParameter(RecipeParameterType type, String name)
-        {
+        public RecipeParameter(RecipeParameterType type, String name) {
             this.type = type;
             this.name = name;
         }
     }
 
-    public static class RecipeParameterNumber extends RecipeParameter
-    {
+    public static class RecipeParameterNumber extends RecipeParameter {
         private final Number value;
         @Getter
         private final boolean isDouble;
 
-        public RecipeParameterNumber(String name, Number value, boolean isDouble)
-        {
+        public RecipeParameterNumber(String name, Number value, boolean isDouble) {
             super(RecipeParameterType.NUMBER, name);
             this.value = value;
             this.isDouble = isDouble;
         }
 
-        public Number getNumberValue()
-        {
+        public Number getNumberValue() {
             return value;
         }
     }
 
-    public static class RecipeParameterBoolean extends RecipeParameter
-    {
+    public static class RecipeParameterBoolean extends RecipeParameter {
         private final boolean value;
 
-        public RecipeParameterBoolean(String name, boolean value)
-        {
+        public RecipeParameterBoolean(String name, boolean value) {
             super(RecipeParameterType.BOOLEAN, name);
             this.value = value;
         }
 
-        public boolean getBoolean()
-        {
+        public boolean getBoolean() {
             return value;
         }
     }
 
     @Getter
-    public static class RecipeParameterMap extends RecipeParameter
-    {
+    public static class RecipeParameterMap extends RecipeParameter {
         private final Map<Integer, Identifier> map;
 
-        public RecipeParameterMap(String name, Map<Integer, Identifier> map)
-        {
+        public RecipeParameterMap(String name, Map<Integer, Identifier> map) {
             super(RecipeParameterType.MAP, name);
             this.map = map;
         }
     }
 
     @Getter
-    public static class RecipeParameterIntList extends RecipeParameter
-    {
+    public static class RecipeParameterIntList extends RecipeParameter {
         private final List<Integer> list;
 
-        public RecipeParameterIntList(String name, List<Integer> list)
-        {
+        public RecipeParameterIntList(String name, List<Integer> list) {
             super(RecipeParameterType.INT_LIST, name);
             this.list = list;
         }
     }
 
-    public static class Parameters
-    {
-        // Base Parameters
+    public static class Parameters {
+        // Base
         public static final String SHAPED = "shaped";
         public static final String TAGGED_SLOTS = "tagged_slots";
         public static final String KUBEJS_RECIPE = "kubejs_recipe";
         public static final String NBT_SLOTS = "nbt_slots";
 
-        // Vanilla Parameters
+        // Vanilla
         public static final String EXPERIENCE = "experience";
         public static final String COOKING_TIME = "cooking_time";
 
-        // Botania Parameters
+        // Botania
         public static final String TIME = "time";
         public static final String MANA = "mana";
 
-        // Thermal Parameters
+        // Thermal
         public static final String ENERGY = "energy";
         public static final String ENERGY_MOD = "energy_mod";
         public static final String WATER_MOD = "water_mod";
@@ -253,8 +208,7 @@ public class RecipeInfos implements JsonSerializable
         public static final String CHANCE = "chance";
     }
 
-    public enum RecipeParameterType
-    {
+    public enum RecipeParameterType {
         NUMBER,
         STRING,
         BOOLEAN,

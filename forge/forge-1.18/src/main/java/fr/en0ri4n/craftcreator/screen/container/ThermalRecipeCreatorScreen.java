@@ -9,7 +9,6 @@ import fr.en0ri4n.craftcreator.container.slot.utils.PositionnedSlot;
 import fr.en0ri4n.craftcreator.init.InitPackets;
 import fr.en0ri4n.craftcreator.packets.RetrieveRecipeCreatorTileDataServerPacket;
 import fr.en0ri4n.craftcreator.packets.UpdateRecipeCreatorTileDataServerPacket;
-import fr.en0ri4n.craftcreator.recipes.utils.RecipeInfos;
 import fr.en0ri4n.craftcreator.screen.container.base.MultiScreenModRecipeCreatorScreen;
 import fr.en0ri4n.craftcreator.screen.widgets.buttons.SimpleCheckBox;
 import fr.en0ri4n.craftcreator.utils.SlotHelper;

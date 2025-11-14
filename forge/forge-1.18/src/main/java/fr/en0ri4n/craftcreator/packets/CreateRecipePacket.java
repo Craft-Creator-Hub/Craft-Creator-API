@@ -8,7 +8,6 @@ import fr.en0ri4n.craftcreator.base.RecipeManagerDispatcher;
 import fr.en0ri4n.craftcreator.base.SupportedMods;
 import fr.en0ri4n.craftcreator.container.base.CommonContainer;
 import fr.en0ri4n.craftcreator.recipes.base.ModRecipeSerializer;
-import fr.en0ri4n.craftcreator.recipes.utils.RecipeInfos;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;

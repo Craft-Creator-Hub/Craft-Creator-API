@@ -1,12 +1,14 @@
 package fr.en0ri4n.craftcreator.recipes.serializers;
 
 import com.google.gson.JsonObject;
+import fr.en0ri4n.craftcreator.api.recipe.model.CraftingGrid;
+import fr.en0ri4n.craftcreator.api.recipe.serialize.CraftingTableRecipeSerializer;
+import fr.en0ri4n.craftcreator.api.recipe.utils.RecipeEntry;
 import fr.en0ri4n.craftcreator.base.RecipeCreator;
 import fr.en0ri4n.craftcreator.base.SupportedMods;
 import fr.en0ri4n.craftcreator.recipes.base.ModRecipeSerializer;
 import fr.en0ri4n.craftcreator.recipes.utils.CraftIngredients;
-import fr.en0ri4n.craftcreator.recipes.utils.DatapackHelper;
-import fr.en0ri4n.craftcreator.recipes.utils.RecipeEntry;
+import fr.en0ri4n.craftcreator.utils.Identifier;
 import io.netty.buffer.Unpooled;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -58,36 +60,79 @@ public class MinecraftRecipeSerializer extends ModRecipeSerializer
         addRecipeTo(obj, RecipeType.SMITHING, output.getRegistryName());
     }
 
-    public void serializeCraftingTableRecipe(ItemStack output, List<SlotItemHandler> slots, Map<Integer, ResourceLocation> taggedSlots, List<Integer> nbtSlots, boolean shaped)
-    {
-        JsonObject obj = createBaseJson(RecipeType.CRAFTING);
+    public void serializeCraftingTableRecipe(ItemStack output,
+                                             List<SlotItemHandler> slots,
+                                             Map<Integer, ResourceLocation> taggedSlots,
+                                             List<Integer> nbtSlots,
+                                             boolean shaped) {
+        Identifier resultId = Identifier.from(output.getItem().getRegistryName().toString());
 
-        if(shaped)
-        {
-            obj.addProperty("type", "minecraft:crafting_shaped");
-            obj.add("pattern", DatapackHelper.createPatternJson(slots, taggedSlots));
-            obj.add("key", DatapackHelper.createSymbolKeys(slots, taggedSlots));
-        }
-        else
-        {
-            obj.addProperty("type", "minecraft:crafting_shapeless");
-            obj.add("ingredients", DatapackHelper.createShapelessIngredientsJsonArray(slots, taggedSlots));
+        JsonObject obj;
+        if (shaped) {
+            CraftingGrid grid = new CraftingGrid(3, 3);
+            for (int slotIndex = 0; slotIndex < 9; slotIndex++) {
+                SlotItemHandler slot = slots.get(slotIndex);
+                ItemStack stack = slot.getItem();
+                if (stack.isEmpty()) continue;
+
+                int x = slotIndex % 3;
+                int y = slotIndex / 3;
+
+                ResourceLocation rl = stack.getItem().getRegistryName();
+                Identifier id = Identifier.from(rl.getNamespace(), rl.getPath());
+
+                boolean isTag = taggedSlots.containsKey(slotIndex);
+                Identifier tagId = isTag
+                        ? Identifier.from(taggedSlots.get(slotIndex).getNamespace(), taggedSlots.get(slotIndex).getPath())
+                        : id;
+
+                RecipeEntry entry = isTag
+                        ? RecipeEntry.itemTag(tagId, stack.getCount())
+                        : RecipeEntry.item(id, stack.getCount());
+
+                grid.set(x, y, entry);
+            }
+
+            obj = CraftingTableRecipeSerializer.shaped(resultId, output.getCount(), grid);
+        } else {
+            RecipeEntry.MultiInput inputs = new RecipeEntry.MultiInput();
+            for (int slotIndex = 0; slotIndex < 9; slotIndex++) {
+                SlotItemHandler slot = slots.get(slotIndex);
+                ItemStack stack = slot.getItem();
+                if (stack.isEmpty()) continue;
+
+                ResourceLocation rl = stack.getItem().getRegistryName();
+                Identifier id = Identifier.from(rl.getNamespace(), rl.getPath());
+
+                boolean isTag = taggedSlots.containsKey(slotIndex);
+                Identifier tagId = isTag
+                        ? Identifier.from(taggedSlots.get(slotIndex).getNamespace(), taggedSlots.get(slotIndex).getPath())
+                        : id;
+
+                RecipeEntry entry = isTag
+                        ? RecipeEntry.itemTag(tagId, stack.getCount())
+                        : RecipeEntry.item(id, stack.getCount());
+
+                inputs.add(entry);
+            }
+
+            obj = CraftingTableRecipeSerializer.shapeless(resultId, output.getCount(), inputs);
         }
 
-        JsonObject resultObj = new JsonObject();
-        resultObj.addProperty("item", output.getItem().getRegistryName().toString());
-        resultObj.addProperty("count", output.getCount());
-        if(nbtSlots.contains(9))
-        {
+        // NBT handling is loader-specific, so keep it here:
+        if (nbtSlots.contains(9)) {
+            JsonObject resultObj = obj.getAsJsonObject("result");
             resultObj.addProperty("type", "forge:nbt");
             CompoundTag nbt = slots.get(9).getItem().getTag();
-            nbt.remove("display"); // Remove display to avoid issues with the name and lore (no one wants to see a lore like +NBT in the recipe)
-            resultObj.addProperty("nbt", escape(nbt.toString(), false));
+            if (nbt != null) {
+                nbt.remove("display");
+                resultObj.addProperty("nbt", escape(nbt.toString(), false));
+            }
         }
-        obj.add("result", resultObj);
 
         addRecipeTo(obj, RecipeType.CRAFTING, output.getItem().getRegistryName());
     }
+
 
     @Override
     public CraftIngredients getInput(Recipe<?> recipe)

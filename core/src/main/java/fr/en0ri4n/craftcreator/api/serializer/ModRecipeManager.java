@@ -1,19 +1,5 @@
 package fr.en0ri4n.craftcreator.api.serializer;
 
-import com.google.gson.*;
-import fr.en0ri4n.craftcreator.SupportedMods;
-import fr.en0ri4n.craftcreator.api.recipe.KubeJSRecipe;
-import fr.en0ri4n.craftcreator.api.recipe.utils.KubeJSRecipeAction;
-import fr.en0ri4n.craftcreator.api.recipe.utils.RecipeEntry;
-import fr.en0ri4n.craftcreator.utils.Feedback;
-import fr.en0ri4n.craftcreator.utils.SerializerType;
-
-import java.awt.*;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 public abstract class ModRecipeManager
 {
 //    private static final List<Character> TO_ESCAPE_PATTERN = Arrays.asList('$', '(', ')', '{', '}', '[', ']', '.');

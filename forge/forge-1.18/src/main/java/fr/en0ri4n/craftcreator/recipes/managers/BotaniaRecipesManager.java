@@ -1,12 +1,11 @@
 package fr.en0ri4n.craftcreator.recipes.managers;
 
+import fr.en0ri4n.craftcreator.api.recipe.utils.RecipeInfos;
 import fr.en0ri4n.craftcreator.base.RecipeCreator;
 import fr.en0ri4n.craftcreator.container.slot.utils.PositionnedSlot;
 import fr.en0ri4n.craftcreator.recipes.base.BaseRecipesManager;
 import fr.en0ri4n.craftcreator.recipes.base.ModRecipeSerializer;
 import fr.en0ri4n.craftcreator.recipes.serializers.BotaniaRecipeSerializer;
-import fr.en0ri4n.craftcreator.recipes.utils.RecipeEntry;
-import fr.en0ri4n.craftcreator.recipes.utils.RecipeInfos;
 import fr.en0ri4n.craftcreator.utils.SlotHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.Slot;
