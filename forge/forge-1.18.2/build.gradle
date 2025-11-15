@@ -17,13 +17,11 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.parchmentmc.librarian.forgegradle'
 
 version = "${craftcreator_version}"
-group = 'fr.eno.craftcreator' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = 'fr.en0ri4n.craftcreator' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "${craftcreator_name}"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
-
-evaluationDependsOn(':core') // en tête du fichier, si vous incluez les outputs de core
 
 minecraft {
 
@@ -85,6 +83,16 @@ minecraft {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
+// Ensure core's compiled output is part of the forge module classpath (compile and runtime)
+sourceSets {
+    main {
+        // add core outputs to compile/runtime classpath so run tasks can see core classes
+        compileClasspath += project(':core').sourceSets.main.output
+        runtimeClasspath += project(':core').sourceSets.main.output
+    }
+}
+
+
 repositories {
     // Curseforge Maven
     maven {
@@ -109,7 +117,7 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
 
-    implementation project(":core")
+    implementation project(':core')
 
     // JEI
     // compile against the JEI API but do not include it at runtime
@@ -146,6 +154,8 @@ dependencies {
 
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+
+    dependsOn(':core:classes')
 
     from(project(":core").sourceSets.main.output)
 

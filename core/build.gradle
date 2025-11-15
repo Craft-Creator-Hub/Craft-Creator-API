@@ -1,7 +1,7 @@
-apply plugin: 'java'
-apply plugin: 'maven-publish'
-apply plugin: 'java-library'
-
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
 
 version = "${craftcreator_version}"
 group = 'fr.en0ri4n.craftcreator'
@@ -10,7 +10,7 @@ println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty '
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21) // if you require Java 21
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -20,12 +20,20 @@ repositories {
 
 dependencies {
     // GSON
-    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'com.google.code.gson:gson:2.11.0'
 
     // Lombok
-    compileOnly 'org.projectlombok:lombok:1.18.28'
-    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
     // Log4j
     implementation 'log4j:log4j:1.2.17'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
 }
