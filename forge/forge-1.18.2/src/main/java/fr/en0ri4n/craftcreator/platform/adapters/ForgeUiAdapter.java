@@ -1,18 +1,18 @@
-package fr.en0ri4n.craftcreator.platform;
+package fr.en0ri4n.craftcreator.platform.adapters;
 
 import fr.en0ri4n.craftcreator.api.platform.UiAdapter;
 import fr.en0ri4n.craftcreator.api.ui.ClickContext;
-import fr.en0ri4n.craftcreator.api.ui.ScreenRenderer;
-import fr.en0ri4n.craftcreator.platform.ui.ForgeWrappedScreen;
+import fr.en0ri4n.craftcreator.api.ui.CoreScreenDefinition;
+import fr.en0ri4n.craftcreator.screen.ForgeScreenRenderer;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import net.minecraft.client.Minecraft;
 
 public class ForgeUiAdapter implements UiAdapter {
 
     @Override
-    public void openScreen(ScreenRenderer renderer) {
+    public void openScreen(CoreScreenDefinition screenDefinition) {
         Minecraft.getInstance().tell(() ->
-                Minecraft.getInstance().setScreen(new ForgeWrappedScreen(renderer))
+                Minecraft.getInstance().setScreen(new ForgeScreenRenderer(screenDefinition))
         );
     }
 

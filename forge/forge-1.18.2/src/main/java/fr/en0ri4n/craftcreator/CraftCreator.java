@@ -2,7 +2,7 @@ package fr.en0ri4n.craftcreator;
 
 import fr.en0ri4n.craftcreator.api.init.InitManager;
 import fr.en0ri4n.craftcreator.platform.Forge1182Platform;
-import fr.en0ri4n.craftcreator.platform.ForgeRegistryAdapter;
+import fr.en0ri4n.craftcreator.platform.adapters.ForgeRegistryAdapter;
 import fr.en0ri4n.craftcreator.utils.CraftCreatorException;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -26,6 +26,7 @@ public class CraftCreator
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         adapter.getBlockDeferredRegister().register(modEventBus);
         adapter.getItemDeferredRegister().register(modEventBus);
+        adapter.getMenuDeferredRegister().register(modEventBus);
         // Now run core-registered definitions through the adapter.
         // This will call adapter.registerBlock/registerItem/registerBlockItem which
         // register entries with the DeferredRegister instances above.

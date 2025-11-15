@@ -10,7 +10,7 @@ public interface ContainerModel {
     CoreScreenDefinition getScreenDefinition();
 
     // Called when a button is pressed
-    void onButtonAction(String elementId, String actionId);
+    void onButtonPressed(String elementId, String actionId);
 
     // Called when dropdown selection changes
     void onDropdownChanged(String elementId, int index, String value);
@@ -18,6 +18,30 @@ public interface ContainerModel {
     // Optional: text inputs
     default void onTextChanged(String elementId, String value) {}
 
-    // Optional: slot click hook
-    default void onSlotClick(Identifier slotId, int button, boolean shift) {}
+    static void addPlayerInventorySlots(ContainerLayout layout, int startX, int startY) {
+        // Player inventory (3 rows of 9)
+        int idx = 9; // skip hotbar
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 9; col++) {
+                layout.addSlot(new SlotDescriptor(
+                        SlotDescriptor.SlotType.PLAYER,
+                        startX + col * 18,
+                        startY + row * 18,
+                        idx++,
+                        Identifier.fromMod("player_inv_" + idx)
+                ));
+            }
+        }
+
+        // Hotbar (1 row of 9)
+        for (int i = 0; i < 9; i++) {
+            layout.addSlot(new SlotDescriptor(
+                    SlotDescriptor.SlotType.HOTBAR,
+                    startX + i * 18,
+                    startY + 58,
+                    i,
+                    Identifier.fromMod("hotbar_" + i)
+            ));
+        }
+    }
 }

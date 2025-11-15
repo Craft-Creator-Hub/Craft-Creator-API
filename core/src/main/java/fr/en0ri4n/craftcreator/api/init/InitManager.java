@@ -107,6 +107,8 @@ public final class InitManager {
             adapter.registerItem(i);
         }
 
+        adapter.registerMenus();
+
         locked = true;
     }
 }

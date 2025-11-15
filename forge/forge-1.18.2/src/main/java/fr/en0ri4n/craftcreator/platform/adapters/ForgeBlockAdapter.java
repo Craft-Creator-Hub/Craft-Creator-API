@@ -1,4 +1,4 @@
-package fr.en0ri4n.craftcreator.platform;
+package fr.en0ri4n.craftcreator.platform.adapters;
 
 import fr.en0ri4n.craftcreator.api.block.CCBlock;
 import fr.en0ri4n.craftcreator.api.platform.BlockAdapter;

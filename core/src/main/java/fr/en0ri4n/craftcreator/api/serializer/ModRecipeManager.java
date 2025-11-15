@@ -52,7 +52,7 @@ public abstract class ModRecipeManager
 //        switch(currentSerializeType)
 //        {
 //            case KUBE_JS:
-//                feedback = KubeJSHelper.addRecipeToFile(this.mod, recipeType, KubeJSModifiedRecipe.BASE_LINE.format(KubeJSModifiedRecipe.KubeJSModifiedRecipeType.CUSTOM, GSON.toJson(recipeJson)));
+//                feedback = KubeJSHelper.addRecipeToFile(this.mod, recipeType, KubeJSModifiedRecipe.BASE_LINE.format(KubeJSModifiedRecipe.KubeJSModifiedRecipeType.RECIPE_CREATOR_INPUT, GSON.toJson(recipeJson)));
 //                break;
 //            default:
 //            case MINECRAFT_DATAPACK:

@@ -24,6 +24,11 @@ public interface RegistryAdapter {
     void registerItem(CoreItemDef item);
 
     /**
+     * Register all menus (containers) used by the mod.
+     */
+    void registerMenus();
+
+    /**
      * Convenience: register a block and its block-item (if present) in a single step.
      * Platform adapters may implement this by registering the block and then creating
      * registering the item that wraps the block, or by delegating to registerBlock/registerItem.

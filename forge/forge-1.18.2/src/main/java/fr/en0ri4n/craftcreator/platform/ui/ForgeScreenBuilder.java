@@ -19,9 +19,6 @@ import net.minecraft.network.chat.TextComponent;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Builds a Forge 1.18 Screen from a CoreScreenDefinition.
- */
 public final class ForgeScreenBuilder {
 
     private ForgeScreenBuilder() {}

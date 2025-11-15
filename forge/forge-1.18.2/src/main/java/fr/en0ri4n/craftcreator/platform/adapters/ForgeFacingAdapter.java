@@ -1,7 +1,6 @@
-package fr.en0ri4n.craftcreator.platform;
+package fr.en0ri4n.craftcreator.platform.adapters;
 
 import fr.en0ri4n.craftcreator.api.init.shapes.CoreFacing;
-import fr.en0ri4n.craftcreator.api.init.shapes.CoreVoxelShape;
 import fr.en0ri4n.craftcreator.api.platform.FacingAdapter;
 import net.minecraft.core.Direction;
 
