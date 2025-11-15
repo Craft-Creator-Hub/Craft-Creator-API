@@ -86,15 +86,6 @@ minecraft {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-// Ensure core's compiled output is part of the forge module classpath (compile and runtime)
-sourceSets {
-    main {
-        // add core outputs to compile/runtime classpath so run tasks can see core classes
-        compileClasspath += project(':core').sourceSets.main.output
-        runtimeClasspath += project(':core').sourceSets.main.output
-    }
-}
-
 
 repositories {
     // Curseforge Maven

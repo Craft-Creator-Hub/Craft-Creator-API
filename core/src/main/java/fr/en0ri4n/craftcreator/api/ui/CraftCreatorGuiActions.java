@@ -1,6 +1,4 @@
-package fr.en0ri4n.craftcreator.api;
-
-import fr.en0ri4n.craftcreator.api.ui.ClickContext;
+package fr.en0ri4n.craftcreator.api.ui;
 
 public final class CraftCreatorGuiActions {
 

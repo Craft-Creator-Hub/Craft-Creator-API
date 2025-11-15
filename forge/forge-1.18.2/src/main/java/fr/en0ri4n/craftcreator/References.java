@@ -1,6 +1,7 @@
 package fr.en0ri4n.craftcreator;
 
 
+import fr.en0ri4n.craftcreator.api.CCReferences;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -11,12 +12,8 @@ import net.minecraft.resources.ResourceLocation;
  * <p>
  * This class contains all the references of the mod.
  */
-public class References implements CCReferences
+public class References extends CCReferences
 {
-    /**
-     * The mod id
-     */
-    public static final String MOD_ID = "craftcreator";
     /**
      * The mod name
      */
@@ -47,11 +44,6 @@ public class References implements CCReferences
     public static ResourceLocation getLoc(String path)
     {
         return new ResourceLocation(MOD_ID, path);
-    }
-
-    @Override
-    public String getModId() {
-        return MOD_ID;
     }
 
     @Override

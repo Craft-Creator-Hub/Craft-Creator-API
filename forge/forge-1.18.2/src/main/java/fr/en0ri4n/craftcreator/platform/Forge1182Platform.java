@@ -1,32 +1,28 @@
 package fr.en0ri4n.craftcreator.platform;
 
+import fr.en0ri4n.craftcreator.CraftCreator;
+import fr.en0ri4n.craftcreator.api.init.RegistryAdapter;
 import fr.en0ri4n.craftcreator.api.mod.SupportedModLoaders;
 import fr.en0ri4n.craftcreator.api.mod.SupportedMods;
 import fr.en0ri4n.craftcreator.api.platform.*;
 import fr.en0ri4n.craftcreator.utils.Identifier;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Path;
 
-public class ForgePlatform implements Platform {
-
-    private static final ForgePlatform instance = new ForgePlatform();
-    public static ForgePlatform getInstance() {
-        return instance;
-    }
-
-    private final Logger logger = LogManager.getLogger("CraftCreator");
+public class Forge1182Platform implements Platform {
 
     private final LoggerFacade loggerFacade = new LoggerFacade() {
-        @Override public void info(String msg)  { logger.info(msg); }
-        @Override public void warn(String msg)  { logger.warn(msg); }
-        @Override public void error(String msg) { logger.error(msg); }
-        @Override public void error(String msg, Throwable t) { logger.error(msg, t); }
+        @Override public void info(String msg)  { CraftCreator.LOGGER.info(msg); }
+        @Override public void warn(String msg)  { CraftCreator.LOGGER.warn(msg); }
+        @Override public void error(String msg) { CraftCreator.LOGGER.error(msg); }
+        @Override public void error(String msg, Throwable t) { CraftCreator.LOGGER.error(msg, t); }
     };
 
     private final PathsProvider paths = new PathsProvider() {
@@ -75,6 +71,12 @@ public class ForgePlatform implements Platform {
     private final UiAdapter uiAdapter = new ForgeUiAdapter();
 
     private final ContainerUiAdapter containerUiAdapter = new ForgeContainerUiAdapter();
+
+    private final RegistryAdapter registryAdapter = new ForgeRegistryAdapter();
+
+    private final BlockShapeAdapter<VoxelShape> blockShapeAdapter = new ForgeBlockShapeAdapter();
+
+    private final FacingAdapter<Direction> facingAdapter = new ForgeFacingAdapter();
 
     @Override
     public SupportedModLoaders getLoader() {
@@ -130,5 +132,23 @@ public class ForgePlatform implements Platform {
     @Override
     public UiAdapter getUiAdapter() {
         return uiAdapter;
+    }
+
+    @Override
+    public RegistryAdapter getRegistryAdapter()
+    {
+        return registryAdapter;
+    }
+
+    @Override
+    public BlockShapeAdapter<VoxelShape> getBlockShapeAdapter()
+    {
+        return blockShapeAdapter;
+    }
+
+    @Override
+    public FacingAdapter<Direction> getFacingAdapter()
+    {
+        return facingAdapter;
     }
 }

@@ -1,4 +1,4 @@
-package fr.en0ri4n.craftcreator.init;
+package fr.en0ri4n.craftcreator.api.init;
 
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.AllArgsConstructor;
