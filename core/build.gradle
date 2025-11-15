@@ -1,10 +1,18 @@
 apply plugin: 'java'
 apply plugin: 'maven-publish'
+apply plugin: 'java-library'
+
 
 version = "${craftcreator_version}"
 group = 'fr.en0ri4n.craftcreator'
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21) // if you require Java 21
+    }
+}
 
 repositories {
     mavenCentral()
@@ -12,7 +20,7 @@ repositories {
 
 dependencies {
     // GSON
-    implementation 'com.google.code.gson:gson:2.11.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.28'
