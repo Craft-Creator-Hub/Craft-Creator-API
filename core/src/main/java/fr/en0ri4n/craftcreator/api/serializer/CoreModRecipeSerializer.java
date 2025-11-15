@@ -2,6 +2,7 @@ package fr.en0ri4n.craftcreator.api.serializer;
 
 import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.CraftCreatorAPI;
+import fr.en0ri4n.craftcreator.api.mod.SupportedMods;
 import fr.en0ri4n.craftcreator.api.platform.Platform;
 import fr.en0ri4n.craftcreator.api.recipe.RecipeTypeKey;
 import fr.en0ri4n.craftcreator.api.recipe.utils.RecipeInfos;
@@ -29,18 +30,18 @@ import java.util.Set;
 public abstract class CoreModRecipeSerializer {
 
     /** Namespace / mod id this serializer targets, e.g. "minecraft", "create", "botania". */
-    private final String modNamespace;
+    private final SupportedMods mod;
 
     /** Where to output recipes by default. */
     private final Set<RecipeOutputTarget> defaultTargets;
 
-    protected CoreModRecipeSerializer(String modNamespace, Set<RecipeOutputTarget> defaultTargets) {
-        this.modNamespace = modNamespace;
+    protected CoreModRecipeSerializer(SupportedMods mod, Set<RecipeOutputTarget> defaultTargets) {
+        this.mod = mod;
         this.defaultTargets = EnumSet.copyOf(defaultTargets);
     }
 
-    protected CoreModRecipeSerializer(String modNamespace, RecipeOutputTarget singleTarget) {
-        this(modNamespace, EnumSet.of(singleTarget));
+    protected CoreModRecipeSerializer(SupportedMods mod, RecipeOutputTarget singleTarget) {
+        this(mod, EnumSet.of(singleTarget));
     }
 
     /**
@@ -133,7 +134,7 @@ public abstract class CoreModRecipeSerializer {
                 .resolve("kubejs")
                 .resolve("server_scripts");
 
-        String fileName = "craftcreator_" + modNamespace + "_recipes.js";
+        String fileName = "craftcreator_" + mod + "_recipes.js";
         Path scriptFile = kubejsDir.resolve(fileName);
 
         try {

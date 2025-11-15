@@ -1,8 +1,6 @@
 package fr.en0ri4n.craftcreator;
 
 import fr.en0ri4n.craftcreator.api.platform.Platform;
-import fr.en0ri4n.craftcreator.api.recipe.model.Recipe;
-import fr.en0ri4n.craftcreator.api.recipe.serialize.CraftingTableRecipeSerializer;
 import fr.en0ri4n.craftcreator.api.recipe.utils.RecipeInfos;
 import fr.en0ri4n.craftcreator.api.recipe.serialize.RecipeInfosSerializer;
 import fr.en0ri4n.craftcreator.serialize.SerializerRegistry;
@@ -30,11 +28,11 @@ public class CraftCreatorAPI {
 
     private Platform platform;
 
-    private ReferenceBase references;
+    private CCReferences references;
     private InitBlocks initBlocks;
     private InitItemBase initItemBase;
 
-    public void initialize(Platform platform, ReferenceBase references) throws CraftCreatorException {
+    public void initialize(Platform platform, CCReferences references) throws CraftCreatorException {
         if (initialized) {
             throw new CraftCreatorException("CraftCreatorAPI has already been initialized !");
         }

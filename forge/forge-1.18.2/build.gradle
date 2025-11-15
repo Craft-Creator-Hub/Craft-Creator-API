@@ -1,0 +1,167 @@
+buildscript {
+    repositories {
+        maven { url = 'https://maven.minecraftforge.net' }
+        maven { url = 'https://maven.parchmentmc.org' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath 'org.parchmentmc:librarian:1.+'
+    }
+}
+
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
+
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'org.parchmentmc.librarian.forgegradle'
+
+version = "${craftcreator_version}"
+group = 'fr.eno.craftcreator' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "${craftcreator_name}"
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+
+evaluationDependsOn(':core') // en tête du fichier, si vous incluez les outputs de core
+
+minecraft {
+
+    mappings channel: 'parchment', version: "${mc_version}-${parchment_version}"
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                craftcreator {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run/SERVER')
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                craftcreator {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run')
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
+            args '--mod', "${craftcreator_id}", '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+
+            mods {
+                craftcreator {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+repositories {
+    // Curseforge Maven
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+
+    maven {
+        // location of the maven that hosts JEI files
+        name = "Progwml6 maven"
+        url = "https://dvs1.progwml6.com/files/maven/"
+    }
+    maven {
+        // location of a maven mirror for JEI files, as a fallback
+        name = "ModMaven"
+        url = "https://modmaven.dev"
+    }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
+
+    implementation project(":core")
+
+    // JEI
+    // compile against the JEI API but do not include it at runtime
+    compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api")
+    // at runtime, use the full JEI jar
+    runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
+
+    // KubeJS
+    implementation fg.deobf("curse.maven:kubejs-${kubejs_project_id}:${kubejs_cursefile_id}") // KubeJS
+    // Rhino (KubeJS Dependency)
+    implementation fg.deobf("curse.maven:rhino-${rhino_project_id}:${rhino_cursefile_id}")
+    // Architectury (KubeJS Dependency)
+    implementation fg.deobf("curse.maven:architectury-${architectury_project_id}:${architectury_cursefile_id}")
+
+    // Botania
+    implementation fg.deobf("curse.maven:botania-${botania_project_id}:${botania_cursefile_id}") // Botania
+    // Curios (Botania Dependency)
+    implementation fg.deobf("curse.maven:curios-${curios_project_id}:${curios_cursefile_id}")
+    // Patchouli (Botania Dependency)
+    implementation fg.deobf("curse.maven:patchouli-${patchouli_project_id}:${patchouli_cursefile_id}")
+
+    // Thermal Expansion
+    implementation fg.deobf("curse.maven:thermal-expansion-${thermal_expansion_project_id}:${thermal_expansion_cursefile_id}") // Thermal Expansion
+    // Thermal Foundation (Thermal Expansion Dependency)
+    implementation fg.deobf("curse.maven:thermal-foundation-${thermal_foundation_project_id}:${thermal_foundation_cursefile_id}")
+    // CoFH Core (Thermal Dependency)
+    implementation fg.deobf("curse.maven:cofh-core-${cofh_core_project_id}:${cofh_core_cursefile_id}")
+
+    // Create
+    implementation fg.deobf("curse.maven:create-${create_project_id}:${create_cursefile_id}") // Create
+    // Flywheel (Create Dependency)
+    implementation fg.deobf("curse.maven:flywheel-${flywheel_project_id}:${flywheel_cursefile_id}")
+}
+
+jar {
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+
+    from(project(":core").sourceSets.main.output)
+
+    manifest {
+        attributes([
+                "Specification-Title"     : "${craftcreator_name}",
+                "Specification-Vendor"    : "En0ri4n",
+                "Specification-Version"   : project.version, // We are version 1 of ourselves
+                "Implementation-Title"    : "${craftcreator_name}",
+                "Implementation-Version"  : project.version,
+                "Implementation-Vendor"   : "En0ri4n",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}

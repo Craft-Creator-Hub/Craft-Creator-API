@@ -5,7 +5,7 @@ plugins {
 group = 'fr.en0ri4n'
 version = '1.0.0'
 
-def mcVersion = project.hasProperty("mc_version") ? project.mc_version : "1.20"
+def mcVersion = project.hasProperty("mc_version") ? project.mc_version : "1.18.2"
 
 dependencies {
     implementation project(":core")

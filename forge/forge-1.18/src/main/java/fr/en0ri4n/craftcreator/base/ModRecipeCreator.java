@@ -1,1 +1,0 @@
-package fr.en0ri4n.craftcreator.base;
