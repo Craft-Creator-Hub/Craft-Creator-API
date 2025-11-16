@@ -16,12 +16,20 @@ import fr.en0ri4n.craftcreator.utils.Identifier;
 public final class DefinitionsRegistrar {
 
     static {
+        // Existing crafting table recipe creator definition
         CoreBlockEntityDefinition def = CoreBlockEntityDefinition.builder(Identifier.fromMod(BehaviorsRegistrar.CRAFTING_TABLE_RECIPE_CREATOR))
                 .inventorySize(10)
                 .addBehavior(BehaviorsRegistrar.CRAFTING_TABLE_RECIPE_CREATOR)
                 .build();
 
         CoreBlockEntityManager.get().registerDefinition(def);
+
+        // Recipe creator block definition (simple container with no behaviors)
+        CoreBlockEntityDefinition recipeCreatorDef = CoreBlockEntityDefinition.builder(Identifier.from("craftcreator:recipe_creator"))
+                .inventorySize(10)
+                .build();
+
+        CoreBlockEntityManager.get().registerDefinition(recipeCreatorDef);
     }
 
     private DefinitionsRegistrar() {}

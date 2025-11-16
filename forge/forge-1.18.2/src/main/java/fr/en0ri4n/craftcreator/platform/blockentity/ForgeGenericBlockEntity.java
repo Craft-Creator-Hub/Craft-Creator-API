@@ -5,7 +5,9 @@ import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntity;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityDefinition;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityManager;
 import fr.en0ri4n.craftcreator.api.blockentity.BlockEntityBehavior;
+import fr.en0ri4n.craftcreator.api.ui.recipe.RecipeCreatorContainerModel;
 import fr.en0ri4n.craftcreator.platform.adapters.ForgeRegistryAdapter;
+import fr.en0ri4n.craftcreator.platform.ui.container.ForgeRecipeCreatorMenu;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -153,7 +155,11 @@ public class ForgeGenericBlockEntity extends BlockEntity implements BlockEntityT
                     @Override
                     public AbstractContainerMenu createMenu(int windowId, Inventory playerInv, Player playerEntity) {
                         // create a menu using your platform adapter / ContainerModel here
-                        return null; // TODO: integrate your container factory
+                        if ("craftcreator:recipe_creator".equals(cid)) {
+                            RecipeCreatorContainerModel model = new RecipeCreatorContainerModel(coreEntity);
+                            return new ForgeRecipeCreatorMenu(windowId, playerInv, model);
+                        }
+                        return null; // TODO: integrate your container factory for other types
                     }
                 }, buf -> buf.writeBlockPos(worldPosition));
                 handled = true;
