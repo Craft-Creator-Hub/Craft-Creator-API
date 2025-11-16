@@ -10,6 +10,7 @@ import fr.en0ri4n.craftcreator.api.init.definitions.FacingType;
 import fr.en0ri4n.craftcreator.api.init.shapes.CoreShapes;
 import fr.en0ri4n.craftcreator.api.init.shapes.CoreVoxelShape;
 import fr.en0ri4n.craftcreator.impl.model.container.minecraft.CraftingTableRecipeCreatorContainerModel;
+import fr.en0ri4n.craftcreator.platform.block.RecipeCreatorBlock;
 import fr.en0ri4n.craftcreator.platform.blockentity.ForgeGenericBlockEntity;
 import fr.en0ri4n.craftcreator.platform.ui.container.ForgeRecipeCreatorMenu;
 import fr.en0ri4n.craftcreator.utils.Identifier;
@@ -66,9 +67,18 @@ public final class ForgeRegistryAdapter implements RegistryAdapter
     public static final RegistryObject<MenuType<ForgeRecipeCreatorMenu>> RECIPE_CREATOR_MENU =
             MENUS.register("recipe_creator", () -> IForgeMenuType.create(ForgeRecipeCreatorMenu::new));
 
+    // Register the RecipeCreatorBlock
+    public static final RegistryObject<Block> RECIPE_CREATOR_BLOCK =
+            BLOCKS.register("recipe_creator", RecipeCreatorBlock::new);
+
+    // Register the RecipeCreatorBlock item
+    public static final RegistryObject<Item> RECIPE_CREATOR_BLOCK_ITEM =
+            ITEMS.register("recipe_creator", () -> new BlockItem(RECIPE_CREATOR_BLOCK.get(), 
+                    new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS)));
+
     public static final RegistryObject<BlockEntityType<ForgeGenericBlockEntity>> GENERIC_BLOCK_ENTITY =
             BLOCK_ENTITIES.register("generic_block_entity", () ->
-                    BlockEntityType.Builder.of(ForgeGenericBlockEntity::new, new Block[]{}).build(null)
+                    BlockEntityType.Builder.of(ForgeGenericBlockEntity::new, RECIPE_CREATOR_BLOCK.get()).build(null)
             );
 
     /**
