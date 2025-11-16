@@ -32,7 +32,6 @@ public final class ForgeScreenBuilder {
         private final CoreScreenDefinition coreScreen;
         private final CoreUiActionHandler handler;
 
-        // Map core element ids to widgets if you want to sync state back
         private final Map<String, EditBox> textInputs = new HashMap<>();
 
         protected BuiltScreen(CoreScreenDefinition coreScreen, CoreUiActionHandler handler) {
@@ -44,6 +43,8 @@ public final class ForgeScreenBuilder {
         @Override
         protected void init() {
             super.init();
+
+            coreScreen.init();
 
             // Centering / scaling strategy is up to you; here we use core coordinates directly.
             for (CoreUiElement element : coreScreen.getElements()) {

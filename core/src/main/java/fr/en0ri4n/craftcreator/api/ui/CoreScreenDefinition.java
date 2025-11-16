@@ -40,6 +40,8 @@ public abstract class CoreScreenDefinition {
                 .orElse(null);
     }
 
+    public abstract void init();
+
     public void renderBackground(int x, int y, int width, int height) {
         RenderAdapter adapter = CraftCreatorAPI.getInstance().getPlatform().getRenderAdapter();
         RenderContext context = CraftCreatorAPI.getInstance().getPlatform().getRenderContext();

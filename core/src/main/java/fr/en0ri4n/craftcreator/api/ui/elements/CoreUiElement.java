@@ -7,11 +7,12 @@ import java.util.UUID;
 
 /**
  * Loader-agnostic description of a UI element.
- * No Minecraft/loader classes here.
  */
 @Getter
 @RequiredArgsConstructor
 public abstract class CoreUiElement {
+
+    private final CoreUiElementType type;
 
     /** Unique id within the screen, used to wire actions / read state. */
     private final String id;
@@ -24,11 +25,11 @@ public abstract class CoreUiElement {
     private final int width;
     private final int height;
 
-    /** Optional tooltip text. */
+    /** tooltip text. */
     private final String tooltip;
 
     /** Convenience: auto-generate a random id. */
-    protected CoreUiElement(int x, int y, int width, int height, String tooltip) {
-        this(UUID.randomUUID().toString(), x, y, width, height, tooltip);
+    protected CoreUiElement(CoreUiElementType type, int x, int y, int width, int height, String tooltip) {
+        this(type, UUID.randomUUID().toString(), x, y, width, height, tooltip);
     }
 }

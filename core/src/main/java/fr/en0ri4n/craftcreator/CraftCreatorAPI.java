@@ -1,6 +1,9 @@
 package fr.en0ri4n.craftcreator;
 
 import fr.en0ri4n.craftcreator.api.CCReferences;
+import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityDefinition;
+import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityManager;
+import fr.en0ri4n.craftcreator.api.blockentity.definitions.DefinitionsRegistrar;
 import fr.en0ri4n.craftcreator.api.init.InitManager;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockDef;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockItemDef;
@@ -54,6 +57,9 @@ public class CraftCreatorAPI {
 
         // Registrations
         registerBlockItems();
+
+        // register block-entity definitions
+        DefinitionsRegistrar.class.getName(); // ensure static init
 
         platform.getLogger().info("CraftCreatorAPI initialized successfully.");
     }

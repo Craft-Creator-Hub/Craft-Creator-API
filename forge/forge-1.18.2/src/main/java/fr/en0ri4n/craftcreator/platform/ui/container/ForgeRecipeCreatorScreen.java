@@ -1,6 +1,5 @@
 package fr.en0ri4n.craftcreator.platform.ui.container;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
 import fr.en0ri4n.craftcreator.api.ui.elements.*;
@@ -13,10 +12,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-
-import java.util.Objects;
 
 public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecipeCreatorMenu>
 {
@@ -41,24 +37,24 @@ public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecip
     {
         super.init();
 
-        // Centering / scaling strategy is up to you; here we use core coordinates directly.
         for(CoreUiElement element : model.getScreenDefinition().getElements())
         {
-            if(element instanceof CoreButton btn)
+            switch(element.getType())
             {
-                addButtonWidget(btn);
-            }
-            else if(element instanceof CoreTextInput text)
-            {
-                addTextInputWidget(text);
-            }
-            else if(element instanceof CoreDropdown dropdown)
-            {
-                addDropdownWidget(dropdown);
-            }
-            else if(element instanceof CoreList list)
-            {
-                addListWidget(list);
+                case BUTTON:
+                    addButtonWidget((CoreButton) element);
+                    break;
+                case TEXT_INPUT:
+                    addTextInputWidget((CoreTextInput) element);
+                    break;
+                case DROPDOWN:
+                    addDropdownWidget((CoreDropdown) element);
+                    break;
+                case LIST:
+                    addListWidget((CoreList) element);
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + model.getScreenDefinition().getElements().stream().map(CoreUiElement::getType));
             }
         }
     }
@@ -70,10 +66,7 @@ public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecip
         int w = btn.getWidth();
         int h = btn.getHeight();
 
-        Button mcButton = new Button(x, y, w, h, new TextComponent(btn.getLabel()), b ->
-        {
-            model.onButtonPressed(btn.getId(), btn.getActionId());
-        });
+        Button mcButton = new Button(x, y, w, h, new TextComponent(btn.getLabel()), b -> model.onButtonPressed(btn.getId(), btn.getActionId()));
         mcButton.active = btn.isEnabled();
         this.addRenderableWidget(mcButton);
     }

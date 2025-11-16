@@ -13,9 +13,6 @@ public class CraftingTableScreenDefinition extends CoreScreenDefinition
     public CraftingTableScreenDefinition()
     {
         super("crafting_table_recipe_creator", "Crafting Table Recipe Creator"); // TODO: localization
-
-        addElement(new CoreDropdown("mod_selector", 10, 10, 100, 20, List.of("Minecraft", "Create", "Botania", "Thermal"), -1, ""));
-        addElement(new CoreButton("export_button", 10, 40, 80, 20, "Export", "export_recipes", "Export the currently selected recipes"));
     }
 
     @Override
@@ -28,5 +25,12 @@ public class CraftingTableScreenDefinition extends CoreScreenDefinition
     public Pair<Integer, Integer> getBackgroundTextureSize()
     {
         return Pair.create(176, 166);
+    }
+
+    @Override
+    public void init()
+    {
+        addElement(new CoreDropdown("mod_selector", 10, 10, 100, 20, List.of("Minecraft", "Create", "Botania", "Thermal"), -1, ""));
+        addElement(new CoreButton("export_button", 10, 40, 80, 20, "Export", "export_recipes", "Export the currently selected recipes"));
     }
 }

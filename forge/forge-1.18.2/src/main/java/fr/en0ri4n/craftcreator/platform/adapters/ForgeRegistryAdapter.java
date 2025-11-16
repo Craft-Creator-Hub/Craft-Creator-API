@@ -10,6 +10,7 @@ import fr.en0ri4n.craftcreator.api.init.definitions.FacingType;
 import fr.en0ri4n.craftcreator.api.init.shapes.CoreShapes;
 import fr.en0ri4n.craftcreator.api.init.shapes.CoreVoxelShape;
 import fr.en0ri4n.craftcreator.impl.model.container.minecraft.CraftingTableRecipeCreatorContainerModel;
+import fr.en0ri4n.craftcreator.platform.blockentity.ForgeGenericBlockEntity;
 import fr.en0ri4n.craftcreator.platform.ui.container.ForgeRecipeCreatorMenu;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import net.minecraft.core.BlockPos;
@@ -33,6 +34,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -59,9 +61,15 @@ public final class ForgeRegistryAdapter implements RegistryAdapter
     private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, CCReferences.MOD_ID);
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, CCReferences.MOD_ID);
     private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(ForgeRegistries.CONTAINERS, CCReferences.MOD_ID);
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITIES, CCReferences.MOD_ID);
 
     public static final RegistryObject<MenuType<ForgeRecipeCreatorMenu>> RECIPE_CREATOR_MENU =
             MENUS.register("recipe_creator", () -> IForgeMenuType.create(ForgeRecipeCreatorMenu::new));
+
+    public static final RegistryObject<BlockEntityType<ForgeGenericBlockEntity>> GENERIC_BLOCK_ENTITY =
+            BLOCK_ENTITIES.register("generic_block_entity", () ->
+                    BlockEntityType.Builder.of(ForgeGenericBlockEntity::new, new Block[]{}).build(null)
+            );
 
     /**
      * Expose the DeferredRegister instances so caller can register them on their mod event bus.
