@@ -2,7 +2,6 @@ package fr.en0ri4n.craftcreator;
 
 
 import fr.en0ri4n.craftcreator.api.mod.SupportedMods;
-import fr.en0ri4n.craftcreator.container.slot.PositionnedSlot;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.Getter;
 
@@ -11,24 +10,24 @@ import java.util.List;
 @Getter
 public abstract class RecipeCreator
 {
-    private final SupportedMods mod;
-    private final List<PositionnedSlot> slots;
-    private final int maxInputSize;
-    private final int maxOutputSize;
-    private final Identifier recipeTypeLocation;
-    private final Identifier itemIcon;
-    private final Identifier guiTexture;
-
-    private RecipeCreator(SupportedMods mod, List<PositionnedSlot> slots, int maxInputSize, int maxOutputSize, Identifier recipeTypeLocation, Identifier itemIcon, Identifier guiTexture)
-    {
-        this.mod = mod;
-        this.slots = slots;
-        this.maxInputSize = maxInputSize;
-        this.maxOutputSize = maxOutputSize;
-        this.recipeTypeLocation = recipeTypeLocation;
-        this.itemIcon = itemIcon;
-        this.guiTexture = guiTexture;
-    }
+//    private final SupportedMods mod;
+//    private final List<PositionnedSlot> slots;
+//    private final int maxInputSize;
+//    private final int maxOutputSize;
+//    private final Identifier recipeTypeLocation;
+//    private final Identifier itemIcon;
+//    private final Identifier guiTexture;
+//
+//    private RecipeCreator(SupportedMods mod, List<PositionnedSlot> slots, int maxInputSize, int maxOutputSize, Identifier recipeTypeLocation, Identifier itemIcon, Identifier guiTexture)
+//    {
+//        this.mod = mod;
+//        this.slots = slots;
+//        this.maxInputSize = maxInputSize;
+//        this.maxOutputSize = maxOutputSize;
+//        this.recipeTypeLocation = recipeTypeLocation;
+//        this.itemIcon = itemIcon;
+//        this.guiTexture = guiTexture;
+//    }
 
     // TODO: Re-implement when RecipeType will be available
 //    public <C extends Container, T extends Recipe<C>> RecipeType<T> getRecipeType()

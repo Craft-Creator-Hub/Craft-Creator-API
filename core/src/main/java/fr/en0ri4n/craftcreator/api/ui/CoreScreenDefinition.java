@@ -44,9 +44,8 @@ public abstract class CoreScreenDefinition {
 
     public void renderBackground(int x, int y, int width, int height) {
         RenderAdapter adapter = CraftCreatorAPI.getInstance().getPlatform().getRenderAdapter();
-        RenderContext context = CraftCreatorAPI.getInstance().getPlatform().getRenderContext();
         adapter.bindTexture(getBackgroundTexture());
-        adapter.renderTexture(context, getBackgroundTexture(),
+        adapter.renderTexture(getBackgroundTexture(),
                 x, y, width, height,
                 256, 256,
                 0f, 0f, 256f, 256f,

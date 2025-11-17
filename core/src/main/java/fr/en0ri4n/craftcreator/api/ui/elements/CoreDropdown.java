@@ -19,7 +19,7 @@ public class CoreDropdown extends CoreUiElement {
 
     public CoreDropdown(String id, int x, int y, int width, int height,
                         List<String> options, int selectedIndex, String tooltip) {
-        super(id, x, y, width, height, tooltip);
+        super(CoreUiElementType.DROPDOWN, id, x, y, width, height, tooltip);
         this.options = List.copyOf(options);
         this.selectedIndex = selectedIndex;
     }

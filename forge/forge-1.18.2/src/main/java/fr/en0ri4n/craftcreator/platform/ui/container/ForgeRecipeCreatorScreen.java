@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
 import fr.en0ri4n.craftcreator.api.ui.elements.*;
 import fr.en0ri4n.craftcreator.impl.model.container.minecraft.CraftingTableRecipeCreatorContainerModel;
+import fr.en0ri4n.craftcreator.platform.ForgeRenderAdapter;
 import fr.en0ri4n.craftcreator.platform.ui.ForgeDropdownWidget;
 import fr.en0ri4n.craftcreator.platform.ui.elements.ForgeSimpleListWidget;
 import net.minecraft.client.Minecraft;
@@ -118,12 +119,14 @@ public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecip
     @Override
     protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY)
     {
+        ForgeRenderAdapter.getInstance().setCurrentPoseStack(poseStack);
         model.getScreenDefinition().renderBackground(this.leftPos, this.topPos, this.imageWidth, this.imageHeight);
     }
 
     @Override
     public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks)
     {
+        ForgeRenderAdapter.getInstance().setCurrentPoseStack(poseStack);
         this.renderBackground(poseStack);
         super.render(poseStack, mouseX, mouseY, partialTicks);
         this.renderTooltip(poseStack, mouseX, mouseY);

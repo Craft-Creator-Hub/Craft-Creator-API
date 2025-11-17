@@ -110,7 +110,7 @@ public class ForgeRecipeCreatorMenu extends AbstractContainerMenu {
             // Handle quick crafting
             int diff = newStack.getCount() - oldStack.getCount();
             if (diff > 0) {
-                this.onCrafted(newStack, diff);
+//                this.onCrafted(newStack, diff);
             }
         }
 

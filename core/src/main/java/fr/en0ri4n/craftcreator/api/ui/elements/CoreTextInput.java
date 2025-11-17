@@ -18,7 +18,7 @@ public class CoreTextInput extends CoreUiElement {
 
     public CoreTextInput(String id, int x, int y, int width, int height,
                          String value, String placeholder, int maxLength, String tooltip) {
-        super(id, x, y, width, height, tooltip);
+        super(CoreUiElementType.TEXT_INPUT, id, x, y, width, height, tooltip);
         this.value = value;
         this.placeholder = placeholder;
         this.maxLength = maxLength;

@@ -78,6 +78,8 @@ public class Forge1182Platform implements Platform {
 
     private final FacingAdapter<Direction> facingAdapter = new ForgeFacingAdapter();
 
+    private final RenderAdapter renderAdapter = new ForgeRenderAdapter();
+
     @Override
     public SupportedModLoaders getLoader() {
         return SupportedModLoaders.FORGE;
@@ -150,5 +152,11 @@ public class Forge1182Platform implements Platform {
     public FacingAdapter<Direction> getFacingAdapter()
     {
         return facingAdapter;
+    }
+
+    @Override
+    public RenderAdapter getRenderAdapter()
+    {
+        return renderAdapter;
     }
 }

@@ -57,15 +57,6 @@ public class RecipeCreatorBlock extends Block implements EntityBlock {
         return blockEntity;
     }
 
-    @Nullable
-    @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        // Return the block entity as its own ticker (ForgeGenericBlockEntity implements BlockEntityTicker)
-        return type == ForgeRegistryAdapter.GENERIC_BLOCK_ENTITY.get() 
-            ? (BlockEntityTicker<T>) (BlockEntityTicker<ForgeGenericBlockEntity>) ForgeGenericBlockEntity::tick
-            : null;
-    }
-
     @Override
     public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (world.isClientSide()) {

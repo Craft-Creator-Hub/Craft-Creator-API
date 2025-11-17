@@ -2,7 +2,6 @@ package fr.en0ri4n.craftcreator.api.platform;
 
 import fr.en0ri4n.craftcreator.api.init.RegistryAdapter;
 import fr.en0ri4n.craftcreator.api.mod.SupportedModLoaders;
-import fr.en0ri4n.craftcreator.api.ui.RenderContext;
 
 public interface Platform {
     SupportedModLoaders getLoader();          // "Forge", "Fabric", "NeoForge", etc.
@@ -30,6 +29,4 @@ public interface Platform {
     FacingAdapter<?> getFacingAdapter();
 
     RenderAdapter getRenderAdapter();
-
-    RenderContext getRenderContext();
 }

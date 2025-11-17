@@ -19,7 +19,7 @@ public class CoreButton extends CoreUiElement {
 
     public CoreButton(String id, int x, int y, int width, int height,
                       String label, String actionId, String tooltip) {
-        super(id, x, y, width, height, tooltip);
+        super(CoreUiElementType.BUTTON, id, x, y, width, height, tooltip);
         this.label = label;
         this.actionId = actionId;
     }

@@ -22,7 +22,7 @@ public class CoreList extends CoreUiElement {
 
     public CoreList(String id, int x, int y, int width, int height,
                     List<String> entries, int visibleRows, String tooltip) {
-        super(id, x, y, width, height, tooltip);
+        super(CoreUiElementType.LIST, id, x, y, width, height, tooltip);
         this.entries = List.copyOf(entries);
         this.visibleRows = visibleRows;
     }
