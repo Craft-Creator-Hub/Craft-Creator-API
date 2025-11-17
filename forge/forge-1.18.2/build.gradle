@@ -20,7 +20,7 @@ version = "${craftcreator_version}"
 group = 'fr.en0ri4n.craftcreator' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "${craftcreator_name}"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 
 minecraft {
