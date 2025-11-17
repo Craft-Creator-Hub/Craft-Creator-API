@@ -18,7 +18,7 @@ public final class CoreBlockEntityManager {
     private static final CoreBlockEntityManager INSTANCE = new CoreBlockEntityManager();
 
     private final Map<Identifier, CoreBlockEntityDefinition> definitions = new HashMap<>();
-    private final Map<String, Supplier<BlockEntityBehavior>> behaviorRegistry = new HashMap<>();
+    private final Map<Identifier, Supplier<BlockEntityBehavior>> behaviorRegistry = new HashMap<>();
     private boolean locked = false;
 
     private CoreBlockEntityManager() {}
@@ -30,7 +30,7 @@ public final class CoreBlockEntityManager {
         definitions.put(def.getId(), def);
     }
 
-    public synchronized void registerBehavior(String id, Supplier<BlockEntityBehavior> behaviorFactory) {
+    public synchronized void registerBehavior(Identifier id, Supplier<BlockEntityBehavior> behaviorFactory) {
         checkNotLocked();
         behaviorRegistry.put(id, behaviorFactory);
     }
@@ -39,7 +39,7 @@ public final class CoreBlockEntityManager {
         return definitions.get(id);
     }
 
-    public Map<String, Supplier<BlockEntityBehavior>> getBehaviorRegistry() {
+    public Map<Identifier, Supplier<BlockEntityBehavior>> getBehaviorRegistry() {
         return Collections.unmodifiableMap(behaviorRegistry);
     }
 
@@ -56,7 +56,7 @@ public final class CoreBlockEntityManager {
         CoreBlockEntity entity = new CoreBlockEntity(typeId, def.getInventorySize());
 
         // instantiate and attach behaviors by resolving their suppliers
-        for (String bId : def.getBehaviors()) {
+        for (Identifier bId : def.getBehaviors()) {
             Supplier<BlockEntityBehavior> sup = behaviorRegistry.get(bId);
             if (sup != null) {
                 BlockEntityBehavior beh = sup.get();

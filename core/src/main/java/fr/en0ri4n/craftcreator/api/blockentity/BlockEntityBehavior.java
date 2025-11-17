@@ -10,11 +10,6 @@ import com.google.gson.JsonObject;
 public interface BlockEntityBehavior {
 
     /**
-     * Called every tick on server (or client if appropriate).
-     */
-    default void tick(CoreBlockEntity entity, BlockEntityContext ctx) {}
-
-    /**
      * Called when the entity is loaded (after construction / deserialization).
      */
     default void onLoad(CoreBlockEntity entity, BlockEntityContext ctx) {}

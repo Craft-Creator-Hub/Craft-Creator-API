@@ -25,7 +25,7 @@ public class CoreBlockEntity {
         this.typeId = typeId;
         this.inventory = new ArrayList<>(inventorySize);
         // initialize inventory with empty slots
-        for (int i = 0; i < inventorySize; i++) inventory.add(new CoreItemStack(Identifier.from("minecraft:air"), 0));
+        for (int i = 0; i < inventorySize; i++) inventory.add(CoreItemStack.EMPTY);
         this.extraData = new JsonObject();
     }
 
@@ -33,7 +33,7 @@ public class CoreBlockEntity {
 
     public void setSlot(int slot, CoreItemStack stack) {
         if (slot < 0 || slot >= inventory.size()) return;
-        inventory.set(slot, stack == null ? new CoreItemStack(Identifier.from("minecraft:air"), 0) : stack);
+        inventory.set(slot, stack == null ? CoreItemStack.EMPTY : stack);
     }
 
     public CoreItemStack getSlot(int slot) {

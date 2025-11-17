@@ -1,10 +1,10 @@
 package fr.en0ri4n.craftcreator.platform.blockentity;
 
 import com.google.gson.JsonParser;
+import fr.en0ri4n.craftcreator.api.blockentity.BlockEntityBehavior;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntity;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityDefinition;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityManager;
-import fr.en0ri4n.craftcreator.api.blockentity.BlockEntityBehavior;
 import fr.en0ri4n.craftcreator.api.ui.recipe.RecipeCreatorContainerModel;
 import fr.en0ri4n.craftcreator.platform.adapters.ForgeRegistryAdapter;
 import fr.en0ri4n.craftcreator.platform.ui.container.ForgeRecipeCreatorMenu;
@@ -12,26 +12,23 @@ import fr.en0ri4n.craftcreator.utils.Identifier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.network.NetworkHooks;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Supplier;
 
 /**
  * Generic Forge BlockEntity that stores core block entity JSON in NBT and delegates behavior.
  * Use a single BlockEntityType for multiple core block-entity types.
  */
-public class ForgeGenericBlockEntity extends BlockEntity implements BlockEntityTicker<ForgeGenericBlockEntity>
+public class ForgeGenericBlockEntity extends BlockEntity
 {
-
     private static final String CORE_TAG = "core_json";
 
     private CoreBlockEntity coreEntity;
@@ -60,8 +57,8 @@ public class ForgeGenericBlockEntity extends BlockEntity implements BlockEntityT
                 if (def != null) {
                     this.coreEntity = CoreBlockEntity.fromJson(obj, def);
                     // call behaviors onLoad via manager behaviorRegistry if needed
-                    for (String bId : def.getBehaviors()) {
-                        var sup = CoreBlockEntityManager.get().getBehaviorRegistry().get(bId);
+                    for (Identifier bId : def.getBehaviors()) {
+                        Supplier<BlockEntityBehavior> sup = CoreBlockEntityManager.get().getBehaviorRegistry().get(bId);
                         if (sup != null) {
                             BlockEntityBehavior beh = sup.get();
                             beh.load(coreEntity, obj);
@@ -90,33 +87,13 @@ public class ForgeGenericBlockEntity extends BlockEntity implements BlockEntityT
         if (coreEntity != null) {
             CoreBlockEntityDefinition def = CoreBlockEntityManager.get().getDefinition(coreEntity.getTypeId());
             if (def != null) {
-                for (String bId : def.getBehaviors()) {
-                    var sup = CoreBlockEntityManager.get().getBehaviorRegistry().get(bId);
+                for (Identifier bId : def.getBehaviors()) {
+                    Supplier<BlockEntityBehavior> sup = CoreBlockEntityManager.get().getBehaviorRegistry().get(bId);
                     if (sup != null) sup.get().onRemove(coreEntity, new ForgeBlockEntityContext(level, worldPosition, null));
                 }
             }
         }
         super.setRemoved();
-    }
-
-    @Override
-    public void tick(Level pLevel, BlockPos pPos, BlockState pState, ForgeGenericBlockEntity pBlockEntity)
-    {
-        if (level == null || coreEntity == null) return;
-        CoreBlockEntityDefinition def = CoreBlockEntityManager.get().getDefinition(coreEntity.getTypeId());
-        if (def == null) return;
-
-        // server-only ticking for now
-        if (!level.isClientSide()) {
-            ForgeBlockEntityContext ctx = new ForgeBlockEntityContext(level, worldPosition, null);
-            for (String bId : def.getBehaviors()) {
-                var sup = CoreBlockEntityManager.get().getBehaviorRegistry().get(bId);
-                if (sup != null) {
-                    BlockEntityBehavior beh = sup.get();
-                    beh.tick(coreEntity, ctx);
-                }
-            }
-        }
     }
 
     /**
@@ -128,8 +105,8 @@ public class ForgeGenericBlockEntity extends BlockEntity implements BlockEntityT
         if (def == null) return false;
         ForgeBlockEntityContext ctx = new ForgeBlockEntityContext(level, worldPosition, player);
         boolean handled = false;
-        for (String bId : def.getBehaviors()) {
-            var sup = CoreBlockEntityManager.get().getBehaviorRegistry().get(bId);
+        for (Identifier bId : def.getBehaviors()) {
+            Supplier<BlockEntityBehavior> sup = CoreBlockEntityManager.get().getBehaviorRegistry().get(bId);
             if (sup != null) {
                 BlockEntityBehavior beh = sup.get();
                 if (beh.onInteract(coreEntity, ctx)) {

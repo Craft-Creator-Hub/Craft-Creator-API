@@ -10,6 +10,8 @@ import lombok.Getter;
  */
 @Getter
 public final class CoreItemStack {
+    public static final CoreItemStack EMPTY = new CoreItemStack(Identifier.from("minecraft:air"), 0);
+
     private final Identifier itemId;
     private final int count;
     private final JsonObject nbt; // optional extra data as JSON

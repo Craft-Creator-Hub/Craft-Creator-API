@@ -24,19 +24,23 @@ public final class CoreBlockDef {
     private final boolean rotateModel;  // whether to ask model to rotate with blockstate
     @Getter
     private final Map<CoreFacing, CoreVoxelShape> facingShapes;
+    @Getter
+    private final CoreVoxelShape blockShape; // shape for blocks without facing, can be null if using facingShapes
 
     private CoreBlockDef(Identifier id,
                          Map<String, String> properties,
                          FacingType facingType,
                          String defaultFacing,
                          boolean rotateModel,
-                         Map<CoreFacing, CoreVoxelShape> facingShape) {
+                         Map<CoreFacing, CoreVoxelShape> facingShape,
+                         CoreVoxelShape blockShape) {
         this.id = Objects.requireNonNull(id, "id");
         this.properties = properties == null ? Collections.emptyMap() : Map.copyOf(properties);
         this.facingType = facingType == null ? FacingType.NONE : facingType;
         this.defaultFacing = defaultFacing;
         this.rotateModel = rotateModel;
         this.facingShapes = facingShape == null ? Collections.emptyMap() : Map.copyOf(facingShape);
+        this.blockShape = blockShape;
     }
 
     public Optional<String> getDefaultFacing() { return Optional.ofNullable(defaultFacing); }
@@ -49,6 +53,7 @@ public final class CoreBlockDef {
         private FacingType facingType = FacingType.NONE;
         private String defaultFacing = null;
         private Map<CoreFacing, CoreVoxelShape> facingShape = null;
+        private CoreVoxelShape blockShape = null;
 
         public Builder(Identifier id) { this.id = id; }
 
@@ -61,8 +66,10 @@ public final class CoreBlockDef {
 
         public Builder facingShapes(Map<CoreFacing, CoreVoxelShape> facingShape) { this.facingShape = facingShape; return this; }
 
+        public Builder blockShape(CoreVoxelShape blockShape) { this.blockShape = blockShape; return this; }
+
         public CoreBlockDef build() {
-            return new CoreBlockDef(id, props, facingType, defaultFacing, facingType != FacingType.NONE, facingShape);
+            return new CoreBlockDef(id, props, facingType, defaultFacing, facingType != FacingType.NONE, facingShape, blockShape);
         }
     }
 }

@@ -13,9 +13,6 @@ public class CraftingTableRecipeCreatorBehavior implements BlockEntityBehavior {
     private boolean isCraftingShapeless = true;
 
     @Override
-    public void tick(CoreBlockEntity entity, BlockEntityContext ctx) {}
-
-    @Override
     public void save(CoreBlockEntity entity, JsonObject out) {
         out.addProperty(KEY_CRAFTING_TYPE, isCraftingShapeless ? "shapeless" : "shaped");
     }

@@ -24,7 +24,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Recipe Creator Block that opens a 10-slot container with a dropdown for recipe type selection.
+ * Block class for the every recipe creator blocks.
  */
 public class RecipeCreatorBlock extends Block implements EntityBlock {
 

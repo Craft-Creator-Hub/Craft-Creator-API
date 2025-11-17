@@ -1,6 +1,7 @@
 package fr.en0ri4n.craftcreator.api.init.definitions;
 
 import fr.en0ri4n.craftcreator.utils.Identifier;
+import lombok.Getter;
 
 import java.util.Objects;
 
@@ -11,13 +12,14 @@ import java.util.Objects;
  * in one place. Platform adapters may choose to register both the block and the
  * item (with the block's id) or only the block if they prefer.
  */
+@Getter
 public final class CoreBlockItemDef {
 
     private final CoreBlockDef block;
     private final CoreItemDef item; // nullable — may be null when no item should be created
 
     private CoreBlockItemDef(CoreBlockDef block, CoreItemDef item) {
-        this.block = Objects.requireNonNull(block, "block");
+        this.block = Objects.requireNonNull(block, "block definition must not be null");
         this.item = item;
     }
 
@@ -35,14 +37,6 @@ public final class CoreBlockItemDef {
      */
     public static Builder builder(Identifier id) {
         return new Builder(id);
-    }
-
-    public CoreBlockDef getBlock() {
-        return block;
-    }
-
-    public CoreItemDef getItem() {
-        return item;
     }
 
     public boolean hasItem() {

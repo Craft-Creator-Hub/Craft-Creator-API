@@ -16,9 +16,9 @@ public class CoreBlockEntityDefinition {
 
     private final Identifier id;
     private final int inventorySize;
-    private final List<String> behaviors;
+    private final List<Identifier> behaviors;
 
-    public CoreBlockEntityDefinition(Identifier id, int inventorySize, List<String> behaviors) {
+    public CoreBlockEntityDefinition(Identifier id, int inventorySize, List<Identifier> behaviors) {
         this.id = id;
         this.inventorySize = Math.max(0, inventorySize);
         this.behaviors = behaviors == null ? Collections.emptyList() : List.copyOf(behaviors);
@@ -29,13 +29,13 @@ public class CoreBlockEntityDefinition {
     public static class Builder {
         private final Identifier id;
         private int inventorySize = 0;
-        private final List<String> behaviors = new ArrayList<>();
+        private final List<Identifier> behaviors = new ArrayList<>();
 
         public Builder(Identifier id) { this.id = id; }
 
         public Builder inventorySize(int size) { this.inventorySize = size; return this; }
 
-        public Builder addBehavior(String behaviorId) { this.behaviors.add(behaviorId); return this; }
+        public Builder addBehavior(Identifier behaviorId) { this.behaviors.add(behaviorId); return this; }
 
         public CoreBlockEntityDefinition build() {
             return new CoreBlockEntityDefinition(id, inventorySize, behaviors);

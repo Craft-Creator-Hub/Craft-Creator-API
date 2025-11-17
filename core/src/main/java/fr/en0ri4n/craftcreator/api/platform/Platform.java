@@ -14,8 +14,6 @@ public interface Platform {
     PathsProvider getPaths();
     LoaderServices getServices();
 
-    BlockAdapter<?> getBlockAdapter();
-
     IdentifierAdapter<?> getIdentifierAdapter();
 
     ContainerUiAdapter getContainerUiAdapter();

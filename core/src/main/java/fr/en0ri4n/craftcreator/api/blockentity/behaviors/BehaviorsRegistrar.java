@@ -1,6 +1,7 @@
 package fr.en0ri4n.craftcreator.api.blockentity.behaviors;
 
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityManager;
+import fr.en0ri4n.craftcreator.utils.Identifier;
 
 /**
  * Register simple core behaviors. This class performs registration in a static block,
@@ -8,10 +9,9 @@ import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityManager;
  */
 public final class BehaviorsRegistrar {
 
-    public static final String CRAFTING_TABLE_RECIPE_CREATOR = "crafting_table_recipe_creator";
+    public static final Identifier CRAFTING_TABLE_RECIPE_CREATOR = Identifier.fromMod("crafting_table_recipe_creator");
 
     static {
-        // register the simple burn behavior under id "simple_burn"
         CoreBlockEntityManager.get().registerBehavior(CRAFTING_TABLE_RECIPE_CREATOR, CraftingTableRecipeCreatorBehavior::new);
     }
 

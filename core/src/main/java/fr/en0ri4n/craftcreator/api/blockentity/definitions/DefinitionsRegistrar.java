@@ -17,7 +17,7 @@ public final class DefinitionsRegistrar {
 
     static {
         // Existing crafting table recipe creator definition
-        CoreBlockEntityDefinition def = CoreBlockEntityDefinition.builder(Identifier.fromMod(BehaviorsRegistrar.CRAFTING_TABLE_RECIPE_CREATOR))
+        CoreBlockEntityDefinition def = CoreBlockEntityDefinition.builder(BehaviorsRegistrar.CRAFTING_TABLE_RECIPE_CREATOR)
                 .inventorySize(10)
                 .addBehavior(BehaviorsRegistrar.CRAFTING_TABLE_RECIPE_CREATOR)
                 .build();

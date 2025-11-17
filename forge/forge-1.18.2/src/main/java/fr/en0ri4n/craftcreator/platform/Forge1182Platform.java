@@ -6,6 +6,7 @@ import fr.en0ri4n.craftcreator.api.mod.SupportedModLoaders;
 import fr.en0ri4n.craftcreator.api.mod.SupportedMods;
 import fr.en0ri4n.craftcreator.api.platform.*;
 import fr.en0ri4n.craftcreator.platform.adapters.*;
+import fr.en0ri4n.craftcreator.platform.render.ForgeRenderAdapter;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -66,8 +67,6 @@ public class Forge1182Platform implements Platform {
         }
     };
 
-    private final BlockAdapter<Block> blockAdapter = new ForgeBlockAdapter();
-
     private final UiAdapter uiAdapter = new ForgeUiAdapter();
 
     private final ContainerUiAdapter containerUiAdapter = new ForgeContainerUiAdapter();
@@ -113,11 +112,6 @@ public class Forge1182Platform implements Platform {
     @Override
     public LoaderServices getServices() {
         return services;
-    }
-
-    @Override
-    public BlockAdapter<Block> getBlockAdapter() {
-        return blockAdapter;
     }
 
     @Override

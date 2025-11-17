@@ -2,6 +2,7 @@ package fr.en0ri4n.craftcreator.api.ui;
 
 import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.api.platform.RenderAdapter;
+import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreUiElement;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import fr.en0ri4n.craftcreator.utils.Pair;
@@ -42,10 +43,10 @@ public abstract class CoreScreenDefinition {
 
     public abstract void init();
 
-    public void renderBackground(int x, int y, int width, int height) {
+    public void renderBackground(RenderContext ctx, int x, int y, int width, int height) {
         RenderAdapter adapter = CraftCreatorAPI.getInstance().getPlatform().getRenderAdapter();
-        adapter.bindTexture(getBackgroundTexture());
-        adapter.renderTexture(getBackgroundTexture(),
+        adapter.bindTexture(ctx, getBackgroundTexture());
+        adapter.renderTexture(ctx, getBackgroundTexture(),
                 x, y, width, height,
                 256, 256,
                 0f, 0f, 256f, 256f,
