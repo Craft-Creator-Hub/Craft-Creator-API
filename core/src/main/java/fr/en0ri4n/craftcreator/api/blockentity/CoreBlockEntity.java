@@ -1,6 +1,7 @@
 package fr.en0ri4n.craftcreator.api.blockentity;
 
 import com.google.gson.*;
+import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.Getter;
 

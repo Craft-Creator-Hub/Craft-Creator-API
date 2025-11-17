@@ -8,13 +8,13 @@ import fr.en0ri4n.craftcreator.utils.Identifier;
 
 import java.util.List;
 
-public class CraftingTableScreenDefinition extends CoreScreenDefinition
+public class CraftingTableRCScreenDefinition extends CoreScreenDefinition
 {
     private static final Identifier BACKGROUND_TEXTURE = Identifier.fromMod("textures/gui/container/minecraft/crafting_recipe_creator.png");
 
     private static final String EXPORT_BUTTON_ID = "export_button";
 
-    public CraftingTableScreenDefinition()
+    public CraftingTableRCScreenDefinition()
     {
         super(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR.toString(), "Crafting Table Recipe Creator"); // TODO: localization
     }

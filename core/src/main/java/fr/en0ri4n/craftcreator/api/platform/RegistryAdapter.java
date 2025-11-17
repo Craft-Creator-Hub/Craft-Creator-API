@@ -1,8 +1,6 @@
-package fr.en0ri4n.craftcreator.api.init;
+package fr.en0ri4n.craftcreator.api.platform;
 
-import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockDef;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockItemDef;
-import fr.en0ri4n.craftcreator.api.init.definitions.CoreItemDef;
 
 /**
  * Platform adapter contract used by core to ask the loader to register items/blocks.

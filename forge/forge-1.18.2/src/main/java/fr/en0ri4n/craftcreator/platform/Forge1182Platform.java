@@ -1,7 +1,7 @@
 package fr.en0ri4n.craftcreator.platform;
 
 import fr.en0ri4n.craftcreator.CraftCreator;
-import fr.en0ri4n.craftcreator.api.init.RegistryAdapter;
+import fr.en0ri4n.craftcreator.api.platform.RegistryAdapter;
 import fr.en0ri4n.craftcreator.api.item.ItemStackAdapter;
 import fr.en0ri4n.craftcreator.api.mod.SupportedModLoaders;
 import fr.en0ri4n.craftcreator.api.mod.SupportedMods;

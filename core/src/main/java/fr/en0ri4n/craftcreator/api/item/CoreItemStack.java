@@ -1,4 +1,4 @@
-package fr.en0ri4n.craftcreator.api.blockentity;
+package fr.en0ri4n.craftcreator.api.item;
 
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import com.google.gson.JsonObject;

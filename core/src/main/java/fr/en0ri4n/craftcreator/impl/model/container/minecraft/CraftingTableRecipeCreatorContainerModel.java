@@ -4,7 +4,7 @@ import fr.en0ri4n.craftcreator.api.ui.CoreScreenDefinition;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerLayout;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
 import fr.en0ri4n.craftcreator.api.ui.container.SlotDescriptor;
-import fr.en0ri4n.craftcreator.impl.model.screen.minecraft.CraftingTableScreenDefinition;
+import fr.en0ri4n.craftcreator.impl.model.screen.minecraft.CraftingTableRCScreenDefinition;
 import lombok.Getter;
 
 @Getter
@@ -25,7 +25,7 @@ public class CraftingTableRecipeCreatorContainerModel implements ContainerModel
         ContainerModel.addPlayerInventorySlots(layout, 8, 84);
 
         this.layout = layout;
-        this.screen = new CraftingTableScreenDefinition();
+        this.screen = new CraftingTableRCScreenDefinition();
     }
 
     @Override

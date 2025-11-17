@@ -1,7 +1,5 @@
 package fr.en0ri4n.craftcreator.api.item;
 
-import fr.en0ri4n.craftcreator.api.blockentity.CoreItemStack;
-
 /**
  * Adapter that converts between core CoreItemStack and a platform ItemStack object.
  *

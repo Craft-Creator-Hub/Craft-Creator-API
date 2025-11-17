@@ -3,9 +3,9 @@ package fr.en0ri4n.craftcreator.api.init;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockDef;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockItemDef;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreItemDef;
+import fr.en0ri4n.craftcreator.api.platform.RegistryAdapter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 

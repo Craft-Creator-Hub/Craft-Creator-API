@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import fr.en0ri4n.craftcreator.api.blockentity.CoreItemStack;
+import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
 import fr.en0ri4n.craftcreator.api.item.ItemStackAdapter;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import net.minecraft.nbt.*;
