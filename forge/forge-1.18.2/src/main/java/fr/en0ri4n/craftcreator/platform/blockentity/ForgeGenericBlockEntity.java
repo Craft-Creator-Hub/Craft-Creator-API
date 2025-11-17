@@ -5,21 +5,22 @@ import fr.en0ri4n.craftcreator.api.blockentity.BlockEntityBehavior;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntity;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityDefinition;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityManager;
-import fr.en0ri4n.craftcreator.api.ui.recipe.RecipeCreatorContainerModel;
 import fr.en0ri4n.craftcreator.platform.adapters.ForgeRegistryAdapter;
+import fr.en0ri4n.craftcreator.platform.item.ForgeItemStackAdapter;
 import fr.en0ri4n.craftcreator.platform.ui.container.ForgeRecipeCreatorMenu;
 import fr.en0ri4n.craftcreator.utils.Identifier;
+import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.MenuProvider;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.network.NetworkHooks;
 
 import java.util.function.Supplier;
 
@@ -27,22 +28,26 @@ import java.util.function.Supplier;
  * Generic Forge BlockEntity that stores core block entity JSON in NBT and delegates behavior.
  * Use a single BlockEntityType for multiple core block-entity types.
  */
-public class ForgeGenericBlockEntity extends BlockEntity
+public class ForgeGenericBlockEntity extends BaseContainerBlockEntity
 {
     private static final String CORE_TAG = "core_json";
 
     private CoreBlockEntity coreEntity;
 
-    public ForgeGenericBlockEntity(BlockPos pos, BlockState state) {
+    public ForgeGenericBlockEntity(BlockPos pos, BlockState state)
+    {
         super(ForgeRegistryAdapter.GENERIC_BLOCK_ENTITY.get(), pos, state);
     }
 
-    public void setCoreEntity(CoreBlockEntity entity) {
-        this.coreEntity = entity;
+    public ForgeGenericBlockEntity(BlockPos pos, BlockState state, Identifier coreId)
+    {
+        this(pos, state);
+        coreEntity = CoreBlockEntityManager.get().create(coreId);
+        coreEntity.getExtraData().addProperty("container", coreId.toString());
     }
 
     public CoreBlockEntity getCoreEntity() {
-        return this.coreEntity;
+        return coreEntity;
     }
 
     @Override
@@ -58,7 +63,7 @@ public class ForgeGenericBlockEntity extends BlockEntity
                     this.coreEntity = CoreBlockEntity.fromJson(obj, def);
                     // call behaviors onLoad via manager behaviorRegistry if needed
                     for (Identifier bId : def.getBehaviors()) {
-                        Supplier<BlockEntityBehavior> sup = CoreBlockEntityManager.get().getBehaviorRegistry().get(bId);
+                        Supplier<BlockEntityBehavior> sup = CoreBlockEntityManager.get().getBehavior(bId);
                         if (sup != null) {
                             BlockEntityBehavior beh = sup.get();
                             beh.load(coreEntity, obj);
@@ -82,13 +87,19 @@ public class ForgeGenericBlockEntity extends BlockEntity
     }
 
     @Override
+    protected Component getDefaultName()
+    {
+        return new TranslatableComponent("container.craftcreator." + getCoreEntity().getTypeId().getPath());
+    }
+
+    @Override
     public void setRemoved() {
         // call behaviors onRemove
         if (coreEntity != null) {
             CoreBlockEntityDefinition def = CoreBlockEntityManager.get().getDefinition(coreEntity.getTypeId());
             if (def != null) {
                 for (Identifier bId : def.getBehaviors()) {
-                    Supplier<BlockEntityBehavior> sup = CoreBlockEntityManager.get().getBehaviorRegistry().get(bId);
+                    Supplier<BlockEntityBehavior> sup = CoreBlockEntityManager.get().getBehavior(bId);
                     if (sup != null) sup.get().onRemove(coreEntity, new ForgeBlockEntityContext(level, worldPosition, null));
                 }
             }
@@ -96,53 +107,60 @@ public class ForgeGenericBlockEntity extends BlockEntity
         super.setRemoved();
     }
 
-    /**
-     * Helper to handle interaction; called from block.use.
-     */
-    public boolean onInteract(ServerPlayer player) {
-        if (coreEntity == null) return false;
-        CoreBlockEntityDefinition def = CoreBlockEntityManager.get().getDefinition(coreEntity.getTypeId());
-        if (def == null) return false;
-        ForgeBlockEntityContext ctx = new ForgeBlockEntityContext(level, worldPosition, player);
-        boolean handled = false;
-        for (Identifier bId : def.getBehaviors()) {
-            Supplier<BlockEntityBehavior> sup = CoreBlockEntityManager.get().getBehaviorRegistry().get(bId);
-            if (sup != null) {
-                BlockEntityBehavior beh = sup.get();
-                if (beh.onInteract(coreEntity, ctx)) {
-                    handled = true;
-                }
-            }
-        }
+    @Override
+    public AbstractContainerMenu createMenu(int pContainerId, Inventory pInventory)
+    {
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        buf.writeBlockPos(worldPosition);
+        buf.writeUtf(getCoreEntity().getTypeId().toString());
+        return new ForgeRecipeCreatorMenu(pContainerId, pInventory, buf);
+    }
 
-        // if not handled by behavior, try to open a menu if block entity defines a container id in extra data
-        if (!handled) {
-            // example: coreEntity.extraData may contain "container" : "craftcreator:recipe_editor"
-            if (coreEntity.getExtraData().has("container")) {
-                String cid = coreEntity.getExtraData().get("container").getAsString();
-                // open server-side container using NetworkHooks if you have a provider
-                // For demonstration we send a simple MenuProvider that creates a menu using a ContainerModel
-                NetworkHooks.openGui(player, new MenuProvider() {
+    @Override
+    public int getContainerSize()
+    {
+        return getCoreEntity().getInventorySize();
+    }
 
-                    @Override
-                    public net.minecraft.network.chat.Component getDisplayName() {
-                        return new TextComponent(cid);
-                    }
+    @Override
+    public boolean isEmpty()
+    {
+        return getCoreEntity().isInventoryEmpty();
+    }
 
-                    @Override
-                    public AbstractContainerMenu createMenu(int windowId, Inventory playerInv, Player playerEntity) {
-                        // create a menu using your platform adapter / ContainerModel here
-                        if ("craftcreator:recipe_creator".equals(cid)) {
-                            RecipeCreatorContainerModel model = new RecipeCreatorContainerModel(coreEntity);
-                            return new ForgeRecipeCreatorMenu(windowId, playerInv, model);
-                        }
-                        return null; // TODO: integrate your container factory for other types
-                    }
-                }, buf -> buf.writeBlockPos(worldPosition));
-                handled = true;
-            }
-        }
+    @Override
+    public ItemStack getItem(int pSlot)
+    {
+        return ForgeItemStackAdapter.get().toPlatform(getCoreEntity().getSlot(pSlot));
+    }
 
-        return handled;
+    @Override
+    public ItemStack removeItem(int pSlot, int pAmount)
+    {
+        return ForgeItemStackAdapter.get().toPlatform(getCoreEntity().removeItem(pSlot, pAmount));
+    }
+
+    @Override
+    public ItemStack removeItemNoUpdate(int pSlot)
+    {
+        return ForgeItemStackAdapter.get().toPlatform(getCoreEntity().removeItemNoUpdate(pSlot));
+    }
+
+    @Override
+    public void setItem(int pSlot, ItemStack pStack)
+    {
+        getCoreEntity().setSlot(pSlot, ForgeItemStackAdapter.get().fromPlatform(pStack));
+    }
+
+    @Override
+    public boolean stillValid(Player pPlayer)
+    {
+        return true;
+    }
+
+    @Override
+    public void clearContent()
+    {
+        getCoreEntity().clearInventory();
     }
 }

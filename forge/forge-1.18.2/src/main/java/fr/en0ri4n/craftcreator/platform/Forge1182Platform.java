@@ -2,15 +2,20 @@ package fr.en0ri4n.craftcreator.platform;
 
 import fr.en0ri4n.craftcreator.CraftCreator;
 import fr.en0ri4n.craftcreator.api.init.RegistryAdapter;
+import fr.en0ri4n.craftcreator.api.item.ItemStackAdapter;
 import fr.en0ri4n.craftcreator.api.mod.SupportedModLoaders;
 import fr.en0ri4n.craftcreator.api.mod.SupportedMods;
 import fr.en0ri4n.craftcreator.api.platform.*;
-import fr.en0ri4n.craftcreator.platform.adapters.*;
+import fr.en0ri4n.craftcreator.platform.adapters.ForgeBlockShapeAdapter;
+import fr.en0ri4n.craftcreator.platform.adapters.ForgeFacingAdapter;
+import fr.en0ri4n.craftcreator.platform.adapters.ForgeRegistryAdapter;
+import fr.en0ri4n.craftcreator.platform.adapters.ForgeUiAdapter;
+import fr.en0ri4n.craftcreator.platform.item.ForgeItemStackAdapter;
 import fr.en0ri4n.craftcreator.platform.render.ForgeRenderAdapter;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
@@ -69,8 +74,6 @@ public class Forge1182Platform implements Platform {
 
     private final UiAdapter uiAdapter = new ForgeUiAdapter();
 
-    private final ContainerUiAdapter containerUiAdapter = new ForgeContainerUiAdapter();
-
     private final RegistryAdapter registryAdapter = new ForgeRegistryAdapter();
 
     private final BlockShapeAdapter<VoxelShape> blockShapeAdapter = new ForgeBlockShapeAdapter();
@@ -120,12 +123,6 @@ public class Forge1182Platform implements Platform {
     }
 
     @Override
-    public ContainerUiAdapter getContainerUiAdapter()
-    {
-        return containerUiAdapter;
-    }
-
-    @Override
     public UiAdapter getUiAdapter() {
         return uiAdapter;
     }
@@ -152,5 +149,11 @@ public class Forge1182Platform implements Platform {
     public RenderAdapter getRenderAdapter()
     {
         return renderAdapter;
+    }
+
+    @Override
+    public ItemStackAdapter<ItemStack> getItemStackAdapter()
+    {
+        return ForgeItemStackAdapter.get();
     }
 }

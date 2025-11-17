@@ -27,6 +27,7 @@ public class CraftCreator
         adapter.getBlockDeferredRegister().register(modEventBus);
         adapter.getItemDeferredRegister().register(modEventBus);
         adapter.getMenuDeferredRegister().register(modEventBus);
+        adapter.getBlockEntityDeferredRegister().register(modEventBus);
         // Now run core-registered definitions through the adapter.
         // This will call adapter.registerBlock/registerItem/registerBlockItem which
         // register entries with the DeferredRegister instances above.

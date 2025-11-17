@@ -1,6 +1,7 @@
 package fr.en0ri4n.craftcreator.api.platform;
 
 import fr.en0ri4n.craftcreator.api.init.RegistryAdapter;
+import fr.en0ri4n.craftcreator.api.item.ItemStackAdapter;
 import fr.en0ri4n.craftcreator.api.mod.SupportedModLoaders;
 
 public interface Platform {
@@ -16,8 +17,6 @@ public interface Platform {
 
     IdentifierAdapter<?> getIdentifierAdapter();
 
-    ContainerUiAdapter getContainerUiAdapter();
-
     UiAdapter getUiAdapter();
 
     RegistryAdapter getRegistryAdapter();
@@ -27,4 +26,6 @@ public interface Platform {
     FacingAdapter<?> getFacingAdapter();
 
     RenderAdapter getRenderAdapter();
+
+    ItemStackAdapter getItemStackAdapter();
 }

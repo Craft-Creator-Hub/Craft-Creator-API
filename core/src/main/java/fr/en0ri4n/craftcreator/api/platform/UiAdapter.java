@@ -27,8 +27,4 @@ import fr.en0ri4n.craftcreator.api.ui.CoreScreenDefinition;
 public interface UiAdapter {
 
     void openScreen(CoreScreenDefinition renderer);
-
-    ClickContext buildContext(Object rawEventOrScreen); // platform decides what this is
-
-    void schedule(ClickContext.ClickActionWithContext action, ClickContext ctx);
 }

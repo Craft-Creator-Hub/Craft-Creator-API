@@ -1,4 +1,4 @@
-package fr.en0ri4n.craftcreator.api.blockentity.behaviors;
+package fr.en0ri4n.craftcreator.impl.blockentity.behaviors;
 
 import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.api.blockentity.BlockEntityBehavior;
@@ -9,7 +9,6 @@ public class CraftingTableRecipeCreatorBehavior implements BlockEntityBehavior {
 
     private static final String KEY_CRAFTING_TYPE = "crafting_table_recipe_creator.type";
 
-    // Example constants
     private boolean isCraftingShapeless = true;
 
     @Override

@@ -1,9 +1,7 @@
 package fr.en0ri4n.craftcreator;
 
 import fr.en0ri4n.craftcreator.api.CCReferences;
-import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityDefinition;
-import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityManager;
-import fr.en0ri4n.craftcreator.api.blockentity.definitions.DefinitionsRegistrar;
+import fr.en0ri4n.craftcreator.impl.blockentity.definitions.CoreBlockEntityDefinitionsRegistrar;
 import fr.en0ri4n.craftcreator.api.init.InitManager;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockDef;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockItemDef;
@@ -14,9 +12,9 @@ import fr.en0ri4n.craftcreator.api.init.shapes.CoreShapes;
 import fr.en0ri4n.craftcreator.api.platform.Platform;
 import fr.en0ri4n.craftcreator.api.recipe.serialize.RecipeInfosSerializer;
 import fr.en0ri4n.craftcreator.api.recipe.utils.RecipeInfos;
+import fr.en0ri4n.craftcreator.impl.model.ContainerModels;
 import fr.en0ri4n.craftcreator.serialize.SerializerRegistry;
 import fr.en0ri4n.craftcreator.utils.CraftCreatorException;
-import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -58,8 +56,11 @@ public class CraftCreatorAPI {
         // Registrations
         registerBlockItems();
 
+        // Register container models
+        ContainerModels.get().registerAll();
+
         // register block-entity definitions
-        DefinitionsRegistrar.class.getName(); // ensure static init
+        CoreBlockEntityDefinitionsRegistrar.init();
 
         platform.getLogger().info("CraftCreatorAPI initialized successfully.");
     }
@@ -69,7 +70,7 @@ public class CraftCreatorAPI {
         platform.getLogger().info("Registering core blocks and items...");
         // during core static init or module setup
         InitManager.get().registerBlockItem(CoreBlockItemDef.of(
-                CoreBlockDef.builder(Identifier.fromMod("minecraft_recipe_creator"))
+                CoreBlockDef.builder(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR)
                         .facing(FacingType.HORIZONTAL)
                         .facingShapes(Map.of(
                                 CoreFacing.WEST, CoreShapes.MinecraftRecipeCreatorShapes.SHAPE_WEST,
@@ -78,7 +79,7 @@ public class CraftCreatorAPI {
                                 CoreFacing.SOUTH, CoreShapes.MinecraftRecipeCreatorShapes.SHAPE_SOUTH
                         ))
                         .build(),
-                CoreItemDef.builder(Identifier.fromMod("minecraft_recipe_creator"))
+                CoreItemDef.builder(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR)
                         .maxStackSize(10)
                         .build()
         ));

@@ -32,7 +32,10 @@ public abstract class CoreScreenDefinition {
 
     public abstract Identifier getBackgroundTexture();
 
-    public abstract Pair<Integer, Integer> getBackgroundTextureSize();
+    public Pair<Integer, Integer> getBackgroundTextureSize()
+    {
+        return Pair.create(176, 166);
+    }
 
     public CoreUiElement findById(String elementId) {
         return elements.stream()

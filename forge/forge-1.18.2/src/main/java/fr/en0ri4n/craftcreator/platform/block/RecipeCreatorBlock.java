@@ -1,75 +1,102 @@
 package fr.en0ri4n.craftcreator.platform.block;
 
+import fr.en0ri4n.craftcreator.CraftCreator;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntity;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityManager;
+import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockDef;
+import fr.en0ri4n.craftcreator.api.init.shapes.CoreShapes;
+import fr.en0ri4n.craftcreator.api.init.shapes.CoreVoxelShape;
 import fr.en0ri4n.craftcreator.platform.blockentity.ForgeGenericBlockEntity;
-import fr.en0ri4n.craftcreator.platform.adapters.ForgeRegistryAdapter;
-import fr.en0ri4n.craftcreator.utils.Identifier;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * Block class for the every recipe creator blocks.
  */
-public class RecipeCreatorBlock extends Block implements EntityBlock {
+public class RecipeCreatorBlock extends Block implements EntityBlock
+{
+    private final CoreBlockDef coreBlockDef;
 
-    public RecipeCreatorBlock() {
+    public RecipeCreatorBlock(CoreBlockDef coreBlockId) {
         super(BlockBehaviour.Properties.of(Material.METAL)
                 .strength(3.0f, 3.0f)
                 .requiresCorrectToolForDrops());
-    }
-
-    @Override
-    public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.MODEL;
+        this.coreBlockDef = coreBlockId;
     }
 
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        // Create a ForgeGenericBlockEntity and set its core entity
-        ForgeGenericBlockEntity blockEntity = new ForgeGenericBlockEntity(pos, state);
-        
-        // Create a core entity for the recipe_creator type
-        CoreBlockEntity coreEntity = CoreBlockEntityManager.get().create(Identifier.from("craftcreator:recipe_creator"));
-        
-        // Set the container ID in extraData so onInteract knows which menu to open
-        coreEntity.getExtraData().addProperty("container", "craftcreator:recipe_creator");
-        
-        // Assign the core entity to the forge block entity
-        blockEntity.setCoreEntity(coreEntity);
-        
-        return blockEntity;
+        // Create a ForgeGenericBlockEntity and set its core entity ID
+        return new ForgeGenericBlockEntity(pos, state, coreBlockDef.getId());
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (world.isClientSide()) {
-            // Client: return success to swing the hand etc. Server will open UI.
-            return InteractionResult.SUCCESS;
-        }
+    public RenderShape getRenderShape(BlockState pState)
+    {
+        return RenderShape.MODEL;
+    }
 
-        // Server side: forward to block entity's onInteract
-        BlockEntity be = world.getBlockEntity(pos);
-        if (be instanceof ForgeGenericBlockEntity && player instanceof ServerPlayer) {
-            ForgeGenericBlockEntity genericBE = (ForgeGenericBlockEntity) be;
-            boolean handled = genericBE.onInteract((ServerPlayer) player);
-            return handled ? InteractionResult.CONSUME : InteractionResult.PASS;
+    @Override
+    public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext)
+    {
+        CoreVoxelShape coreShape = coreBlockDef.getFacingShapes().getOrDefault(CraftCreator.getInstance().getPlatform().getFacingAdapter().toCore(pState.getValue(BlockStateProperties.HORIZONTAL_FACING)), CoreShapes.FULL);
+
+        return CraftCreator.getInstance().getPlatform().getBlockShapeAdapter().toPlatformShape(coreShape);
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
+    {
+        builder.add(BlockStateProperties.HORIZONTAL_FACING);
+    }
+
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext ctx)
+    {
+        Direction dir = ctx.getHorizontalDirection().getOpposite();
+        return this.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, dir);
+    }
+
+    @Override
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
+    {
+        if(world.isClientSide())
+            return InteractionResult.SUCCESS;
+
+        if(player instanceof ServerPlayer serverPlayer)
+        {
+            ForgeGenericBlockEntity blockEntity = (ForgeGenericBlockEntity) world.getBlockEntity(pos);
+
+            // Use NetworkHooks to open the screen; write position so client can recreate menu/lookup BE
+            NetworkHooks.openGui(serverPlayer, blockEntity, buf ->
+            {
+                buf.writeBlockPos(pos);
+                buf.writeUtf(coreBlockDef.getId().toString());
+            });
+
+            return InteractionResult.CONSUME;
         }
 
         return InteractionResult.PASS;

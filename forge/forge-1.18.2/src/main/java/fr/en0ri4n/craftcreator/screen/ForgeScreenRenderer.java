@@ -2,7 +2,6 @@ package fr.en0ri4n.craftcreator.screen;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import fr.en0ri4n.craftcreator.api.ui.CoreScreenDefinition;
-import fr.en0ri4n.craftcreator.platform.render.ForgeRenderAdapter;
 import fr.en0ri4n.craftcreator.platform.render.ForgeRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;

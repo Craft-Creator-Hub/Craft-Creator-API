@@ -15,34 +15,29 @@ public class CraftingTableRecipeCreatorContainerModel implements ContainerModel
 
     public CraftingTableRecipeCreatorContainerModel()
     {
-        this.layout = getLayout();
-        this.screen = getScreenDefinition();
+        ContainerLayout layout = new ContainerLayout();
+        int idx = 0;
+        for(int i = 0; i < 3; i++)
+            for(int j = 0; j < 3; j++)
+                layout.addSlot(new SlotDescriptor(SlotDescriptor.SlotType.RECIPE_CREATOR_INPUT, 30 + j * 18, 17 + i * 18, idx++, null));
+
+        layout.addSlot(new SlotDescriptor(SlotDescriptor.SlotType.RECIPE_CREATOR_OUTPUT, 124, 35, idx++, null));
+        ContainerModel.addPlayerInventorySlots(layout, 8, 84);
+
+        this.layout = layout;
+        this.screen = new CraftingTableScreenDefinition();
     }
 
     @Override
     public ContainerLayout getLayout()
     {
-        ContainerLayout layout = new ContainerLayout();
-        // Define slots specific to crafting table recipe creation
-        for(int i = 0; i < 3; i++)
-        {
-            for(int j = 0; j < 3; j++)
-            {
-                layout.addSlot(new SlotDescriptor(SlotDescriptor.SlotType.RECIPE_CREATOR_INPUT, 30 + j * 18, 17 + i * 18, i * 3 + j, null));
-            }
-        }
-
-        layout.addSlot(new SlotDescriptor(SlotDescriptor.SlotType.RECIPE_CREATOR_OUTPUT, 124, 35, 0, null));
-
-        ContainerModel.addPlayerInventorySlots(layout, 8, 84);
-
         return layout;
     }
 
     @Override
     public CoreScreenDefinition getScreenDefinition()
     {
-        return new CraftingTableScreenDefinition();
+        return screen;
     }
 
     @Override

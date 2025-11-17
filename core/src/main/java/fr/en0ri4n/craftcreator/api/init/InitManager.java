@@ -97,17 +97,9 @@ public final class InitManager {
             adapter.registerBlockItem(bid);
         }
 
-        // Then register standalone blocks (skip those already covered by blockItemDefs).
-        for (CoreBlockDef b : new ArrayList<>(blocks)) {
-            adapter.registerBlock(b);
-        }
-
-        // Then register standalone items (skip those already covered by blockItemDefs).
-        for (CoreItemDef i : new ArrayList<>(items)) {
-            adapter.registerItem(i);
-        }
-
         adapter.registerMenus();
+
+        adapter.registerBlockEntities();
 
         locked = true;
     }

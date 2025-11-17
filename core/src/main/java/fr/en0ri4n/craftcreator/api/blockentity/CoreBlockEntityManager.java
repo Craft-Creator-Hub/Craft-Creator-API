@@ -17,8 +17,8 @@ public final class CoreBlockEntityManager {
 
     private static final CoreBlockEntityManager INSTANCE = new CoreBlockEntityManager();
 
-    private final Map<Identifier, CoreBlockEntityDefinition> definitions = new HashMap<>();
-    private final Map<Identifier, Supplier<BlockEntityBehavior>> behaviorRegistry = new HashMap<>();
+    private final Map<String, CoreBlockEntityDefinition> definitions = new HashMap<>();
+    private final Map<String, Supplier<BlockEntityBehavior>> behaviorRegistry = new HashMap<>();
     private boolean locked = false;
 
     private CoreBlockEntityManager() {}
@@ -27,20 +27,20 @@ public final class CoreBlockEntityManager {
 
     public synchronized void registerDefinition(CoreBlockEntityDefinition def) {
         checkNotLocked();
-        definitions.put(def.getId(), def);
+        definitions.put(def.getId().toString(), def);
     }
 
     public synchronized void registerBehavior(Identifier id, Supplier<BlockEntityBehavior> behaviorFactory) {
         checkNotLocked();
-        behaviorRegistry.put(id, behaviorFactory);
+        behaviorRegistry.put(id.toString(), behaviorFactory);
     }
 
     public CoreBlockEntityDefinition getDefinition(Identifier id) {
-        return definitions.get(id);
+        return definitions.get(id.toString());
     }
 
-    public Map<Identifier, Supplier<BlockEntityBehavior>> getBehaviorRegistry() {
-        return Collections.unmodifiableMap(behaviorRegistry);
+    public Supplier<BlockEntityBehavior> getBehavior(Identifier id) {
+        return behaviorRegistry.get(id.toString());
     }
 
     private void checkNotLocked() {
@@ -51,13 +51,13 @@ public final class CoreBlockEntityManager {
      * Create a new CoreBlockEntity instance from a registered definition.
      */
     public CoreBlockEntity create(Identifier typeId) {
-        CoreBlockEntityDefinition def = definitions.get(typeId);
+        CoreBlockEntityDefinition def = definitions.get(typeId.toString());
         if (def == null) throw new IllegalArgumentException("Unknown block-entity type: " + typeId);
         CoreBlockEntity entity = new CoreBlockEntity(typeId, def.getInventorySize());
 
         // instantiate and attach behaviors by resolving their suppliers
         for (Identifier bId : def.getBehaviors()) {
-            Supplier<BlockEntityBehavior> sup = behaviorRegistry.get(bId);
+            Supplier<BlockEntityBehavior> sup = behaviorRegistry.get(bId.toString());
             if (sup != null) {
                 BlockEntityBehavior beh = sup.get();
                 try {

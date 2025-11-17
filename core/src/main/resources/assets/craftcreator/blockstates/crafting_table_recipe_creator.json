@@ -1,0 +1,19 @@
+{
+    "variants": {
+        "facing=east": {
+            "model": "craftcreator:block/crafting_table_recipe_creator",
+            "y": 90
+        },
+        "facing=north": {
+            "model": "craftcreator:block/crafting_table_recipe_creator"
+        },
+        "facing=south": {
+            "model": "craftcreator:block/crafting_table_recipe_creator",
+            "y": 180
+        },
+        "facing=west": {
+            "model": "craftcreator:block/crafting_table_recipe_creator",
+            "y": 270
+        }
+    }
+}

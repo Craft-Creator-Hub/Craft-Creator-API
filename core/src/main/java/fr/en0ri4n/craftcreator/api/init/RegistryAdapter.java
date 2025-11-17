@@ -16,12 +16,12 @@ public interface RegistryAdapter {
      * Register a single block definition on the platform.
      * Implementations should ensure the block ends up in the corresponding game registry.
      */
-    void registerBlock(CoreBlockDef block);
+//    void registerBlock(CoreBlockDef block);
 
     /**
      * Register a single item definition on the platform.
      */
-    void registerItem(CoreItemDef item);
+//    void registerItem(CoreItemDef item);
 
     /**
      * Register all menus (containers) used by the mod.
@@ -33,10 +33,10 @@ public interface RegistryAdapter {
      * Platform adapters may implement this by registering the block and then creating
      * registering the item that wraps the block, or by delegating to registerBlock/registerItem.
      */
-    default void registerBlockItem(CoreBlockItemDef blockItemDef) {
-        registerBlock(blockItemDef.getBlock());
-        if (blockItemDef.hasItem()) {
-            registerItem(blockItemDef.getItem());
-        }
-    }
+    void registerBlockItem(CoreBlockItemDef blockItemDef);
+
+    /**
+     * Register all block-entities used by the mod.
+     */
+    void registerBlockEntities();
 }

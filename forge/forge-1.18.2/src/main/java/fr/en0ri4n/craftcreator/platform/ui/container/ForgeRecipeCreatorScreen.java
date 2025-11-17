@@ -39,6 +39,8 @@ public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecip
     {
         super.init();
 
+        model.getScreenDefinition().init();
+
         for(CoreUiElement element : model.getScreenDefinition().getElements())
         {
             switch(element.getType())
@@ -63,8 +65,8 @@ public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecip
 
     private void addButtonWidget(CoreButton btn)
     {
-        int x = btn.getX();
-        int y = btn.getY();
+        int x = this.leftPos + btn.getX();
+        int y = this.topPos + btn.getY();
         int w = btn.getWidth();
         int h = btn.getHeight();
 
@@ -75,8 +77,8 @@ public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecip
 
     private void addTextInputWidget(CoreTextInput text)
     {
-        int x = text.getX();
-        int y = text.getY();
+        int x = this.leftPos + text.getX();
+        int y = this.topPos + text.getY();
         int w = text.getWidth();
         int h = text.getHeight();
 
@@ -88,8 +90,8 @@ public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecip
 
     private void addDropdownWidget(CoreDropdown dropdown)
     {
-        int x = dropdown.getX();
-        int y = dropdown.getY();
+        int x = this.leftPos + dropdown.getX();
+        int y = this.topPos + dropdown.getY();
         int w = dropdown.getWidth();
         int h = dropdown.getHeight();
 

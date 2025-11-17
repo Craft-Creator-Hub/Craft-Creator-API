@@ -5,6 +5,7 @@ import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,6 +44,13 @@ public class CoreBlockEntity {
 
     public int getInventorySize() { return inventory.size(); }
 
+    public boolean isInventoryEmpty() {
+        for (CoreItemStack s : inventory) {
+            if (s != null && s.getCount() > 0) return false;
+        }
+        return true;
+    }
+
     /* ---- serialization ---- */
 
     public JsonObject toJson() {
@@ -79,5 +87,38 @@ public class CoreBlockEntity {
         }
 
         return entity;
+    }
+
+    public CoreItemStack removeItem(int slot, int amount)
+    {
+        CoreItemStack current = getSlot(slot);
+        if (current == null || current.getCount() <= 0 || amount <= 0) {
+            return CoreItemStack.EMPTY;
+        }
+
+        int toRemove = Math.min(amount, current.getCount());
+        Identifier itemId = current.getItemId();
+
+        // Update the core stack
+        int remaining = current.getCount() - toRemove;
+        setSlot(slot, new CoreItemStack(itemId, remaining));
+
+        return new CoreItemStack(itemId, toRemove);
+    }
+
+    public CoreItemStack removeItemNoUpdate(int slot)
+    {
+        CoreItemStack current = getSlot(slot);
+        if (current == null || current.getCount() <= 0) {
+            return CoreItemStack.EMPTY;
+        }
+
+        setSlot(slot, CoreItemStack.EMPTY);
+        return current;
+    }
+
+    public void clearInventory()
+    {
+        Collections.fill(inventory, CoreItemStack.EMPTY);
     }
 }

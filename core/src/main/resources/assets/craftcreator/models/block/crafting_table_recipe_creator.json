@@ -3,8 +3,8 @@
 	"texture_size": [32, 32],
 	"parent": "block/lectern",
 	"textures": {
-		"0": "craftcreator:block/minecraft_recipe_creator",
-		"particle": "craftcreator:block/minecraft_recipe_creator"
+		"0": "craftcreator:block/crafting_table_recipe_creator",
+		"particle": "craftcreator:block/crafting_table_recipe_creator"
 	},
 	"elements": [
 		{
