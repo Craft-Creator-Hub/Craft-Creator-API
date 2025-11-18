@@ -26,5 +26,9 @@ public interface Platform {
 
     RenderAdapter getRenderAdapter();
 
-    ItemStackAdapter getItemStackAdapter();
+    ItemStackAdapter<?> getItemStackAdapter();
+
+    BlockPosAdapter<?> getBlockPosAdapter();
+
+    NetworkInteractionAdapter<?> getNetworkInteractionAdapter();
 }

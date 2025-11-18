@@ -19,7 +19,7 @@ public final class DatapackHelper {
      * dataDir is provided by Platform.getPaths().getDataDirectory().
      */
     public static Path getOutputFile(RecipeTypeKey type, Identifier output) {
-        Platform platform = CraftCreatorAPI.getInstance().getPlatform();
+        Platform platform = CraftCreatorAPI.get().getPlatform();
 
         Path baseDir = platform.getPaths().getDataDirectory();
         ensureDirectory(baseDir);
@@ -34,7 +34,7 @@ public final class DatapackHelper {
                 Files.createDirectories(dir);
             }
         } catch (Exception e) {
-            CraftCreatorAPI.getInstance().getPlatform().getLogger()
+            CraftCreatorAPI.get().getPlatform().getLogger()
                     .error("Failed to create Craft Creator data directory: " + dir, e);
         }
     }

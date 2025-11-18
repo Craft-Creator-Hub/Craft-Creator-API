@@ -2,7 +2,6 @@ package fr.en0ri4n.craftcreator;
 
 import fr.en0ri4n.craftcreator.api.CCReferences;
 import fr.en0ri4n.craftcreator.platform.adapters.ForgeRegistryAdapter;
-import fr.en0ri4n.craftcreator.platform.ui.container.ForgeRecipeCreatorMenu;
 import fr.en0ri4n.craftcreator.platform.ui.container.ForgeRecipeCreatorScreen;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraftforge.api.distmarker.Dist;
@@ -16,6 +15,6 @@ public class ClientSetup
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event)
     {
-        MenuScreens.<ForgeRecipeCreatorMenu, ForgeRecipeCreatorScreen>register(ForgeRegistryAdapter.RECIPE_CREATOR_MENU.get(), ForgeRecipeCreatorScreen::new);
+        MenuScreens.register(ForgeRegistryAdapter.RECIPE_CREATOR_MENU.get(), ForgeRecipeCreatorScreen::new);
     }
 }

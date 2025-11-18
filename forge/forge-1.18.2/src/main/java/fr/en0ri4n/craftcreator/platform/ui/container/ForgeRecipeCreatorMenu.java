@@ -4,6 +4,7 @@ import fr.en0ri4n.craftcreator.api.ui.container.ContainerLayout;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
 import fr.en0ri4n.craftcreator.api.ui.container.SlotDescriptor;
 import fr.en0ri4n.craftcreator.impl.model.ContainerModels;
+import fr.en0ri4n.craftcreator.platform.Forge1182Platform;
 import fr.en0ri4n.craftcreator.platform.adapters.ForgeRegistryAdapter;
 import fr.en0ri4n.craftcreator.platform.blockentity.ForgeGenericBlockEntity;
 import fr.en0ri4n.craftcreator.utils.Identifier;
@@ -19,6 +20,7 @@ public class ForgeRecipeCreatorMenu extends AbstractContainerMenu {
 
     private final ContainerModel model;
     private final ForgeGenericBlockEntity coreEntity;
+    private final BlockPos pos;
 
     public ForgeRecipeCreatorMenu(int windowId, Inventory playerInv, FriendlyByteBuf buf) {
         this(windowId, playerInv, buf.readBlockPos(), Identifier.from(buf.readUtf()));
@@ -26,8 +28,9 @@ public class ForgeRecipeCreatorMenu extends AbstractContainerMenu {
 
     public ForgeRecipeCreatorMenu(int windowId, Inventory playerInv, BlockPos pos, Identifier modelId) {
         super(ForgeRegistryAdapter.RECIPE_CREATOR_MENU.get(), windowId);
-        this.model = ContainerModels.get().getContainerModel(modelId);
-        coreEntity = (ForgeGenericBlockEntity) playerInv.player.level.getBlockEntity(pos);
+        this.model = ContainerModels.get().getContainerModel(modelId, Forge1182Platform.get().getBlockPosAdapter().toCore(pos));
+        this.coreEntity = (ForgeGenericBlockEntity) playerInv.player.level.getBlockEntity(pos);
+        this.pos = pos;
         ContainerLayout layout = model.getLayout();
 
         if(coreEntity == null) {
@@ -51,6 +54,10 @@ public class ForgeRecipeCreatorMenu extends AbstractContainerMenu {
         }
     }
 
+    public ContainerModel getModel() {
+        return model;
+    }
+
     @Override
     public boolean stillValid(Player player) {
         return true;
@@ -60,5 +67,10 @@ public class ForgeRecipeCreatorMenu extends AbstractContainerMenu {
     public ItemStack quickMoveStack(Player pPlayer, int pIndex)
     {
         return coreEntity.getItem(pIndex);
+    }
+
+    public BlockPos getPos()
+    {
+        return pos;
     }
 }

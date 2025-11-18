@@ -20,7 +20,7 @@ public class CoreBlockEntity {
     private final UUID uuid;
     private final Identifier typeId; // the definition id
     private final List<CoreItemStack> inventory;
-    private final JsonObject extraData; // arbitrary JSON tree for behaviors
+    private final JsonObject extraData; // JSON tree for behaviors
 
     public CoreBlockEntity(Identifier typeId, int inventorySize) {
         this.uuid = UUID.randomUUID();
@@ -72,7 +72,7 @@ public class CoreBlockEntity {
         CoreBlockEntity entity = new CoreBlockEntity(type, def.getInventorySize());
 
         if (json.has("uuid")) {
-            try { /* ignore - uuid is final; can't set; keep generated */ } catch (Exception ignored) {}
+            /* ignore - uuid is final; can't set; keep generated */
         }
 
         if (json.has("inventory")) {
@@ -88,6 +88,17 @@ public class CoreBlockEntity {
         }
 
         return entity;
+    }
+
+    public void updateData(JsonObject payload) {
+        for (String key : payload.keySet()) {
+            JsonElement val = payload.get(key);
+            extraData.add(key, val.deepCopy());
+        }
+    }
+
+    public JsonObject fetchData() {
+        return extraData.deepCopy();
     }
 
     public CoreItemStack removeItem(int slot, int amount)

@@ -1,6 +1,7 @@
 package fr.en0ri4n.craftcreator.platform.blockentity;
 
 import com.google.gson.JsonParser;
+import fr.en0ri4n.craftcreator.CraftCreator;
 import fr.en0ri4n.craftcreator.api.blockentity.BlockEntityBehavior;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntity;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityDefinition;
@@ -66,13 +67,13 @@ public class ForgeGenericBlockEntity extends BaseContainerBlockEntity
                         Supplier<BlockEntityBehavior> sup = CoreBlockEntityManager.get().getBehavior(bId);
                         if (sup != null) {
                             BlockEntityBehavior beh = sup.get();
-                            beh.load(coreEntity, obj);
+                            beh.load(coreEntity, coreEntity.getExtraData());
                             beh.onLoad(coreEntity, new ForgeBlockEntityContext(level, worldPosition, null));
                         }
                     }
                 }
             } catch (Exception e) {
-                // log parsing error if you have a logger
+                CraftCreator.LOGGER.error("Failed to load core block entity from JSON: {}", json, e);
             }
         }
     }
@@ -81,6 +82,17 @@ public class ForgeGenericBlockEntity extends BaseContainerBlockEntity
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         if (coreEntity != null) {
+            // call behaviors onSave
+            CoreBlockEntityDefinition def = CoreBlockEntityManager.get().getDefinition(coreEntity.getTypeId());
+            if (def != null) {
+                for (Identifier bId : def.getBehaviors()) {
+                    Supplier<BlockEntityBehavior> sup = CoreBlockEntityManager.get().getBehavior(bId);
+                    if (sup != null) {
+                        BlockEntityBehavior beh = sup.get();
+                        beh.save(coreEntity, coreEntity.getExtraData());
+                    }
+                }
+            }
             String s = coreEntity.toJson().toString();
             tag.putString(CORE_TAG, s);
         }

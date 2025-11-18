@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.api.mod.SupportedMods;
+import fr.en0ri4n.craftcreator.api.platform.Platform;
 import fr.en0ri4n.craftcreator.api.recipe.model.CraftingGrid;
 import fr.en0ri4n.craftcreator.api.recipe.serialize.CraftingTableRecipeSerializer;
 import fr.en0ri4n.craftcreator.api.recipe.utils.RecipeEntry;
@@ -218,7 +219,7 @@ public class KubeJsActions {
      * ---------------------------------------------------------------------- */
 
     private void appendToScript(String snippet) {
-        var platform = CraftCreatorAPI.getInstance().getPlatform();
+        Platform platform = CraftCreatorAPI.get().getPlatform();
 
         // kubejs/server_scripts/craftcreator_<modId>_recipes.js
         String modId = mod.getModId();

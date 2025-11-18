@@ -1,24 +1,33 @@
 package fr.en0ri4n.craftcreator.api.ui.container;
 
+import fr.en0ri4n.craftcreator.api.blockentity.BlockEntityBehavior;
+import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockPos;
+import fr.en0ri4n.craftcreator.api.ui.CoreContainerScreenDefinition;
 import fr.en0ri4n.craftcreator.api.ui.CoreScreenDefinition;
 import fr.en0ri4n.craftcreator.utils.Identifier;
+import lombok.Getter;
+import lombok.Setter;
 
-public interface ContainerModel {
+@Getter
+@Setter
+public abstract class ContainerModel<T extends BlockEntityBehavior> {
 
-    ContainerLayout getLayout();
+    private CoreBlockPos blockEntityPos;
 
-    CoreScreenDefinition getScreenDefinition();
+    public abstract ContainerLayout getLayout();
+
+    public abstract CoreContainerScreenDefinition<T> getScreenDefinition();
 
     // Called when a button is pressed
-    void onButtonPressed(String elementId, String actionId);
+    public abstract void onButtonPressed(String elementId, String actionId);
 
     // Called when dropdown selection changes
-    void onDropdownChanged(String elementId, int index, String value);
+    public abstract void onDropdownChanged(String elementId, int index, String value);
 
-    // Optional: text inputs
-    default void onTextChanged(String elementId, String value) {}
+    // Text inputs
+    public void onTextChanged(String elementId, String value) {}
 
-    static void addPlayerInventorySlots(ContainerLayout layout, int startX, int startY) {
+    protected void addPlayerInventorySlots(ContainerLayout layout, int startX, int startY) {
         // Player inventory (3 rows of 9)
         int idx = 9; // skip hotbar
         for (int row = 0; row < 3; row++) {

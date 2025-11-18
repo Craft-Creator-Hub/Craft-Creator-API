@@ -1,11 +1,9 @@
 package fr.en0ri4n.craftcreator.platform.block;
 
-import fr.en0ri4n.craftcreator.CraftCreator;
-import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntity;
-import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityManager;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockDef;
 import fr.en0ri4n.craftcreator.api.init.shapes.CoreShapes;
 import fr.en0ri4n.craftcreator.api.init.shapes.CoreVoxelShape;
+import fr.en0ri4n.craftcreator.platform.Forge1182Platform;
 import fr.en0ri4n.craftcreator.platform.blockentity.ForgeGenericBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -48,7 +46,6 @@ public class RecipeCreatorBlock extends Block implements EntityBlock
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        // Create a ForgeGenericBlockEntity and set its core entity ID
         return new ForgeGenericBlockEntity(pos, state, coreBlockDef.getId());
     }
 
@@ -61,9 +58,9 @@ public class RecipeCreatorBlock extends Block implements EntityBlock
     @Override
     public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext)
     {
-        CoreVoxelShape coreShape = coreBlockDef.getFacingShapes().getOrDefault(CraftCreator.getInstance().getPlatform().getFacingAdapter().toCore(pState.getValue(BlockStateProperties.HORIZONTAL_FACING)), CoreShapes.FULL);
+        CoreVoxelShape coreShape = coreBlockDef.getFacingShapes().getOrDefault(Forge1182Platform.get().getFacingAdapter().toCore(pState.getValue(BlockStateProperties.HORIZONTAL_FACING)), CoreShapes.FULL);
 
-        return CraftCreator.getInstance().getPlatform().getBlockShapeAdapter().toPlatformShape(coreShape);
+        return Forge1182Platform.get().getBlockShapeAdapter().toPlatformShape(coreShape);
     }
 
     @Override

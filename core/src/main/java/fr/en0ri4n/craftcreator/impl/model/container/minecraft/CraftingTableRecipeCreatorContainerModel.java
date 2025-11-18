@@ -1,17 +1,19 @@
 package fr.en0ri4n.craftcreator.impl.model.container.minecraft;
 
+import fr.en0ri4n.craftcreator.api.ui.CoreContainerScreenDefinition;
 import fr.en0ri4n.craftcreator.api.ui.CoreScreenDefinition;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerLayout;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
 import fr.en0ri4n.craftcreator.api.ui.container.SlotDescriptor;
+import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.CraftingTableRCBehavior;
 import fr.en0ri4n.craftcreator.impl.model.screen.minecraft.CraftingTableRCScreenDefinition;
 import lombok.Getter;
 
 @Getter
-public class CraftingTableRecipeCreatorContainerModel implements ContainerModel
+public class CraftingTableRecipeCreatorContainerModel extends ContainerModel<CraftingTableRCBehavior>
 {
     private final ContainerLayout layout;
-    private final CoreScreenDefinition screen;
+    private final CraftingTableRCScreenDefinition screen;
 
     public CraftingTableRecipeCreatorContainerModel()
     {
@@ -22,10 +24,10 @@ public class CraftingTableRecipeCreatorContainerModel implements ContainerModel
                 layout.addSlot(new SlotDescriptor(SlotDescriptor.SlotType.RECIPE_CREATOR_INPUT, 30 + j * 18, 17 + i * 18, idx++, null));
 
         layout.addSlot(new SlotDescriptor(SlotDescriptor.SlotType.RECIPE_CREATOR_OUTPUT, 124, 35, idx++, null));
-        ContainerModel.addPlayerInventorySlots(layout, 8, 84);
+        addPlayerInventorySlots(layout, 8, 84);
 
         this.layout = layout;
-        this.screen = new CraftingTableRCScreenDefinition();
+        this.screen = new CraftingTableRCScreenDefinition(this);
     }
 
     @Override
@@ -35,7 +37,7 @@ public class CraftingTableRecipeCreatorContainerModel implements ContainerModel
     }
 
     @Override
-    public CoreScreenDefinition getScreenDefinition()
+    public CoreContainerScreenDefinition<CraftingTableRCBehavior> getScreenDefinition()
     {
         return screen;
     }

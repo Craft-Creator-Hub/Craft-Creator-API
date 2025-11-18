@@ -37,4 +37,9 @@ public interface RegistryAdapter {
      * Register all block-entities used by the mod.
      */
     void registerBlockEntities();
+
+    /**
+     * Register all network packets used by the mod.
+     */
+    void registerPackets();
 }

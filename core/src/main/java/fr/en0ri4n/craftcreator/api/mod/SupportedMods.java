@@ -31,7 +31,7 @@ public enum SupportedMods
     public static List<SupportedMods> getSupportedLoadedMods()
     {
         return Arrays.stream(SupportedMods.values())
-                .filter(mod -> CraftCreatorAPI.getInstance().getPlatform().getServices().IsModLoaded(mod))
+                .filter(mod -> CraftCreatorAPI.get().getPlatform().getServices().IsModLoaded(mod))
                 .collect(Collectors.toList());
     }
 
@@ -42,6 +42,6 @@ public enum SupportedMods
      */
     public static boolean isKubeJSLoaded()
     {
-        return CraftCreatorAPI.getInstance().getPlatform().getServices().IsModLoaded(SupportedMods.KUBEJS);
+        return CraftCreatorAPI.get().getPlatform().getServices().IsModLoaded(SupportedMods.KUBEJS);
     }
 }

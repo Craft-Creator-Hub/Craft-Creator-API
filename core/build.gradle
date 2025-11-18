@@ -21,9 +21,6 @@ dependencies {
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
-
-    // Log4j
-    implementation 'log4j:log4j:1.2.17'
 }
 
 publishing {

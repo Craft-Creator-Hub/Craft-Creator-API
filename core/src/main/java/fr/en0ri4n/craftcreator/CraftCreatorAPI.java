@@ -14,6 +14,7 @@ import fr.en0ri4n.craftcreator.api.recipe.serialize.RecipeInfosSerializer;
 import fr.en0ri4n.craftcreator.api.recipe.utils.RecipeInfos;
 import fr.en0ri4n.craftcreator.impl.model.ContainerModels;
 import fr.en0ri4n.craftcreator.serialize.SerializerRegistry;
+import fr.en0ri4n.craftcreator.utils.CoreLogger;
 import fr.en0ri4n.craftcreator.utils.CraftCreatorException;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -28,8 +29,11 @@ import java.util.Objects;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CraftCreatorAPI {
 
-    @Getter
-    private static final CraftCreatorAPI instance = new CraftCreatorAPI();
+    private static final CraftCreatorAPI INSTANCE = new CraftCreatorAPI();
+    public static CraftCreatorAPI get() { return INSTANCE; }
+
+    public static CoreLogger LOGGER = new CoreLogger();
+
     private static boolean initialized = false;
 
     private Platform platform;
@@ -37,18 +41,18 @@ public class CraftCreatorAPI {
     private CCReferences references;
 
     public void initialize(Platform platform, CCReferences references) throws CraftCreatorException {
-        if (initialized) {
+        if (initialized)
             throw new CraftCreatorException("CraftCreatorAPI has already been initialized !");
-        }
-        initialized = true;
 
-        platform.getLogger().info("Initializing CraftCreatorAPI...");
+        initialized = true;
 
         Objects.requireNonNull(platform, "Platform must not be null");
         this.platform = platform;
 
         Objects.requireNonNull(references, "References must not be null");
         this.references = references;
+
+        CraftCreatorAPI.LOGGER.info("Initializing CraftCreatorAPI[%s][%s-%s]...".formatted(ApiReferences.VERSION, platform.getLoader().getModLoaderName(), platform.getMinecraftVersion()));
 
         // register serializers
         SerializerRegistry.register(RecipeInfos.class, new RecipeInfosSerializer());
@@ -62,12 +66,12 @@ public class CraftCreatorAPI {
         // register block-entity definitions
         CoreBlockEntityDefinitionsRegistrar.init();
 
-        platform.getLogger().info("CraftCreatorAPI initialized successfully.");
+        CraftCreatorAPI.LOGGER.info("CraftCreatorAPI[%s][%s-%s] initialized successfully.".formatted(ApiReferences.VERSION, platform.getLoader().getModLoaderName(), platform.getMinecraftVersion()));
     }
 
     private void registerBlockItems()
     {
-        platform.getLogger().info("Registering core blocks and items...");
+        CraftCreatorAPI.LOGGER.info("Registering core blocks and items...");
         // during core static init or module setup
         InitManager.get().registerBlockItem(CoreBlockItemDef.of(
                 CoreBlockDef.builder(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR)

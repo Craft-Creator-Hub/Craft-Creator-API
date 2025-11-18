@@ -10,7 +10,7 @@ import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityManager;
 public final class CoreBlockEntityBehaviorsRegistrar
 {
     public static void init() {
-        CoreBlockEntityManager.get().registerBehavior(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR, CraftingTableRecipeCreatorBehavior::new);
+        CoreBlockEntityManager.get().registerBehavior(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR, CraftingTableRCBehavior::new);
     }
 
     private CoreBlockEntityBehaviorsRegistrar() {}

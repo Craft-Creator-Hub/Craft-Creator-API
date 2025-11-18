@@ -89,7 +89,7 @@ public abstract class CoreModRecipeSerializer {
                              RecipeInfos infos,
                              Set<RecipeOutputTarget> targets) {
 
-        Platform platform = CraftCreatorAPI.getInstance().getPlatform();
+        Platform platform = CraftCreatorAPI.get().getPlatform();
 
         if (targets.contains(RecipeOutputTarget.DATAPACK)) {
             writeDatapackRecipe(platform, json, recipeTypeId, outputId);
