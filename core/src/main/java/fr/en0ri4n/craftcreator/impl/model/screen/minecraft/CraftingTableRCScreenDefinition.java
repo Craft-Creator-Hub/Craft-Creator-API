@@ -16,6 +16,7 @@ public class CraftingTableRCScreenDefinition extends CoreContainerScreenDefiniti
     private static final Identifier BACKGROUND_TEXTURE = Identifier.fromMod("textures/gui/container/minecraft/crafting_recipe_creator.png");
 
     private CoreDropdown shapeDropdown;
+    private CoreButton exportButton;
 
     public CraftingTableRCScreenDefinition(ContainerModel<CraftingTableRCBehavior> parent)
     {
@@ -31,32 +32,33 @@ public class CraftingTableRCScreenDefinition extends CoreContainerScreenDefiniti
     @Override
     public void init()
     {
-        addElement(shapeDropdown = new CoreDropdown("shape_type", 10, 10, 100, 20, List.of("Shaped", "Shapeless"), getBehavior().isCraftingShapeless() ? 1 : 0, ""));
-        addElement(new CoreButton("test", 120, 10, 10, 10, "S", "export_recipes", "Export the currently selected recipes"));
+        addElement(shapeDropdown = new CoreDropdown("shape_type", 10, 10, 100, 20, List.of("Shaped", "Shapeless"), 0, ""));
+        addElement(exportButton = new CoreButton("export", 120, 10, 10, 10, "S", "export_recipes", "Export the currently selected recipes"));
     }
 
     @Override
     public void updateScreen(UiUpdateData data)
     {
-        System.out.println("Updating CraftingTableRCScreenDefinition with data: " + data);
-        if(data.getPayload().has(CraftingTableRCBehavior.CRAFTING_TYPE_KEY)) {
-            String type = data.getPayload().get(CraftingTableRCBehavior.CRAFTING_TYPE_KEY).getAsString();
-            getBehavior().setCraftingShapeless(type.equals("shapeless"));
-            shapeDropdown.setSelectedIndex(getBehavior().isCraftingShapeless() ? 1 : 0);
-        }
+        getBehavior().load(null, data.getPayload());
+        shapeDropdown.setSelectedIndex(getBehavior().isCraftingShapeless() ? 1 : 0);
+        sendUpdate(shapeDropdown);
     }
 
     @Override
     public void onButtonPressed(String elementId, String actionId)
     {
-        System.out.println("Unknown button pressed. Element ID: " + elementId + ", Action ID: " + actionId);
+        if(elementId.equals(exportButton.getId())) {
+            if(actionId.equals("export_recipes")) {
+                // Trigger export
+            }
+        }
     }
+
 
     @Override
     public void onDropdownChanged(String elementId, int index, String value)
     {
         if(elementId.equals(shapeDropdown.getId())) {
-            System.out.println("Dropdown value changed: " + value);
             getBehavior().setCraftingShapeless(index == 1);
         }
     }

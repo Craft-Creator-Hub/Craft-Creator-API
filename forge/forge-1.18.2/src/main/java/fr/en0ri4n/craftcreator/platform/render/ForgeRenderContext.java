@@ -12,7 +12,7 @@ import fr.en0ri4n.craftcreator.api.render.RenderContext;
  *   ForgeRenderContext ctx = new ForgeRenderContext(poseStack, mc.renderBuffers().bufferSource(), partialTicks);
  *   CraftCreatorAPI.getInstance().getPlatform().getRenderAdapter().renderTexture(ctx, ...);
  */
-public final class ForgeRenderContext implements RenderContext {
+public class ForgeRenderContext implements RenderContext {
 
     private final PoseStack poseStack;
     private final MultiBufferSource.BufferSource bufferSource;

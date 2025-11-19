@@ -4,13 +4,14 @@ import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.api.platform.Platform;
 import fr.en0ri4n.craftcreator.api.recipe.RecipeTypeKey;
 import fr.en0ri4n.craftcreator.utils.Identifier;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public final class DatapackHelper {
-
-    private DatapackHelper() {}
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class DatapackHelper {
 
     /**
      * Get the output file path of the recipe in the Craft Creator data folder.

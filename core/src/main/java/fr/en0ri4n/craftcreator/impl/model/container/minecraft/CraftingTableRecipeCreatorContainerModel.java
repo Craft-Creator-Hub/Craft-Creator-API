@@ -1,7 +1,6 @@
 package fr.en0ri4n.craftcreator.impl.model.container.minecraft;
 
 import fr.en0ri4n.craftcreator.api.ui.CoreContainerScreenDefinition;
-import fr.en0ri4n.craftcreator.api.ui.CoreScreenDefinition;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerLayout;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
 import fr.en0ri4n.craftcreator.api.ui.container.SlotDescriptor;

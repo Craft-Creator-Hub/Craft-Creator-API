@@ -6,7 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 
-public final class NetworkHandler {
+public class NetworkHandler {
     private static final String PROTOCOL = "1";
     public static final ResourceLocation CHANNEL_NAME = new ResourceLocation(CCReferences.MOD_ID, "main");
     public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(

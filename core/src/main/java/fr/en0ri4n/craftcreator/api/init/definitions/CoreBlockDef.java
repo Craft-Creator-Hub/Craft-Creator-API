@@ -11,7 +11,7 @@ import java.util.*;
  * Loader-agnostic description of a block to register.
  * Includes an optional facing/orientation hint used by adapters.
  */
-public final class CoreBlockDef {
+public class CoreBlockDef {
 
     @Getter
     private final Identifier id;
@@ -47,7 +47,7 @@ public final class CoreBlockDef {
 
     public static Builder builder(Identifier id) { return new Builder(id); }
 
-    public static final class Builder {
+    public static class Builder {
         private final Identifier id;
         private final Map<String, String> props = new HashMap<>();
         private FacingType facingType = FacingType.NONE;

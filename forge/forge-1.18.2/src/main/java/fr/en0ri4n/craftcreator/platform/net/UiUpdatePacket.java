@@ -12,7 +12,7 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public final class UiUpdatePacket
+public class UiUpdatePacket
 {
     private final UiUpdateData data;
 

@@ -3,6 +3,8 @@ package fr.en0ri4n.craftcreator.api.init;
 import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockItemDef;
 import fr.en0ri4n.craftcreator.api.platform.RegistryAdapter;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +16,8 @@ import java.util.Objects;
  * Core modules (or data providers) call registerBlockItem during static initialization
  * or setup; later the platform calls runRegistrations(adapter) to perform actual registration.
  */
-public final class InitManager {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class InitManager {
 
     private static final InitManager INSTANCE = new InitManager();
     public static InitManager get() {
@@ -23,8 +26,6 @@ public final class InitManager {
 
     private final List<CoreBlockItemDef> blockItemDefs = new ArrayList<>();
     private boolean locked = false;
-
-    private InitManager() {}
 
     /**
      * Register a combined block + block-item definition. Must be called before runRegistrations.

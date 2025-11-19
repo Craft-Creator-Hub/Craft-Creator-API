@@ -1,14 +1,10 @@
 package fr.en0ri4n.craftcreator.platform.ui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-
 import fr.en0ri4n.craftcreator.api.ui.CoreScreenDefinition;
 import fr.en0ri4n.craftcreator.api.ui.CoreUiActionHandler;
-import fr.en0ri4n.craftcreator.api.ui.elements.CoreButton;
-import fr.en0ri4n.craftcreator.api.ui.elements.CoreDropdown;
-import fr.en0ri4n.craftcreator.api.ui.elements.CoreList;
-import fr.en0ri4n.craftcreator.api.ui.elements.CoreTextInput;
-import fr.en0ri4n.craftcreator.api.ui.elements.CoreUiElement;
+import fr.en0ri4n.craftcreator.api.ui.elements.*;
+import fr.en0ri4n.craftcreator.platform.ui.elements.ForgeDropdownWidget;
 import fr.en0ri4n.craftcreator.platform.ui.elements.ForgeSimpleListWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -19,7 +15,7 @@ import net.minecraft.network.chat.TextComponent;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class ForgeScreenBuilder {
+public class ForgeScreenBuilder {
 
     private ForgeScreenBuilder() {}
 
@@ -44,7 +40,7 @@ public final class ForgeScreenBuilder {
         protected void init() {
             super.init();
 
-            coreScreen.init();
+            coreScreen.initScreen();
 
             // Centering / scaling strategy is up to you; here we use core coordinates directly.
             for (CoreUiElement element : coreScreen.getElements()) {
@@ -92,7 +88,7 @@ public final class ForgeScreenBuilder {
             int w = dropdown.getWidth();
             int h = dropdown.getHeight();
 
-            fr.en0ri4n.craftcreator.platform.ui.ForgeDropdownWidget widget = new fr.en0ri4n.craftcreator.platform.ui.ForgeDropdownWidget(
+            ForgeDropdownWidget widget = new ForgeDropdownWidget(
                     x, y, w, h,
                     dropdown,
                     (selectedIndex, selectedValue) -> {

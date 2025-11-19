@@ -8,7 +8,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.List;
 
-public final class ForgeBlockShapeAdapter implements BlockShapeAdapter<VoxelShape>
+public class ForgeBlockShapeAdapter implements BlockShapeAdapter<VoxelShape>
 {
     @Override
     public VoxelShape toPlatformShape(CoreVoxelShape shape) {

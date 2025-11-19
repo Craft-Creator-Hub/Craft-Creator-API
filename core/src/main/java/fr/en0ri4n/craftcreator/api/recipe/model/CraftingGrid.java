@@ -34,7 +34,7 @@ public class CraftingGrid {
     }
 
     @Getter
-    public static final class Position {
+    public static class Position {
         private final int x;
         private final int y;
 

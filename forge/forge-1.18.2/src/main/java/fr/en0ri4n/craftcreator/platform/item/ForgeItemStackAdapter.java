@@ -18,7 +18,7 @@ import net.minecraftforge.registries.ForgeRegistries;
  * Converts CoreItemStack <-> ItemStack and preserves NBT by translating between
  * JsonObject and CompoundTag recursively.
  */
-public final class ForgeItemStackAdapter implements ItemStackAdapter<ItemStack> {
+public class ForgeItemStackAdapter implements ItemStackAdapter<ItemStack> {
 
     private static final ForgeItemStackAdapter INSTANCE = new ForgeItemStackAdapter();
     private ForgeItemStackAdapter() {}

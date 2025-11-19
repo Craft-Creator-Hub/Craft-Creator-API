@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
 import fr.en0ri4n.craftcreator.api.ui.elements.*;
 import fr.en0ri4n.craftcreator.platform.render.ForgeRenderContext;
-import fr.en0ri4n.craftcreator.platform.ui.ForgeDropdownWidget;
+import fr.en0ri4n.craftcreator.platform.ui.elements.ForgeDropdownWidget;
 import fr.en0ri4n.craftcreator.platform.ui.elements.ForgeSimpleListWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -16,7 +16,7 @@ import net.minecraft.world.entity.player.Inventory;
 
 public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecipeCreatorMenu>
 {
-    private final ContainerModel model;
+    private final ContainerModel<?> model;
 
     public ForgeRecipeCreatorScreen(ForgeRecipeCreatorMenu menu, Inventory playerInv, Component title)
     {
@@ -26,7 +26,7 @@ public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecip
         this.imageHeight = model.getLayout().getHeight();
     }
 
-    public ContainerModel getModel()
+    public ContainerModel<?> getModel()
     {
         return model;
     }
@@ -62,6 +62,13 @@ public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecip
         model.getScreenDefinition().fetchData();
     }
 
+    @Override
+    public void onClose()
+    {
+        model.getScreenDefinition().onClose();
+        super.onClose();
+    }
+
     private void addButtonWidget(CoreButton btn)
     {
         int x = this.leftPos + btn.getX();
@@ -72,6 +79,7 @@ public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecip
         Button mcButton = new Button(x, y, w, h, new TextComponent(btn.getLabel()), b -> model.onButtonPressed(btn.getId(), btn.getActionId()));
         mcButton.active = btn.isEnabled();
         this.addRenderableWidget(mcButton);
+//        this.model.getScreenDefinition().addElementListener(mcButton);
     }
 
     private void addTextInputWidget(CoreTextInput text)
@@ -94,11 +102,9 @@ public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecip
         int w = dropdown.getWidth();
         int h = dropdown.getHeight();
 
-        ForgeDropdownWidget widget = new ForgeDropdownWidget(x, y, w, h, dropdown, (selectedIndex, selectedValue) ->
-        {
-            model.onDropdownChanged(dropdown.getId(), selectedIndex, selectedValue);
-        });
-        this.addRenderableWidget(widget);
+        ForgeDropdownWidget widget = new ForgeDropdownWidget(x, y, w, h, dropdown, (selectedIndex, selectedValue) -> model.onDropdownChanged(dropdown.getId(), selectedIndex, selectedValue));
+        addRenderableWidget(widget);
+        model.getScreenDefinition().addElementListener(widget);
     }
 
     private void addListWidget(CoreList list)

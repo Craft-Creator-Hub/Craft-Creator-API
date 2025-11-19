@@ -101,7 +101,7 @@ public abstract class CoreModRecipeSerializer {
     }
 
     /* -------------------------------------------------------------------------
-     * Internal writers (still core-only)
+     * Internal writers
      * ---------------------------------------------------------------------- */
 
     private void writeDatapackRecipe(Platform platform,
@@ -113,9 +113,9 @@ public abstract class CoreModRecipeSerializer {
             Files.createDirectories(out.getParent());
             String contents = GsonProvider.gson().toJson(json);
             Files.writeString(out, contents, StandardCharsets.UTF_8);
-            platform.getLogger().info("Wrote datapack recipe: " + out);
+            CraftCreatorAPI.LOGGER.info("Wrote datapack recipe: " + out);
         } catch (IOException e) {
-            platform.getLogger().error("Failed to write datapack recipe " + outputId +
+            CraftCreatorAPI.LOGGER.error("Failed to write datapack recipe " + outputId +
                     " for type " + recipeTypeId + " to " + out, e);
         }
     }
@@ -146,9 +146,9 @@ public abstract class CoreModRecipeSerializer {
                             ? java.nio.file.StandardOpenOption.APPEND
                             : java.nio.file.StandardOpenOption.CREATE);
 
-            platform.getLogger().info("Wrote KubeJS recipe snippet to: " + scriptFile);
+            CraftCreatorAPI.LOGGER.info("Wrote KubeJS recipe snippet to: " + scriptFile);
         } catch (IOException e) {
-            platform.getLogger().error("Failed to write KubeJS recipe " + outputId +
+            CraftCreatorAPI.LOGGER.error("Failed to write KubeJS recipe " + outputId +
                     " for type " + recipeTypeId + " to " + scriptFile, e);
         }
     }

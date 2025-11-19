@@ -62,15 +62,6 @@ public class ForgeGenericBlockEntity extends BaseContainerBlockEntity
                 CoreBlockEntityDefinition def = CoreBlockEntityManager.get().getDefinition(typeId);
                 if (def != null) {
                     this.coreEntity = CoreBlockEntity.fromJson(obj, def);
-                    // call behaviors onLoad via manager behaviorRegistry if needed
-                    for (Identifier bId : def.getBehaviors()) {
-                        Supplier<BlockEntityBehavior> sup = CoreBlockEntityManager.get().getBehavior(bId);
-                        if (sup != null) {
-                            BlockEntityBehavior beh = sup.get();
-                            beh.load(coreEntity, coreEntity.getExtraData());
-                            beh.onLoad(coreEntity, new ForgeBlockEntityContext(level, worldPosition, null));
-                        }
-                    }
                 }
             } catch (Exception e) {
                 CraftCreator.LOGGER.error("Failed to load core block entity from JSON: {}", json, e);
@@ -82,17 +73,6 @@ public class ForgeGenericBlockEntity extends BaseContainerBlockEntity
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         if (coreEntity != null) {
-            // call behaviors onSave
-            CoreBlockEntityDefinition def = CoreBlockEntityManager.get().getDefinition(coreEntity.getTypeId());
-            if (def != null) {
-                for (Identifier bId : def.getBehaviors()) {
-                    Supplier<BlockEntityBehavior> sup = CoreBlockEntityManager.get().getBehavior(bId);
-                    if (sup != null) {
-                        BlockEntityBehavior beh = sup.get();
-                        beh.save(coreEntity, coreEntity.getExtraData());
-                    }
-                }
-            }
             String s = coreEntity.toJson().toString();
             tag.putString(CORE_TAG, s);
         }

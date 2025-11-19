@@ -66,7 +66,7 @@ public class ForgeNetworkInteractionAdapter implements NetworkInteractionAdapter
         if(gbe == null)
             return;
 
-        JsonObject payload = gbe.getCoreEntity().fetchData();
+        JsonObject payload = gbe.getCoreEntity().fetchBehaviorData();
 
         // send data update to client
         UiUpdateData updateData = new UiUpdateData(data.getContainerId(), payload);
@@ -81,7 +81,7 @@ public class ForgeNetworkInteractionAdapter implements NetworkInteractionAdapter
         if(gbe == null)
             return;
 
-        gbe.getCoreEntity().updateData(data.getPayload());
+        gbe.getCoreEntity().updateBehaviorData(data.getPayload());
 
         // mark changed and request sync to clients
         gbe.setChanged();

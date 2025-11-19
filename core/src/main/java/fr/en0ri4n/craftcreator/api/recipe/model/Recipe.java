@@ -1,5 +1,6 @@
 package fr.en0ri4n.craftcreator.api.recipe.model;
 
+import fr.en0ri4n.craftcreator.api.recipe.utils.RecipeEntry;
 import fr.en0ri4n.craftcreator.api.recipe.utils.RecipeInfos;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.AllArgsConstructor;
@@ -22,10 +23,10 @@ public class Recipe {
     private final Identifier type;
 
     /** Inputs (items/fluids/blocks) as generic entries; see your existing RecipeEntry hierarchy. */
-    private final List<RecipeEntryWrapper> inputs;
+    private final List<RecipeEntry> inputs;
 
     /** Outputs as generic entries. */
-    private final List<RecipeEntryWrapper> outputs;
+    private final List<RecipeEntry> outputs;
 
     /** Additional parameters (time, energy, shapeless, etc.) */
     private final RecipeInfos infos;

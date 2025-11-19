@@ -27,7 +27,7 @@ import net.minecraftforge.registries.RegistryObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ForgeRegistryAdapter implements RegistryAdapter
+public class ForgeRegistryAdapter implements RegistryAdapter
 {
     private static final ForgeRegistryAdapter INSTANCE = new ForgeRegistryAdapter();
 

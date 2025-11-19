@@ -13,7 +13,7 @@ import java.util.Objects;
  * item (with the block's id) or only the block if they prefer.
  */
 @Getter
-public final class CoreBlockItemDef {
+public class CoreBlockItemDef {
 
     private final CoreBlockDef block;
     private final CoreItemDef item; // nullable — may be null when no item should be created
@@ -48,7 +48,7 @@ public final class CoreBlockItemDef {
      * - block properties are applied to the block
      * - item properties are applied to the generated block item (if enabled)
      */
-    public static final class Builder {
+    public static class Builder {
         private final CoreBlockDef.Builder blockBuilder;
         private final CoreItemDef.Builder itemBuilder;
         private boolean includeItem = true;

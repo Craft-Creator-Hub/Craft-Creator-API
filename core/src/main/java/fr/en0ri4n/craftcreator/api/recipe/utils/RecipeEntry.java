@@ -13,7 +13,7 @@ import java.util.List;
  */
 @Getter
 @AllArgsConstructor
-public final class RecipeEntry {
+public class RecipeEntry {
 
     /** true if this is a tag reference ("forge:ingots/iron"), false for a concrete registry entry. */
     private final boolean tag;
@@ -88,7 +88,7 @@ public final class RecipeEntry {
      * ---------------------------------------------------------------------- */
 
     @Getter
-    public static final class MultiInput {
+    public static class MultiInput {
         private final List<RecipeEntry> entries = new ArrayList<>();
 
         public MultiInput add(RecipeEntry entry) {
@@ -119,7 +119,7 @@ public final class RecipeEntry {
     }
 
     @Getter
-    public static final class MultiOutput {
+    public static class MultiOutput {
         private final List<RecipeEntry> entries = new ArrayList<>();
 
         public MultiOutput add(RecipeEntry entry) {

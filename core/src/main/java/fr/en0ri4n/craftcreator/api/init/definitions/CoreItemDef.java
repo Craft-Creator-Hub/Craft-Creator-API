@@ -9,7 +9,7 @@ import java.util.Objects;
  * Loader-agnostic description of an item to register.
  */
 @Getter
-public final class CoreItemDef
+public class CoreItemDef
 {
     private final Identifier id;
     private final int maxStackSize;
@@ -23,7 +23,7 @@ public final class CoreItemDef
         return new Builder(id);
     }
 
-    public static final class Builder {
+    public static class Builder {
         private final Identifier id;
         private int maxStackSize = 10;
 

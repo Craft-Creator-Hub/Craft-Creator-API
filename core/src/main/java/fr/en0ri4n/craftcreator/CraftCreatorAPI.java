@@ -60,11 +60,11 @@ public class CraftCreatorAPI {
         // Registrations
         registerBlockItems();
 
-        // Register container models
-        ContainerModels.get().registerAll();
-
         // register block-entity definitions
         CoreBlockEntityDefinitionsRegistrar.init();
+
+        // Register container models
+        ContainerModels.get().registerAll();
 
         CraftCreatorAPI.LOGGER.info("CraftCreatorAPI[%s][%s-%s] initialized successfully.".formatted(ApiReferences.VERSION, platform.getLoader().getModLoaderName(), platform.getMinecraftVersion()));
     }

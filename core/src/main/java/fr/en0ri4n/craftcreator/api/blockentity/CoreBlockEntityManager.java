@@ -1,8 +1,9 @@
 package fr.en0ri4n.craftcreator.api.blockentity;
 
 import fr.en0ri4n.craftcreator.utils.Identifier;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -13,15 +14,14 @@ import java.util.function.Supplier;
  * - registerBehavior(...) to bind behavior id -> implementation
  * - create(...) to produce a CoreBlockEntity instance for a given type
  */
-public final class CoreBlockEntityManager {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class CoreBlockEntityManager {
 
     private static final CoreBlockEntityManager INSTANCE = new CoreBlockEntityManager();
 
     private final Map<String, CoreBlockEntityDefinition> definitions = new HashMap<>();
     private final Map<String, Supplier<BlockEntityBehavior>> behaviorRegistry = new HashMap<>();
     private boolean locked = false;
-
-    private CoreBlockEntityManager() {}
 
     public static CoreBlockEntityManager get() { return INSTANCE; }
 
@@ -52,23 +52,10 @@ public final class CoreBlockEntityManager {
      */
     public CoreBlockEntity create(Identifier typeId) {
         CoreBlockEntityDefinition def = definitions.get(typeId.toString());
+        BlockEntityBehavior behavior = behaviorRegistry.get(typeId.toString()).get();
         if (def == null) throw new IllegalArgumentException("Unknown block-entity type: " + typeId);
-        CoreBlockEntity entity = new CoreBlockEntity(typeId, def.getInventorySize());
 
-        // instantiate and attach behaviors by resolving their suppliers
-        for (Identifier bId : def.getBehaviors()) {
-            Supplier<BlockEntityBehavior> sup = behaviorRegistry.get(bId.toString());
-            if (sup != null) {
-                BlockEntityBehavior beh = sup.get();
-                try {
-                    // call lifecycle load later from platform via context
-                    // we store behavior in extraData keyed by behavior id if needed
-                    // For simplicity behaviors can query manager.getBehaviorRegistry again if needed
-                } catch (Exception ignored) {}
-            }
-        }
-
-        return entity;
+        return new CoreBlockEntity(typeId, behavior, def.getInventorySize());
     }
 
     /**
