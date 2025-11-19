@@ -1,6 +1,7 @@
 package fr.en0ri4n.craftcreator.api.platform;
 
 import fr.en0ri4n.craftcreator.api.item.ItemStackAdapter;
+import fr.en0ri4n.craftcreator.api.item.tag.TagProvider;
 import fr.en0ri4n.craftcreator.api.mod.SupportedModLoaders;
 
 public interface Platform {
@@ -31,4 +32,6 @@ public interface Platform {
     BlockPosAdapter<?> getBlockPosAdapter();
 
     NetworkInteractionAdapter<?> getNetworkInteractionAdapter();
+
+    TagProvider getTagProvider();
 }

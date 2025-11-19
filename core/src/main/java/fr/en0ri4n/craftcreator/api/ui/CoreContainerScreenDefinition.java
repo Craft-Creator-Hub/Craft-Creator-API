@@ -14,18 +14,18 @@ import lombok.Getter;
  * A logical screen made of core UI elements.
  */
 @Getter
-public abstract class CoreContainerScreenDefinition<T extends BlockEntityBehavior> extends CoreScreenDefinition
+public abstract class CoreContainerScreenDefinition<T extends BlockEntityBehavior> extends CoreScreenDefinition<CoreContainerScreenDefinition.CoreContainerScreenData<T>>
 {
     private final ContainerModel<T> parent;
-    private final T behavior;
 
-    public CoreContainerScreenDefinition(ContainerModel<T> parent, T behavior, Identifier id, String title) {
-        super(id, title);
+    public CoreContainerScreenDefinition(ContainerModel<T> parent, T behavior, Identifier id, String title)
+    {
+        super(id, title, new CoreContainerScreenData<>(behavior));
         this.parent = parent;
-        this.behavior = behavior;
     }
 
-    public void fetchData() {
+    public void fetchData()
+    {
         CraftCreatorAPI.get().getPlatform().getNetworkInteractionAdapter().fetchData(new FetchData(getParent().getBlockEntityPos(), getId()));
     }
 
@@ -36,7 +36,32 @@ public abstract class CoreContainerScreenDefinition<T extends BlockEntityBehavio
     {
         super.onClose();
         JsonObject payload = new JsonObject();
-        getBehavior().save(null, payload);
+        getScreenData().getBehavior().save(null, payload);
         CraftCreatorAPI.get().getPlatform().getNetworkInteractionAdapter().sendDataUpdateToServer(new BlockEntityUpdateData(parent.getBlockEntityPos(), getId(), payload));
+    }
+
+    @Getter
+    public static class CoreContainerScreenData<T extends BlockEntityBehavior> implements ScreenData
+    {
+        private final T behavior;
+
+        public CoreContainerScreenData(T behavior)
+        {
+            this.behavior = behavior;
+        }
+
+        @Override
+        public void load(JsonObject payload)
+        {
+            this.behavior.load(null, payload);
+        }
+
+        @Override
+        public JsonObject save()
+        {
+            JsonObject payload = new JsonObject();
+            this.behavior.save(null, payload);
+            return payload;
+        }
     }
 }

@@ -1,5 +1,6 @@
 package fr.en0ri4n.craftcreator.api.ui.elements;
 
+import fr.en0ri4n.craftcreator.api.ui.CoreElementListener;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -28,8 +29,23 @@ public abstract class CoreUiElement {
     /** tooltip text. */
     private final String tooltip;
 
+    private CoreElementListener<?> elementListener;
+
     /** Convenience: auto-generate a random id. */
     protected CoreUiElement(CoreUiElementType type, int x, int y, int width, int height, String tooltip) {
         this(type, UUID.randomUUID().toString(), x, y, width, height, tooltip);
+    }
+
+    public void setListener(CoreElementListener<?> listener) {
+        elementListener = listener;
+    }
+
+    public void removeListener(CoreElementListener<?> listener) {
+        elementListener = null;
+    }
+
+    public void sendUpdate() {
+        if(elementListener != null)
+            elementListener.update();
     }
 }

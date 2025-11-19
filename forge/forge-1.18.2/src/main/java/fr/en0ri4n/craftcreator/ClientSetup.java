@@ -2,7 +2,7 @@ package fr.en0ri4n.craftcreator;
 
 import fr.en0ri4n.craftcreator.api.CCReferences;
 import fr.en0ri4n.craftcreator.platform.adapters.ForgeRegistryAdapter;
-import fr.en0ri4n.craftcreator.platform.ui.container.ForgeRecipeCreatorScreen;
+import fr.en0ri4n.craftcreator.platform.ui.screen.ForgeRecipeCreatorScreen;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;

@@ -1,4 +1,4 @@
-package fr.en0ri4n.craftcreator.screen;
+package fr.en0ri4n.craftcreator.platform.ui.screen;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import fr.en0ri4n.craftcreator.api.ui.CoreScreenDefinition;
@@ -7,11 +7,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TextComponent;
 
-public class ForgeScreenRenderer extends Screen
+public class ForgeScreen extends Screen
 {
     private final CoreScreenDefinition screenDefinition;
 
-    public ForgeScreenRenderer(CoreScreenDefinition screenDefinition)
+    public ForgeScreen(CoreScreenDefinition<?> screenDefinition)
     {
         super(new TextComponent(screenDefinition.getTitle()));
         this.screenDefinition = screenDefinition;

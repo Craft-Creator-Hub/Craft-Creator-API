@@ -9,6 +9,7 @@ import fr.en0ri4n.craftcreator.api.mod.SupportedMods;
 import fr.en0ri4n.craftcreator.api.platform.*;
 import fr.en0ri4n.craftcreator.platform.adapters.*;
 import fr.en0ri4n.craftcreator.platform.item.ForgeItemStackAdapter;
+import fr.en0ri4n.craftcreator.platform.item.ForgeTagProvider;
 import fr.en0ri4n.craftcreator.platform.render.ForgeRenderAdapter;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import net.minecraft.core.BlockPos;
@@ -99,6 +100,8 @@ public class Forge1182Platform implements Platform {
 
     private final NetworkInteractionAdapter<ServerPlayer> dataUpdateAdapter = new ForgeNetworkInteractionAdapter();
 
+    private final ForgeTagProvider tagProvider = new ForgeTagProvider();
+
     @Override
     public SupportedModLoaders getLoader() {
         return SupportedModLoaders.FORGE;
@@ -184,5 +187,11 @@ public class Forge1182Platform implements Platform {
     public NetworkInteractionAdapter<ServerPlayer> getNetworkInteractionAdapter()
     {
         return dataUpdateAdapter;
+    }
+
+    @Override
+    public ForgeTagProvider getTagProvider()
+    {
+        return tagProvider;
     }
 }

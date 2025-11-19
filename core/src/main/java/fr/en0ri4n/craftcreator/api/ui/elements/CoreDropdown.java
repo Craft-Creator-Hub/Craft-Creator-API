@@ -16,7 +16,6 @@ public class CoreDropdown extends CoreUiElement
     /**
      * Index into options; -1 means "none selected".
      */
-    @Setter
     private int selectedIndex;
 
     public CoreDropdown(String id, int x, int y, int width, int height, List<String> options, int selectedIndex, String tooltip)
@@ -35,5 +34,11 @@ public class CoreDropdown extends CoreUiElement
     {
         if(selectedIndex < 0 || selectedIndex >= options.size()) return null;
         return options.get(selectedIndex);
+    }
+
+    public void setSelectedIndex(int selectedIndex)
+    {
+        this.selectedIndex = selectedIndex;
+        sendUpdate();
     }
 }

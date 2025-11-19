@@ -15,16 +15,18 @@ import java.util.List;
  * A logical screen made of core UI elements.
  */
 @Getter
-public abstract class CoreScreenDefinition {
+public abstract class CoreScreenDefinition<T extends ScreenData> {
 
     private final Identifier id;
     private final String title;
+    private final T screenData;
     private final List<CoreUiElement> elements = new ArrayList<>();
     private final List<CoreElementListener<?>> elementListeners = new ArrayList<>();
 
-    public CoreScreenDefinition(Identifier id, String title) {
+    public CoreScreenDefinition(Identifier id, String title, T data) {
         this.id = id;
         this.title = title;
+        this.screenData = data;
     }
 
     public void addElement(CoreUiElement element) {

@@ -39,18 +39,15 @@ public class CraftingTableRCScreenDefinition extends CoreContainerScreenDefiniti
     @Override
     public void updateScreen(UiUpdateData data)
     {
-        getBehavior().load(null, data.getPayload());
-        shapeDropdown.setSelectedIndex(getBehavior().isCraftingShapeless() ? 1 : 0);
-        sendUpdate(shapeDropdown);
+        getScreenData().getBehavior().load(null, data.getPayload());
+        shapeDropdown.setSelectedIndex(getScreenData().getBehavior().isCraftingShapeless() ? 1 : 0);
     }
 
     @Override
     public void onButtonPressed(String elementId, String actionId)
     {
         if(elementId.equals(exportButton.getId())) {
-            if(actionId.equals("export_recipes")) {
-                // Trigger export
-            }
+            // Trigger export
         }
     }
 
@@ -59,7 +56,7 @@ public class CraftingTableRCScreenDefinition extends CoreContainerScreenDefiniti
     public void onDropdownChanged(String elementId, int index, String value)
     {
         if(elementId.equals(shapeDropdown.getId())) {
-            getBehavior().setCraftingShapeless(index == 1);
+            getScreenData().getBehavior().setCraftingShapeless(index == 1);
         }
     }
 }

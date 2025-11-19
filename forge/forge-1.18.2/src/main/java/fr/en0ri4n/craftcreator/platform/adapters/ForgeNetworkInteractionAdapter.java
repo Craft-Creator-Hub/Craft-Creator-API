@@ -14,7 +14,7 @@ import fr.en0ri4n.craftcreator.platform.net.BlockEntityUpdatePacket;
 import fr.en0ri4n.craftcreator.platform.net.FetchDataPacket;
 import fr.en0ri4n.craftcreator.platform.net.NetworkHandler;
 import fr.en0ri4n.craftcreator.platform.net.UiUpdatePacket;
-import fr.en0ri4n.craftcreator.platform.ui.container.ForgeRecipeCreatorScreen;
+import fr.en0ri4n.craftcreator.platform.ui.screen.ForgeRecipeCreatorScreen;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;

@@ -23,6 +23,7 @@ public class ForgeDropdownWidget extends AbstractWidget implements CoreElementLi
         super(x, y, width, height, new TextComponent(""));
         this.dropdown = dropdown;
         this.onChange = onChange;
+        dropdown.setListener(this);
         updateMessage();
     }
 

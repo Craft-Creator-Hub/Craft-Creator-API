@@ -1,7 +1,7 @@
 package fr.en0ri4n.craftcreator.api.platform;
 
-import fr.en0ri4n.craftcreator.api.ui.ClickContext;
 import fr.en0ri4n.craftcreator.api.ui.CoreScreenDefinition;
+import fr.en0ri4n.craftcreator.api.ui.elements.CoreUiElement;
 
 /**
  * Platform-side helper for wiring core click actions to actual UI events.
@@ -24,7 +24,9 @@ import fr.en0ri4n.craftcreator.api.ui.CoreScreenDefinition;
  * }
  * }
  */
-public interface UiAdapter {
+public interface UiAdapter<T> {
 
     void openScreen(CoreScreenDefinition renderer);
+
+    T createWidget(CoreUiElement element);
 }

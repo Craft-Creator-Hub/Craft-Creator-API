@@ -1,9 +1,10 @@
-package fr.en0ri4n.craftcreator.platform.ui.container;
+package fr.en0ri4n.craftcreator.platform.ui.screen;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
 import fr.en0ri4n.craftcreator.api.ui.elements.*;
 import fr.en0ri4n.craftcreator.platform.render.ForgeRenderContext;
+import fr.en0ri4n.craftcreator.platform.ui.container.ForgeRecipeCreatorMenu;
 import fr.en0ri4n.craftcreator.platform.ui.elements.ForgeDropdownWidget;
 import fr.en0ri4n.craftcreator.platform.ui.elements.ForgeSimpleListWidget;
 import net.minecraft.client.Minecraft;
@@ -36,7 +37,7 @@ public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecip
     {
         super.init();
 
-        model.getScreenDefinition().init();
+        model.getScreenDefinition().initScreen();
 
         for(CoreUiElement element : model.getScreenDefinition().getElements())
         {
@@ -104,7 +105,6 @@ public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecip
 
         ForgeDropdownWidget widget = new ForgeDropdownWidget(x, y, w, h, dropdown, (selectedIndex, selectedValue) -> model.onDropdownChanged(dropdown.getId(), selectedIndex, selectedValue));
         addRenderableWidget(widget);
-        model.getScreenDefinition().addElementListener(widget);
     }
 
     private void addListWidget(CoreList list)
