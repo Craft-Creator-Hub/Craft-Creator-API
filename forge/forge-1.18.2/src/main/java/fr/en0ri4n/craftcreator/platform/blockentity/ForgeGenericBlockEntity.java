@@ -62,6 +62,7 @@ public class ForgeGenericBlockEntity extends BaseContainerBlockEntity
                 CoreBlockEntityDefinition def = CoreBlockEntityManager.get().getDefinition(typeId);
                 if (def != null) {
                     this.coreEntity = CoreBlockEntity.fromJson(obj, def);
+                    this.coreEntity.getBehavior().onLoad(this.coreEntity, new ForgeBlockEntityContext(level, worldPosition, null));
                 }
             } catch (Exception e) {
                 CraftCreator.LOGGER.error("Failed to load core block entity from JSON: {}", json, e);

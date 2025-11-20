@@ -1,7 +1,9 @@
 package fr.en0ri4n.craftcreator.api.platform;
 
+import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.utils.Identifier;
+import fr.en0ri4n.craftcreator.utils.Pair;
 
 
 /**
@@ -20,18 +22,19 @@ public interface RenderAdapter
      */
     int getScreenHeight();
 
-    void renderTexture(RenderContext ctx,
-                       Identifier textureId,
-                       float x, float y, float width, float height,
-                       int textureWidth, int textureHeight,
-                       float u, float v, float uWidth, float vHeight,
-                       float z);
+    Pair<Integer, CoreItemStack> getItemStackUnderMouse(double mouseX, double mouseY);
 
-    void renderText(RenderContext ctx, String text, float x, float y, int color, float z);
+    void drawTexture(RenderContext ctx,
+                     Identifier textureId,
+                     int x, int y, int width, int height,
+                     int textureWidth, int textureHeight,
+                     int textureX, int textureY, int widthInTexture, int heightInTexture);
 
-    void renderRect(RenderContext ctx, float x, float y, float width, float height, int argb, float z);
+    void drawText(RenderContext ctx, String text, int x, int y, int color);
 
-    void renderItem(RenderContext ctx, Identifier itemId, float x, float y, float z);
+    void drawRect(RenderContext ctx, int x, int y, int width, int height, int argb);
+
+    void drawItem(RenderContext ctx, CoreItemStack item, int x, int y);
 
     void bindTexture(RenderContext ctx, Identifier backgroundTexture);
 }

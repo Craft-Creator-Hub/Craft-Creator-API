@@ -12,14 +12,18 @@ public class ContainerLayout {
     private int width = 176;   // logical GUI width
     private int height = 166;  // logical GUI height
 
-    public ContainerLayout addSlot(SlotDescriptor slot) {
+    public void addSlot(SlotDescriptor slot) {
         slots.add(slot);
-        return this;
     }
 
     public ContainerLayout size(int width, int height) {
         this.width = width;
         this.height = height;
         return this;
+    }
+
+    public SlotDescriptor getSlot(int slotIndex)
+    {
+        return slots.stream().filter(sd -> sd.getIndex() == slotIndex).findFirst().orElse(null);
     }
 }

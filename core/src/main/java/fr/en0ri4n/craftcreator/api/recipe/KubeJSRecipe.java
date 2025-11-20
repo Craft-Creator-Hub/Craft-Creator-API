@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Getter
 @AllArgsConstructor
-public class KubeJSRecipe extends AbstractCCRecipe
+public class KubeJSRecipe// extends AbstractCCRecipe
 {
     public static final FormattableString BASE_LINE = FormattableString.of("event.%s(%s)");
 
@@ -73,39 +73,39 @@ public class KubeJSRecipe extends AbstractCCRecipe
 //        return BASE_LINE;
 //    }
 
-    @Override
-    public void deserialize(JsonObject jsonObject)
-    {
-
-    }
-
-    @Override
-    public JsonObject serialize()
-    {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("action", type.getDescriptor());
-        for(Map.Entry<RecipeDescriptors, String> entry : recipeDescriptors.entrySet())
-        {
-            jsonObject.addProperty(entry.getKey().getTag(), entry.getValue());
-        }
-        return jsonObject;
-    }
-
-    public static KubeJSRecipe deserialize(String jsonStr)
-    {
-        JsonObject jsonObject = gson.fromJson(jsonStr, JsonObject.class);
-
-        KubeJSRecipeAction type = KubeJSRecipeAction.byDescriptor(jsonObject.get("modified_type").getAsString());
-        if(type != null)
-        {
-            KubeJSRecipe recipe = new KubeJSRecipe(type);
-            for(RecipeDescriptors descriptor : RecipeDescriptors.values())
-                if(jsonObject.has(descriptor.getTag()))
-                    recipe.setDescriptor(descriptor, jsonObject.get(descriptor.getTag()).getAsString());
-
-            return recipe;
-        }
-
-        return null;
-    }
+//    @Override
+//    public void deserialize(JsonObject jsonObject)
+//    {
+//
+//    }
+//
+//    @Override
+//    public JsonObject serialize()
+//    {
+//        JsonObject jsonObject = new JsonObject();
+//        jsonObject.addProperty("action", type.getDescriptor());
+//        for(Map.Entry<RecipeDescriptors, String> entry : recipeDescriptors.entrySet())
+//        {
+//            jsonObject.addProperty(entry.getKey().getTag(), entry.getValue());
+//        }
+//        return jsonObject;
+//    }
+//
+//    public static KubeJSRecipe deserialize(String jsonStr)
+//    {
+//        JsonObject jsonObject = gson.fromJson(jsonStr, JsonObject.class);
+//
+//        KubeJSRecipeAction type = KubeJSRecipeAction.byDescriptor(jsonObject.get("modified_type").getAsString());
+//        if(type != null)
+//        {
+//            KubeJSRecipe recipe = new KubeJSRecipe(type);
+//            for(RecipeDescriptors descriptor : RecipeDescriptors.values())
+//                if(jsonObject.has(descriptor.getTag()))
+//                    recipe.setDescriptor(descriptor, jsonObject.get(descriptor.getTag()).getAsString());
+//
+//            return recipe;
+//        }
+//
+//        return null;
+//    }
 }

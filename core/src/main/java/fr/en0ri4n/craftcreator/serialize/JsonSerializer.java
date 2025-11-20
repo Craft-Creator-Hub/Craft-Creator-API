@@ -1,8 +1,8 @@
 package fr.en0ri4n.craftcreator.serialize;
 
-import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 public interface JsonSerializer<T> {
-    JsonElement serialize(T value);
-    T deserialize(JsonElement element);
+    JsonObject serialize(T value);
+    T deserialize(JsonObject element);
 }

@@ -1,6 +1,4 @@
-package fr.en0ri4n.craftcreator.api.ui;
-
-import fr.en0ri4n.craftcreator.api.ui.elements.CoreUiElement;
+package fr.en0ri4n.craftcreator.api.ui.elements;
 
 public interface CoreElementListener<T extends CoreUiElement>
 {

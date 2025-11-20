@@ -1,13 +1,20 @@
 package fr.en0ri4n.craftcreator.platform.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
 import fr.en0ri4n.craftcreator.api.platform.RenderAdapter;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
+import fr.en0ri4n.craftcreator.platform.Forge1182Platform;
+import fr.en0ri4n.craftcreator.platform.blockentity.ForgeGenericBlockEntity;
+import fr.en0ri4n.craftcreator.platform.item.ForgeItemStackAdapter;
 import fr.en0ri4n.craftcreator.utils.Identifier;
+import fr.en0ri4n.craftcreator.utils.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Objects;
 
@@ -35,31 +42,55 @@ public class ForgeRenderAdapter implements RenderAdapter
     }
 
     @Override
-    public void renderTexture(RenderContext ctx, Identifier textureId, float x, float y, float width, float height, int textureWidth, int textureHeight, float u, float v, float uWidth, float vHeight, float z)
+    public Pair<Integer, CoreItemStack> getItemStackUnderMouse(double mouseX, double mouseY)
+    {
+        if(!(mc.screen instanceof AbstractContainerScreen<?> containerScreen)) return null;
+
+        Slot slot = containerScreen.getSlotUnderMouse();
+
+        if(slot == null)
+            return null;
+
+        if(!(slot.container instanceof ForgeGenericBlockEntity))
+            return null;
+
+        if(!slot.hasItem())
+            return null;
+
+        return Pair.of(slot.index, Forge1182Platform.get().getItemStackAdapter().fromPlatform(slot.getItem()));
+    }
+
+    @Override
+    public void drawTexture(RenderContext ctx,
+                            Identifier textureId,
+                            int x, int y, int width, int height,
+                            int textureWidth, int textureHeight,
+                            int textureX, int textureY, int widthInTexture, int heightInTexture)
     {
         ForgeRenderContext forgeRenderContext = ForgeRenderContext.from(ctx);
         bindTexture(ctx, textureId);
-        float uScale = 1.0f / textureWidth;
-        float vScale = 1.0f / textureHeight;
-        Screen.blit(forgeRenderContext.poseStack(), (int)x, (int)y, 0, u * uScale, v * vScale, (int)width, (int)height, textureHeight, textureWidth);
+        Screen.blit(forgeRenderContext.poseStack(), x, y, width, height, textureX, textureY, widthInTexture, heightInTexture, textureWidth, textureHeight);
     }
 
     @Override
-    public void renderText(RenderContext ctx, String text, float x, float y, int color, float z)
+    public void drawText(RenderContext ctx, String text, int x, int y, int color)
     {
 
     }
 
     @Override
-    public void renderRect(RenderContext ctx, float x, float y, float width, float height, int argb, float z)
+    public void drawRect(RenderContext ctx, int x, int y, int width, int height, int argb)
     {
 
     }
 
     @Override
-    public void renderItem(RenderContext ctx, Identifier itemId, float x, float y, float z)
+    public void drawItem(RenderContext ctx, CoreItemStack item, int x, int y)
     {
+        ItemStack platformStack = ForgeItemStackAdapter.get().toPlatform(item);
 
+        ForgeRenderContext forgeRenderContext = ForgeRenderContext.from(ctx);
+        mc.getItemRenderer().renderAndDecorateItem(platformStack, x, y);
     }
 
     @Override

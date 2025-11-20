@@ -1,6 +1,6 @@
 package fr.en0ri4n.craftcreator.impl.model.container.minecraft;
 
-import fr.en0ri4n.craftcreator.api.ui.CoreContainerScreenDefinition;
+import fr.en0ri4n.craftcreator.api.ui.screen.CoreContainerScreenDefinition;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerLayout;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
 import fr.en0ri4n.craftcreator.api.ui.container.SlotDescriptor;
@@ -39,17 +39,5 @@ public class CraftingTableRecipeCreatorContainerModel extends ContainerModel<Cra
     public CoreContainerScreenDefinition<CraftingTableRCBehavior> getScreenDefinition()
     {
         return screen;
-    }
-
-    @Override
-    public void onButtonPressed(String elementId, String actionId)
-    {
-        screen.onButtonPressed(elementId, actionId);
-    }
-
-    @Override
-    public void onDropdownChanged(String elementId, int index, String value)
-    {
-        screen.onDropdownChanged(elementId, index, value);
     }
 }

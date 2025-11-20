@@ -1,6 +1,5 @@
 package fr.en0ri4n.craftcreator.api.ui.elements;
 
-import fr.en0ri4n.craftcreator.api.ui.CoreElementListener;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

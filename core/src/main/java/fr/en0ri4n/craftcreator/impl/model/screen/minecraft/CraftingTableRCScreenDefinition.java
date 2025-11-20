@@ -2,16 +2,19 @@ package fr.en0ri4n.craftcreator.impl.model.screen.minecraft;
 
 import fr.en0ri4n.craftcreator.RecipeCreators;
 import fr.en0ri4n.craftcreator.api.net.UiUpdateData;
-import fr.en0ri4n.craftcreator.api.ui.CoreContainerScreenDefinition;
+import fr.en0ri4n.craftcreator.api.ui.screen.CoreContainerScreenDefinition;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreButton;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreDropdown;
+import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
+import fr.en0ri4n.craftcreator.api.ui.screen.RecipeCreatorContainerScreenDefinition;
+import fr.en0ri4n.craftcreator.api.ui.screen.WidgetRenderer;
 import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.CraftingTableRCBehavior;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 
 import java.util.List;
 
-public class CraftingTableRCScreenDefinition extends CoreContainerScreenDefinition<CraftingTableRCBehavior>
+public class CraftingTableRCScreenDefinition extends RecipeCreatorContainerScreenDefinition<CraftingTableRCBehavior>
 {
     private static final Identifier BACKGROUND_TEXTURE = Identifier.fromMod("textures/gui/container/minecraft/crafting_recipe_creator.png");
 
@@ -30,16 +33,17 @@ public class CraftingTableRCScreenDefinition extends CoreContainerScreenDefiniti
     }
 
     @Override
-    public void init()
+    public void init(WidgetRenderer renderer)
     {
         addElement(shapeDropdown = new CoreDropdown("shape_type", 10, 10, 100, 20, List.of("Shaped", "Shapeless"), 0, ""));
         addElement(exportButton = new CoreButton("export", 120, 10, 10, 10, "S", "export_recipes", "Export the currently selected recipes"));
+        super.init(renderer);
     }
 
     @Override
     public void updateScreen(UiUpdateData data)
     {
-        getScreenData().getBehavior().load(null, data.getPayload());
+        super.updateScreen(data);
         shapeDropdown.setSelectedIndex(getScreenData().getBehavior().isCraftingShapeless() ? 1 : 0);
     }
 

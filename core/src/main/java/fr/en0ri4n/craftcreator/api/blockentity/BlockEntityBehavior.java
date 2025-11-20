@@ -20,12 +20,6 @@ public interface BlockEntityBehavior {
     default void onRemove(CoreBlockEntity entity, BlockEntityContext ctx) {}
 
     /**
-     * Called when a player interacts with the block (right-click).
-     * Return true if the interaction was handled and no default behavior is required.
-     */
-    default boolean onInteract(CoreBlockEntity entity, BlockEntityContext ctx) { return false; }
-
-    /**
      * Called when the entity must serialize any custom data to JSON (for persistence).
      */
     default void save(CoreBlockEntity entity, JsonObject out) {}

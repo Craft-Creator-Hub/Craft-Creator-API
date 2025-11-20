@@ -2,8 +2,7 @@ package fr.en0ri4n.craftcreator.api.ui.container;
 
 import fr.en0ri4n.craftcreator.api.blockentity.BlockEntityBehavior;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockPos;
-import fr.en0ri4n.craftcreator.api.ui.CoreContainerScreenDefinition;
-import fr.en0ri4n.craftcreator.api.ui.CoreScreenDefinition;
+import fr.en0ri4n.craftcreator.api.ui.screen.CoreContainerScreenDefinition;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,15 +16,6 @@ public abstract class ContainerModel<T extends BlockEntityBehavior> {
     public abstract ContainerLayout getLayout();
 
     public abstract CoreContainerScreenDefinition<T> getScreenDefinition();
-
-    // Called when a button is pressed
-    public abstract void onButtonPressed(String elementId, String actionId);
-
-    // Called when dropdown selection changes
-    public abstract void onDropdownChanged(String elementId, int index, String value);
-
-    // Text inputs
-    public void onTextChanged(String elementId, String value) {}
 
     protected void addPlayerInventorySlots(ContainerLayout layout, int startX, int startY) {
         // Player inventory (3 rows of 9)

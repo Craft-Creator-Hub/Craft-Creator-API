@@ -18,7 +18,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class ForgeRecipeCreatorMenu extends AbstractContainerMenu {
 
-    private final ContainerModel model;
+    private final ContainerModel<?> model;
     private final ForgeGenericBlockEntity coreEntity;
     private final BlockPos pos;
 
@@ -54,7 +54,7 @@ public class ForgeRecipeCreatorMenu extends AbstractContainerMenu {
         }
     }
 
-    public ContainerModel getModel() {
+    public ContainerModel<?> getModel() {
         return model;
     }
 

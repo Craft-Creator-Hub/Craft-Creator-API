@@ -1,7 +1,7 @@
 package fr.en0ri4n.craftcreator.platform.ui.elements;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import fr.en0ri4n.craftcreator.api.ui.CoreElementListener;
+import fr.en0ri4n.craftcreator.api.ui.elements.CoreElementListener;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreDropdown;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;

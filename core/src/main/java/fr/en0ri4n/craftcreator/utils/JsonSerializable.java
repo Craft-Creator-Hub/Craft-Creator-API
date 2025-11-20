@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 
 public interface JsonSerializable
 {
-    void deserialize(JsonObject jsonObject);
+    void load(JsonObject jsonObject);
 
-    JsonObject serialize();
+    JsonObject save();
 }

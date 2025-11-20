@@ -1,15 +1,19 @@
 package fr.en0ri4n.craftcreator.platform.ui.screen;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import fr.en0ri4n.craftcreator.api.ui.CoreScreenDefinition;
+import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
+import fr.en0ri4n.craftcreator.api.ui.screen.WidgetRenderer;
+import fr.en0ri4n.craftcreator.platform.adapters.ForgeUiAdapter;
 import fr.en0ri4n.craftcreator.platform.render.ForgeRenderContext;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TextComponent;
 
-public class ForgeScreen extends Screen
+public class ForgeScreen extends Screen implements WidgetRenderer
 {
-    private final CoreScreenDefinition screenDefinition;
+    private final CoreScreenDefinition<?> screenDefinition;
 
     public ForgeScreen(CoreScreenDefinition<?> screenDefinition)
     {
@@ -18,15 +22,24 @@ public class ForgeScreen extends Screen
     }
 
     @Override
+    protected void init()
+    {
+        super.init();
+
+        screenDefinition.init(this);
+    }
+
+    @Override
+    public void addWidgetToScreen(Object widget)
+    {
+        this.addRenderableWidget((GuiEventListener & Widget & NarratableEntry) widget);
+    }
+
+    @Override
     public void renderBackground(PoseStack pPoseStack)
     {
-        ForgeRenderContext ctx = new ForgeRenderContext(pPoseStack, Minecraft.getInstance().renderBuffers().bufferSource(), 0.0f);
-        screenDefinition.renderBackground(
-                ctx,
-                (this.width - screenDefinition.getBackgroundTextureSize().getFirstValue()) / 2,
-                (this.height - screenDefinition.getBackgroundTextureSize().getSecondValue()) / 2,
-                this.width,
-                this.height);
+        renderBackground(pPoseStack, 0);
+        screenDefinition.renderBackground(ForgeRenderContext.of(pPoseStack, 0.0F));
     }
 
     @Override
@@ -34,5 +47,6 @@ public class ForgeScreen extends Screen
     {
         renderBackground(pPoseStack);
         super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
+        screenDefinition.render(ForgeRenderContext.of(pPoseStack, pPartialTick));
     }
 }

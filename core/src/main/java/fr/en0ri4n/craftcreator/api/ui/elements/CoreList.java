@@ -3,6 +3,7 @@ package fr.en0ri4n.craftcreator.api.ui.elements;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,7 +24,7 @@ public class CoreList extends CoreUiElement {
     public CoreList(String id, int x, int y, int width, int height,
                     List<String> entries, int visibleRows, String tooltip) {
         super(CoreUiElementType.LIST, id, x, y, width, height, tooltip);
-        this.entries = List.copyOf(entries);
+        this.entries = new ArrayList<>(entries);
         this.visibleRows = visibleRows;
     }
 
@@ -35,5 +36,12 @@ public class CoreList extends CoreUiElement {
     public String getSelectedValue() {
         if (selectedIndex < 0 || selectedIndex >= entries.size()) return null;
         return entries.get(selectedIndex);
+    }
+
+    public void setEntries(List<String> newEntries) {
+        entries.clear();
+        entries.addAll(newEntries);
+        selectedIndex = -1;
+        sendUpdate();
     }
 }

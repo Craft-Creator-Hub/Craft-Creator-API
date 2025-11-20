@@ -2,20 +2,18 @@ package fr.en0ri4n.craftcreator.platform.ui.screen;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
-import fr.en0ri4n.craftcreator.api.ui.elements.*;
+import fr.en0ri4n.craftcreator.api.ui.screen.WidgetRenderer;
 import fr.en0ri4n.craftcreator.platform.render.ForgeRenderContext;
 import fr.en0ri4n.craftcreator.platform.ui.container.ForgeRecipeCreatorMenu;
-import fr.en0ri4n.craftcreator.platform.ui.elements.ForgeDropdownWidget;
-import fr.en0ri4n.craftcreator.platform.ui.elements.ForgeSimpleListWidget;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.player.Inventory;
 
-public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecipeCreatorMenu>
+public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecipeCreatorMenu> implements WidgetRenderer
 {
     private final ContainerModel<?> model;
 
@@ -37,30 +35,20 @@ public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecip
     {
         super.init();
 
-        model.getScreenDefinition().initScreen();
+        model.getScreenDefinition().init(this);
+    }
 
-        for(CoreUiElement element : model.getScreenDefinition().getElements())
-        {
-            switch(element.getType())
-            {
-                case BUTTON:
-                    addButtonWidget((CoreButton) element);
-                    break;
-                case TEXT_INPUT:
-                    addTextInputWidget((CoreTextInput) element);
-                    break;
-                case DROPDOWN:
-                    addDropdownWidget((CoreDropdown) element);
-                    break;
-                case LIST:
-                    addListWidget((CoreList) element);
-                    break;
-                default:
-                    throw new IllegalStateException("Unexpected value: " + model.getScreenDefinition().getElements().stream().map(CoreUiElement::getType));
-            }
-        }
+    @Override
+    public void addWidgetToScreen(Object widget)
+    {
+        this.addRenderableWidget((GuiEventListener & Widget & NarratableEntry) widget);
+    }
 
-        model.getScreenDefinition().fetchData();
+    @Override
+    public boolean mouseClicked(double pMouseX, double pMouseY, int pButton)
+    {
+        boolean impl = this.model.getScreenDefinition().onClick((pMouseX - this.leftPos), (pMouseY - this.topPos), pButton);
+        return impl || super.mouseClicked(pMouseX, pMouseY, pButton);
     }
 
     @Override
@@ -70,64 +58,11 @@ public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecip
         super.onClose();
     }
 
-    private void addButtonWidget(CoreButton btn)
-    {
-        int x = this.leftPos + btn.getX();
-        int y = this.topPos + btn.getY();
-        int w = btn.getWidth();
-        int h = btn.getHeight();
-
-        Button mcButton = new Button(x, y, w, h, new TextComponent(btn.getLabel()), b -> model.onButtonPressed(btn.getId(), btn.getActionId()));
-        mcButton.active = btn.isEnabled();
-        this.addRenderableWidget(mcButton);
-//        this.model.getScreenDefinition().addElementListener(mcButton);
-    }
-
-    private void addTextInputWidget(CoreTextInput text)
-    {
-        int x = this.leftPos + text.getX();
-        int y = this.topPos + text.getY();
-        int w = text.getWidth();
-        int h = text.getHeight();
-
-        EditBox box = new EditBox(this.font, x, y, w, h, new TextComponent(""));
-        box.setMaxLength(text.getMaxLength());
-        box.setValue(text.getValue() != null ? text.getValue() : "");
-        this.addRenderableWidget(box);
-    }
-
-    private void addDropdownWidget(CoreDropdown dropdown)
-    {
-        int x = this.leftPos + dropdown.getX();
-        int y = this.topPos + dropdown.getY();
-        int w = dropdown.getWidth();
-        int h = dropdown.getHeight();
-
-        ForgeDropdownWidget widget = new ForgeDropdownWidget(x, y, w, h, dropdown, (selectedIndex, selectedValue) -> model.onDropdownChanged(dropdown.getId(), selectedIndex, selectedValue));
-        addRenderableWidget(widget);
-    }
-
-    private void addListWidget(CoreList list)
-    {
-        int x = list.getX();
-        int y = list.getY();
-        int w = list.getWidth();
-        int h = list.getHeight();
-
-        ForgeSimpleListWidget widget = new ForgeSimpleListWidget(Minecraft.getInstance(), w, h, y, y + h, 12, list, (selectedIndex, value) ->
-        {
-            list.setSelectedIndex(selectedIndex);
-            // if you want, add handler callback here too
-        });
-        widget.setLeftPos(x);
-        this.addRenderableWidget(widget);
-    }
-
     @Override
     protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY)
     {
         ForgeRenderContext ctx = new ForgeRenderContext(poseStack, Minecraft.getInstance().renderBuffers().bufferSource(), partialTicks);
-        model.getScreenDefinition().renderBackground(ctx, this.leftPos, this.topPos, this.imageWidth, this.imageHeight);
+        model.getScreenDefinition().renderBackground(ctx);
     }
 
     @Override

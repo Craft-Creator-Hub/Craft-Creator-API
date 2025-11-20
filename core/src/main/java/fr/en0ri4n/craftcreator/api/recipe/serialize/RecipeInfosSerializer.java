@@ -14,7 +14,7 @@ import java.util.*;
 public class RecipeInfosSerializer implements JsonSerializer<RecipeInfos> {
 
     @Override
-    public JsonElement serialize(RecipeInfos value) {
+    public JsonObject serialize(RecipeInfos value) {
         JsonObject jsonObject = new JsonObject();
 
         for (RecipeParameter parameter : value.getParameters()) {
@@ -60,7 +60,7 @@ public class RecipeInfosSerializer implements JsonSerializer<RecipeInfos> {
     }
 
     @Override
-    public RecipeInfos deserialize(JsonElement element) {
+    public RecipeInfos deserialize(JsonObject element) {
         RecipeInfos infos = RecipeInfos.create();
         JsonObject jsonObject = element.getAsJsonObject();
 

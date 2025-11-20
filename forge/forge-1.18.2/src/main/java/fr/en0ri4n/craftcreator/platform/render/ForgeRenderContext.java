@@ -1,6 +1,7 @@
 package fr.en0ri4n.craftcreator.platform.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 
@@ -57,5 +58,9 @@ public class ForgeRenderContext implements RenderContext {
             throw new IllegalArgumentException("Expected ForgeRenderContext, got: " + ctx.getClass().getName());
         }
         return forgeCtx;
+    }
+
+    public static ForgeRenderContext of(PoseStack stack, float partialTicks) {
+        return new ForgeRenderContext(stack, Minecraft.getInstance().renderBuffers().bufferSource(), partialTicks);
     }
 }
