@@ -23,7 +23,6 @@ public class CoreBlockEntity
     private final Identifier typeId; // the definition id
     private final List<CoreItemStack> inventory;
     private final BlockEntityBehavior behavior;
-    private final JsonObject extraData; // JSON tree for behaviors
 
     public CoreBlockEntity(Identifier typeId, BlockEntityBehavior behavior, int inventorySize)
     {
@@ -33,7 +32,6 @@ public class CoreBlockEntity
         // initialize inventory with empty slots
         for(int i = 0; i < inventorySize; i++) inventory.add(CoreItemStack.EMPTY);
         this.behavior = behavior;
-        this.extraData = new JsonObject();
     }
 
     /* ---- helpers to manipulate inventory ---- */
@@ -81,7 +79,6 @@ public class CoreBlockEntity
         }
         root.add("inventory", inv);
         root.add("behaviorData", fetchBehaviorData());
-        root.add("extra", extraData.deepCopy());
 
         return root;
     }
@@ -113,11 +110,6 @@ public class CoreBlockEntity
         {
             JsonObject behData = json.getAsJsonObject("behaviorData");
             entity.updateBehaviorData(behData);
-        }
-
-        if(json.has("extra"))
-        {
-            entity.extraData.add("extra", json.get("extra").getAsJsonObject());
         }
 
         return entity;

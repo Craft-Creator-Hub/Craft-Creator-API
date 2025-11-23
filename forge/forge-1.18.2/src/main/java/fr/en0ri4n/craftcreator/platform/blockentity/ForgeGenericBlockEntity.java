@@ -11,6 +11,7 @@ import fr.en0ri4n.craftcreator.platform.item.ForgeItemStackAdapter;
 import fr.en0ri4n.craftcreator.platform.ui.container.ForgeRecipeCreatorMenu;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import io.netty.buffer.Unpooled;
+import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -29,6 +30,7 @@ import java.util.function.Supplier;
  * Generic Forge BlockEntity that stores core block entity JSON in NBT and delegates behavior.
  * Use a single BlockEntityType for multiple core block-entity types.
  */
+@Getter
 public class ForgeGenericBlockEntity extends BaseContainerBlockEntity
 {
     private static final String CORE_TAG = "core_json";
@@ -43,12 +45,7 @@ public class ForgeGenericBlockEntity extends BaseContainerBlockEntity
     public ForgeGenericBlockEntity(BlockPos pos, BlockState state, Identifier coreId)
     {
         this(pos, state);
-        coreEntity = CoreBlockEntityManager.get().create(coreId);
-        coreEntity.getExtraData().addProperty("container", coreId.toString());
-    }
-
-    public CoreBlockEntity getCoreEntity() {
-        return coreEntity;
+        this.coreEntity = CoreBlockEntityManager.get().create(coreId);
     }
 
     @Override

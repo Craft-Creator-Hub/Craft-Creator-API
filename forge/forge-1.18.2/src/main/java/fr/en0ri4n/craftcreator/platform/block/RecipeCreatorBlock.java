@@ -3,6 +3,7 @@ package fr.en0ri4n.craftcreator.platform.block;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockDef;
 import fr.en0ri4n.craftcreator.api.init.shapes.CoreShapes;
 import fr.en0ri4n.craftcreator.api.init.shapes.CoreVoxelShape;
+import fr.en0ri4n.craftcreator.api.net.OpenContainerRequestData;
 import fr.en0ri4n.craftcreator.platform.Forge1182Platform;
 import fr.en0ri4n.craftcreator.platform.blockentity.ForgeGenericBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -26,7 +27,6 @@ import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -36,16 +36,16 @@ public class RecipeCreatorBlock extends Block implements EntityBlock
 {
     private final CoreBlockDef coreBlockDef;
 
-    public RecipeCreatorBlock(CoreBlockDef coreBlockId) {
-        super(BlockBehaviour.Properties.of(Material.METAL)
-                .strength(3.0f, 3.0f)
-                .requiresCorrectToolForDrops());
+    public RecipeCreatorBlock(CoreBlockDef coreBlockId)
+    {
+        super(BlockBehaviour.Properties.of(Material.METAL).strength(3.0f, 3.0f).requiresCorrectToolForDrops());
         this.coreBlockDef = coreBlockId;
     }
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+    {
         return new ForgeGenericBlockEntity(pos, state, coreBlockDef.getId());
     }
 
@@ -79,19 +79,12 @@ public class RecipeCreatorBlock extends Block implements EntityBlock
     @Override
     public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
     {
-        if(world.isClientSide())
-            return InteractionResult.SUCCESS;
+        if(world.isClientSide()) return InteractionResult.SUCCESS;
 
         if(player instanceof ServerPlayer serverPlayer)
         {
-            ForgeGenericBlockEntity blockEntity = (ForgeGenericBlockEntity) world.getBlockEntity(pos);
-
-            // Use NetworkHooks to open the screen; write position so client can recreate menu/lookup BE
-            NetworkHooks.openGui(serverPlayer, blockEntity, buf ->
-            {
-                buf.writeBlockPos(pos);
-                buf.writeUtf(coreBlockDef.getId().toString());
-            });
+            OpenContainerRequestData request = new OpenContainerRequestData(Forge1182Platform.get().getBlockPosAdapter().toCore(pos), coreBlockDef.getId());
+            Forge1182Platform.get().getNetworkInteractionAdapter().handleServerOpenContainerRequest(serverPlayer, request);
 
             return InteractionResult.CONSUME;
         }

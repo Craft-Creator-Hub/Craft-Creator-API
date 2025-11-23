@@ -10,15 +10,15 @@ import lombok.Setter;
 public class CraftingTableRCBehavior extends RecipeCreatorBlockEntityBehavior
 {
 
-    public static final String CRAFTING_TYPE_KEY = "crafting_table_recipe_creator.type";
+    public static final String CRAFTING_TYPE_KEY = "crafting_type";
 
-    private boolean isCraftingShapeless = true;
+    private CraftingType craftingType = CraftingType.SHAPED;
 
     @Override
     public void save(CoreBlockEntity entity, JsonObject out)
     {
         super.save(entity, out);
-        out.addProperty(CRAFTING_TYPE_KEY, isCraftingShapeless ? "shapeless" : "shaped");
+        out.addProperty(CRAFTING_TYPE_KEY, craftingType.name().toLowerCase());
     }
 
     @Override
@@ -28,7 +28,12 @@ public class CraftingTableRCBehavior extends RecipeCreatorBlockEntityBehavior
         if(in.has(CRAFTING_TYPE_KEY))
         {
             String type = in.get(CRAFTING_TYPE_KEY).getAsString();
-            isCraftingShapeless = type.equals("shapeless");
+            this.craftingType = CraftingType.valueOf(type.toUpperCase());
         }
+    }
+
+    public enum CraftingType {
+        SHAPED,
+        SHAPELESS
     }
 }

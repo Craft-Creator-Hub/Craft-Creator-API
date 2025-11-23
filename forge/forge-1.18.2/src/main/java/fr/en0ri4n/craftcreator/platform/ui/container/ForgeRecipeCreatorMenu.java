@@ -8,6 +8,7 @@ import fr.en0ri4n.craftcreator.platform.Forge1182Platform;
 import fr.en0ri4n.craftcreator.platform.adapters.ForgeRegistryAdapter;
 import fr.en0ri4n.craftcreator.platform.blockentity.ForgeGenericBlockEntity;
 import fr.en0ri4n.craftcreator.utils.Identifier;
+import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
@@ -16,6 +17,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
+@Getter
 public class ForgeRecipeCreatorMenu extends AbstractContainerMenu {
 
     private final ContainerModel<?> model;
@@ -54,10 +56,6 @@ public class ForgeRecipeCreatorMenu extends AbstractContainerMenu {
         }
     }
 
-    public ContainerModel<?> getModel() {
-        return model;
-    }
-
     @Override
     public boolean stillValid(Player player) {
         return true;
@@ -67,10 +65,5 @@ public class ForgeRecipeCreatorMenu extends AbstractContainerMenu {
     public ItemStack quickMoveStack(Player pPlayer, int pIndex)
     {
         return coreEntity.getItem(pIndex);
-    }
-
-    public BlockPos getPos()
-    {
-        return pos;
     }
 }

@@ -24,26 +24,33 @@ public abstract class TaggableSlotsContainerScreenDefinition<T extends TaggableS
     }
 
     @Override
-    public void render(RenderContext ctx)
+    public void render(RenderContext ctx, int mouseX, int mouseY)
     {
-        super.render(ctx);
+        super.render(ctx, mouseX, mouseY);
     }
 
     @Override
     public boolean onClick(double mouseX, double mouseY, int button)
     {
-        if(!getCurrentUiAdapter().isCtrlKeyDown())
-            return false;
-
         Pair<Integer, CoreItemStack> underMouse = getCurrentRenderAdapter().getItemStackUnderMouse(mouseX, mouseY);
 
-        if(underMouse == null)
-            return false;
+        if(!getCurrentUiAdapter().isCtrlKeyDown())
+        {
+            if(underMouse != null)
+            {
+                int slotIndex = underMouse.getFirst();
+                getScreenData().getBehavior().getTaggedSlots().remove(slotIndex); // Remove tag from slot
+            }
 
-        if(getParentContainerModel().getLayout().getSlot(underMouse.getFirst()).getType() != SlotDescriptor.SlotType.RECIPE_CREATOR_INPUT)
+            // Return false to allow normal click processing (as we are just removing the tag)
             return false;
+        }
 
-        TagSelectionScreen tagSelectionScreen = new TagSelectionScreen(this, underMouse.getSecond());
+        if(underMouse == null) return false;
+
+        if(getParentContainerModel().getLayout().getSlot(underMouse.getFirst()).getType() != SlotDescriptor.SlotType.RECIPE_CREATOR_INPUT) return false;
+
+        TagSelectionScreen tagSelectionScreen = new TagSelectionScreen(this, underMouse);
         getCurrentUiAdapter().openScreen(tagSelectionScreen);
         return true;
     }
@@ -54,8 +61,7 @@ public abstract class TaggableSlotsContainerScreenDefinition<T extends TaggableS
         {
             SlotDescriptor slot = getParentContainerModel().getLayout().getSlot(slotIndex);
 
-            if(slot == null)
-                continue;
+            if(slot == null) continue;
 
             renderTagOverlay(ctx, slot);
         }
@@ -65,6 +71,21 @@ public abstract class TaggableSlotsContainerScreenDefinition<T extends TaggableS
     {
         int x = getGuiLeft() + slot.getX();
         int y = getGuiTop() + slot.getY();
-        getCurrentRenderAdapter().drawRect(ctx, x, y, 16, 16, 0x80FF00FF); // semi-transparent magenta overlay
+        Identifier tag = getScreenData().getBehavior().getTaggedSlots().get(slot.getIndex());
+        getCurrentRenderAdapter().drawRect(ctx, x, y, 16, 16, getColorForTag(tag.toString()));
+    }
+
+    /**
+     * Generate a color based on the tag string. This ensures consistent coloring for the same tag.
+     */
+    private static int getColorForTag(String tag) {
+        int hash = tag.hashCode();
+
+        int a = 0xEE; // semi-transparent alpha
+        int r = (hash >> 16) & 0xFF;
+        int g = (hash >> 8)  & 0xFF;
+        int b =  hash        & 0xFF;
+
+        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 }

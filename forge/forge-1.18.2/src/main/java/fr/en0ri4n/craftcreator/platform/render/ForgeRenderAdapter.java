@@ -17,6 +17,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class ForgeRenderAdapter implements RenderAdapter
 {
@@ -24,7 +25,7 @@ public class ForgeRenderAdapter implements RenderAdapter
 
     private static final ForgeRenderAdapter INSTANCE = new ForgeRenderAdapter();
 
-    public static ForgeRenderAdapter getInstance()
+    public static ForgeRenderAdapter get()
     {
         return INSTANCE;
     }
@@ -68,34 +69,58 @@ public class ForgeRenderAdapter implements RenderAdapter
                             int textureX, int textureY, int widthInTexture, int heightInTexture)
     {
         ForgeRenderContext forgeRenderContext = ForgeRenderContext.from(ctx);
-        bindTexture(ctx, textureId);
+        bindTexture(textureId);
         Screen.blit(forgeRenderContext.poseStack(), x, y, width, height, textureX, textureY, widthInTexture, heightInTexture, textureWidth, textureHeight);
     }
 
     @Override
     public void drawText(RenderContext ctx, String text, int x, int y, int color)
     {
-
+        ForgeRenderContext forgeRenderContext = ForgeRenderContext.from(ctx);
+        Screen.drawString(forgeRenderContext.poseStack(), mc.font, text, x, y, color);
     }
 
     @Override
     public void drawRect(RenderContext ctx, int x, int y, int width, int height, int argb)
     {
-
+        ForgeRenderContext forgeRenderContext = ForgeRenderContext.from(ctx);
+        Screen.fill(forgeRenderContext.poseStack(), x, y, x + width, y + height, argb);
     }
 
     @Override
-    public void drawItem(RenderContext ctx, CoreItemStack item, int x, int y)
+    public void drawItem(RenderContext ctx, CoreItemStack item, int x, int y, float scale)
     {
         ItemStack platformStack = ForgeItemStackAdapter.get().toPlatform(item);
-
-        ForgeRenderContext forgeRenderContext = ForgeRenderContext.from(ctx);
-        mc.getItemRenderer().renderAndDecorateItem(platformStack, x, y);
+        RenderSystem.getModelViewStack().pushPose();
+        RenderSystem.getModelViewStack().scale(scale, scale, 1.0F);
+        mc.getItemRenderer().renderAndDecorateItem(platformStack, (int) (x / scale), (int) (y / scale));
+        RenderSystem.getModelViewStack().popPose();
     }
 
     @Override
-    public void bindTexture(RenderContext ctx, Identifier backgroundTexture)
+    public void scale(RenderContext ctx, Consumer<RenderContext> renderCall, float scaleX, float scaleY)
+    {
+        ForgeRenderContext forgeRenderContext = ForgeRenderContext.from(ctx);
+        forgeRenderContext.poseStack().pushPose();
+        forgeRenderContext.poseStack().scale(scaleX, scaleY, 1.0F);
+        renderCall.accept(forgeRenderContext);
+        forgeRenderContext.poseStack().popPose();
+    }
+
+    private void bindTexture(Identifier backgroundTexture)
     {
         RenderSystem.setShaderTexture(0, Objects.requireNonNull(ResourceLocation.tryParse(backgroundTexture.toString())));
+    }
+
+    @Override
+    public int getTextWidth(String label)
+    {
+        return mc.font.width(label);
+    }
+
+    @Override
+    public int getFontHeight()
+    {
+        return mc.font.lineHeight;
     }
 }

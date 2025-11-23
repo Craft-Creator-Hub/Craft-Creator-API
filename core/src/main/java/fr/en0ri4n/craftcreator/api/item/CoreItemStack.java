@@ -46,4 +46,9 @@ public class CoreItemStack {
         if(obj.has("slotIndex")) cis.setSlotIndex(obj.get("slotIndex").getAsInt());
         return cis;
     }
+
+    public boolean isEmpty()
+    {
+        return this.itemId.equals(Identifier.from("minecraft:air")) || this.count <= 0;
+    }
 }

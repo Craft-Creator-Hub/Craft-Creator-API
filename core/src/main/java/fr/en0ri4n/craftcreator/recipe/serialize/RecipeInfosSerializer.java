@@ -1,8 +1,8 @@
-package fr.en0ri4n.craftcreator.api.recipe.serialize;
+package fr.en0ri4n.craftcreator.recipe.serialize;
 
 import com.google.gson.*;
-import fr.en0ri4n.craftcreator.api.recipe.utils.RecipeInfos;
-import fr.en0ri4n.craftcreator.api.recipe.utils.RecipeInfos.*;
+import fr.en0ri4n.craftcreator.recipe.utils.RecipeInfos;
+import fr.en0ri4n.craftcreator.recipe.utils.RecipeInfos.*;
 import fr.en0ri4n.craftcreator.serialize.JsonSerializer;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 

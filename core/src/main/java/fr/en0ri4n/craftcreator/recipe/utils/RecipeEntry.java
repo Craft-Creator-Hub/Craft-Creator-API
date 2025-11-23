@@ -1,8 +1,10 @@
-package fr.en0ri4n.craftcreator.api.recipe.utils;
+package fr.en0ri4n.craftcreator.recipe.utils;
 
+import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.utils.Identifier;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,8 +14,11 @@ import java.util.List;
  * Pure data representation of a single recipe entry (item/block/fluid/tag).
  */
 @Getter
-@AllArgsConstructor
+@Setter
+@RequiredArgsConstructor
 public class RecipeEntry {
+
+    public static final RecipeEntry EMPTY = RecipeEntry.item(Identifier.from("minecraft:air"), 0);
 
     /** true if this is a tag reference ("forge:ingots/iron"), false for a concrete registry entry. */
     private final boolean tag;
@@ -32,6 +37,15 @@ public class RecipeEntry {
 
     /** True if the referenced thing is a fluid. */
     private final boolean fluid;
+
+    /** True if this entry is an output; false for inputs. */
+    private EntryType type = EntryType.INPUT;
+
+    /** Optional slot index for this entry. Used in some serializers. -1 = unspecified */
+    private int slot = -1;
+
+    /* Optional NBT data as a JsonObject. Not implemented yet */
+    private JsonObject nbt;
 
     /* -------------------------------------------------------------------------
      * Convenience queries
@@ -152,5 +166,10 @@ public class RecipeEntry {
         public RecipeEntry getOneOutput() {
             return entries.isEmpty() ? null : entries.get(0);
         }
+    }
+
+    public enum EntryType {
+        INPUT,
+        OUTPUT,
     }
 }

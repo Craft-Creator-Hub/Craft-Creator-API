@@ -19,7 +19,7 @@ import java.util.List;
 @Getter
 public abstract class CoreScreenDefinition<T extends ScreenData>
 {
-    private static final Identifier GUI_TEXTURE = Identifier.fromMod("textures/gui/base.png");
+    public static final Identifier GUI_TEXTURE = Identifier.fromMod("textures/gui/base.png");
 
     private final Identifier id;
     private final String title;
@@ -59,9 +59,19 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
         elements.add(element);
     }
 
-    public abstract void renderBackground(RenderContext ctx);
+    public void renderBackground(RenderContext ctx)
+    {
+        getCurrentRenderAdapter().drawRect(ctx, 0, 0, getCurrentRenderAdapter().getScreenWidth(), getCurrentRenderAdapter().getScreenHeight(), 0xD0101010);
+    }
 
-    public void render(RenderContext ctx) { /* Default implementation does nothing */ }
+    public void render(RenderContext ctx, int mouseX, int mouseY)
+    {
+        int x = (getGuiLeft() + (getGuiSize().getFirst() - getCurrentRenderAdapter().getTextWidth(getTitle())) / 2);
+        int y = getGuiTop() - 12;
+        getCurrentRenderAdapter().drawText(ctx, getTitle(), x, y, 0xFFFFFF);
+    }
+
+    public void renderForeground(RenderContext ctx, int mouseX, int mouseY) { /* Default implementation does nothing */ }
 
     public Pair<Integer, Integer> getBackgroundTextureSize()
     {
@@ -86,30 +96,32 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
     /**
      * Renders a scaled background using the default GUI texture.
      */
-    protected void renderBackgroundWithSize(RenderContext ctx, int width, int height)
+    public static void renderTextureWithSize(RenderContext ctx, Identifier texture, int left, int top, int width, int height, boolean isHovered, boolean isDisabled)
     {
-        RenderAdapter adapter = getCurrentRenderAdapter();
-        int left = (adapter.getScreenWidth() - width) / 2;
-        int top = (adapter.getScreenHeight() - height) / 2;
-        adapter.bindTexture(ctx, GUI_TEXTURE);
+        RenderAdapter adapter = CraftCreatorAPI.get().getPlatform().getRenderAdapter();
+
+        final int textureWidth = 16;
+        final int textureHeight = 48;
+        int baseY = isDisabled ? 32 : isHovered ? 16 : 0;
+
         // Top left
-        adapter.drawTexture(ctx, GUI_TEXTURE, left, top, 5, 5, 16, 16, 0, 0, 5, 5);
+        adapter.drawTexture(ctx, texture, left, top, 5, 5, textureWidth, textureHeight, 0, baseY, 5, 5);
         // Top middle
-        adapter.drawTexture(ctx, GUI_TEXTURE, left + 5, top, width - 10, 5, 16, 16, 5, 0, 1, 5);
+        adapter.drawTexture(ctx, texture, left + 5, top, width - 10, 5, textureWidth, textureHeight, 5, baseY, 1, 5);
         // Top right
-        adapter.drawTexture(ctx, GUI_TEXTURE, left + width - 5, top, 5, 5, 16, 16, 11, 0, 5, 5);
+        adapter.drawTexture(ctx, texture, left + width - 5, top, 5, 5, textureWidth, textureHeight, 11, baseY, 5, 5);
         // Middle left
-        adapter.drawTexture(ctx, GUI_TEXTURE, left, top + 5, 5, height - 10, 16, 16, 0, 5, 5, 1);
+        adapter.drawTexture(ctx, texture, left, top + 5, 5, height - 10, textureWidth, textureHeight, 0, baseY + 5, 5, 1);
         // Middle
-        adapter.drawTexture(ctx, GUI_TEXTURE, left + 5, top + 5, width - 10, height - 10, 16, 16, 5, 5, 1, 1);
+        adapter.drawTexture(ctx, texture, left + 5, top + 5, width - 10, height - 10, textureWidth, textureHeight, 5, baseY + 5, 1, 1);
         // Middle right
-        adapter.drawTexture(ctx, GUI_TEXTURE, left + width - 5, top + 5, 5, height - 10, 16, 16, 11, 5, 5, 1);
+        adapter.drawTexture(ctx, texture, left + width - 5, top + 5, 5, height - 10, textureWidth, textureHeight, 11, baseY + 5, 5, 1);
         // Bottom left
-        adapter.drawTexture(ctx, GUI_TEXTURE, left, top + height - 5, 5, 5, 16, 16, 0, 11, 5, 5);
+        adapter.drawTexture(ctx, texture, left, top + height - 5, 5, 5, textureWidth, textureHeight, 0, baseY + 11, 5, 5);
         // Bottom middle
-        adapter.drawTexture(ctx, GUI_TEXTURE, left + 5, top + height - 5, width - 10, 5, 16, 16, 5, 11, 1, 5);
+        adapter.drawTexture(ctx, texture, left + 5, top + height - 5, width - 10, 5, textureWidth, textureHeight, 5, baseY + 11, 1, 5);
         // Bottom right
-        adapter.drawTexture(ctx, GUI_TEXTURE, left + width - 5, top + height - 5, 5, 5, 16, 16, 11, 11, 5, 5);
+        adapter.drawTexture(ctx, texture, left + width - 5, top + height - 5, 5, 5, textureWidth, textureHeight, 11, baseY + 11, 5, 5);
     }
 
     public RenderAdapter getCurrentRenderAdapter()
@@ -133,15 +145,10 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
         getScreenData().load(data.getPayload());
     }
 
-    public void onButtonPressed(String elementId, String actionId)
-    { /* Default implementation does nothing */ }
-
-    public void onDropdownChanged(String elementId, int index, String value)
-    { /* Default implementation does nothing */ }
-
-    // Text inputs
-    public void onTextChanged(String elementId, String value)
-    { /* Default implementation does nothing */ }
+    protected void cleanScreen()
+    {
+        this.elements.clear();
+    }
 
     public boolean onClick(double mouseX, double mouseY, int button)
     {
@@ -150,7 +157,7 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
 
     public void onClose()
     {
-        this.elements.clear();
+        cleanScreen();
         sendUpdates();
     }
 }

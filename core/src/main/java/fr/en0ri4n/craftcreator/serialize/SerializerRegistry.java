@@ -1,5 +1,8 @@
 package fr.en0ri4n.craftcreator.serialize;
 
+import fr.en0ri4n.craftcreator.recipe.serialize.CraftingTableRecipeSerializer;
+import fr.en0ri4n.craftcreator.recipe.serialize.RecipeInfosSerializer;
+import fr.en0ri4n.craftcreator.recipe.utils.RecipeInfos;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -18,5 +21,11 @@ public class SerializerRegistry {
     @SuppressWarnings("unchecked")
     public static <T> JsonSerializer<T> get(Class<T> type) {
         return (JsonSerializer<T>) BY_CLASS.get(type);
+    }
+
+    public static void registerAll()
+    {
+        register(RecipeInfos.class, new RecipeInfosSerializer());
+//        register(CraftingTableRecipeSerializer.class, new CraftingTableRecipeSerializer());
     }
 }

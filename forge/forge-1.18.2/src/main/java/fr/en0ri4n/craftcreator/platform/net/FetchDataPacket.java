@@ -4,11 +4,13 @@ import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockPos;
 import fr.en0ri4n.craftcreator.api.net.FetchData;
 import fr.en0ri4n.craftcreator.platform.Forge1182Platform;
 import fr.en0ri4n.craftcreator.utils.Identifier;
+import lombok.Getter;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
+@Getter
 public class FetchDataPacket
 {
     private final FetchData data;
@@ -16,11 +18,6 @@ public class FetchDataPacket
     public FetchDataPacket(FetchData data)
     {
         this.data = data;
-    }
-
-    public FetchData getData()
-    {
-        return data;
     }
 
     public static void encode(FetchDataPacket packet, FriendlyByteBuf buf)

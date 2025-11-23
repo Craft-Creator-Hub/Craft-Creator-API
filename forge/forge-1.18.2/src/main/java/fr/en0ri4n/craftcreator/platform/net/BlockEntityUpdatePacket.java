@@ -9,21 +9,19 @@ import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockPos;
 import fr.en0ri4n.craftcreator.api.net.BlockEntityUpdateData;
 import fr.en0ri4n.craftcreator.platform.Forge1182Platform;
 import fr.en0ri4n.craftcreator.utils.Identifier;
+import lombok.Getter;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
+@Getter
 public class BlockEntityUpdatePacket
 {
     private final BlockEntityUpdateData data;
 
     public BlockEntityUpdatePacket(BlockEntityUpdateData data) {
         this.data = data;
-    }
-
-    public BlockEntityUpdateData getData() {
-        return data;
     }
 
     public static void encode(BlockEntityUpdatePacket packet, FriendlyByteBuf buf) {

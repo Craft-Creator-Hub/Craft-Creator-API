@@ -37,6 +37,7 @@ public class TaggableSlotsBlockEntityBehavior implements BlockEntityBehavior
     @Override
     public void load(CoreBlockEntity entity, JsonObject in)
     {
+        taggedSlots.clear();
         if (in.has("taggedSlots"))
         {
             JsonArray tagsArray = in.getAsJsonArray("taggedSlots");

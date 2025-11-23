@@ -1,5 +1,8 @@
 package fr.en0ri4n.craftcreator.api.ui.elements;
 
+import fr.en0ri4n.craftcreator.CraftCreatorAPI;
+import fr.en0ri4n.craftcreator.api.platform.RenderAdapter;
+import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -18,12 +21,12 @@ public abstract class CoreUiElement {
     private final String id;
 
     /** X/Y position in logical screen coordinates. */
-    private final int x;
-    private final int y;
+    protected final int x;
+    protected final int y;
 
     /** Width/height in logical units (pixels or grid units, up to you). */
-    private final int width;
-    private final int height;
+    protected final int width;
+    protected final int height;
 
     /** tooltip text. */
     private final String tooltip;
@@ -46,5 +49,15 @@ public abstract class CoreUiElement {
     public void sendUpdate() {
         if(elementListener != null)
             elementListener.update();
+    }
+
+    protected boolean isMouseOver(int mouseX, int mouseY) {
+        return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
+    }
+
+    public abstract void render(RenderContext ctx, int mouseX, int mouseY);
+
+    protected RenderAdapter getRenderAdapter() {
+        return CraftCreatorAPI.get().getPlatform().getRenderAdapter();
     }
 }

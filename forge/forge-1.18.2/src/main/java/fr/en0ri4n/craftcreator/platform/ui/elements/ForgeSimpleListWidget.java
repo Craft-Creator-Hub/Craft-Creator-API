@@ -3,78 +3,87 @@ package fr.en0ri4n.craftcreator.platform.ui.elements;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreElementListener;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreList;
+import fr.en0ri4n.craftcreator.platform.render.ForgeRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 
 /**
- * Simple scrollable list bound to CoreList.
+ * Simple, pretty list widget for Forge screens.
+ * <p>
+ * - Uses ObjectSelectionList so scrolling/selection/keyboard navigation work out of the box.
+ * - Draws a soft gradient background, subtle border and rounded-like selection highlight.
+ * - Entries can show text and an optional icon (ItemStack or texture ResourceLocation).
+ *
  */
-public class ForgeSimpleListWidget extends ObjectSelectionList<ForgeSimpleListWidget.Entry> implements CoreElementListener<CoreList>
+public class ForgeSimpleListWidget extends ObjectSelectionList<ForgeSimpleListWidget.ForgeSimpleListEntry> implements CoreElementListener<CoreList>
 {
-    private final CoreList coreList;
+    private final CoreList listModel;
 
-    public ForgeSimpleListWidget(int width, int height, int top, int bottom, int itemHeight, CoreList coreList)
+    /**
+     * Create the list widget.
+     *
+     * @param listModel The core list model to back this widget.
+     */
+    public ForgeSimpleListWidget(CoreList listModel)
     {
-        super(Minecraft.getInstance(), width, height, top, bottom, itemHeight);
-        this.coreList = coreList;
-        for(int i = 0; i < coreList.getEntries().size(); i++)
-            this.addEntry(new Entry(i, coreList.getEntries().get(i)));
-        this.coreList.setListener(this);
-    }
-
-    @Override
-    public void setSelected(Entry entry)
-    {
-        super.setSelected(entry);
-        if(entry == null) return;
-        coreList.setSelectedIndex(entry.index);
-    }
-
-    @Override
-    public void update()
-    {
-        clearEntries();
-        for(int i = 0; i < getElement().getEntries().size(); i++)
-            this.addEntry(new Entry(i, getElement().getEntries().get(i)));
-        setSelected(getEntry(getElement().getSelectedIndex()));
+        super(Minecraft.getInstance(), listModel.getWidth(), listModel.getHeight(),
+                listModel.getY(), listModel.getY() + listModel.getHeight(),
+                listModel.getItemHeight());
+        this.listModel = listModel;
+        this.x0 = listModel.getX();
+        this.x1 = listModel.getX() + listModel.getWidth();
+        this.listModel.setListener(this);
     }
 
     @Override
     public CoreList getElement()
     {
-        return coreList;
+        return this.listModel;
     }
 
-    public class Entry extends ObjectSelectionList.Entry<Entry>
+    @Override
+    public void update()
     {
-        private final int index;
-        private final String label;
+        replaceEntries(this.listModel.getEntries().stream().map(ForgeSimpleListEntry::new).toList());
+        if(this.listModel.getSelectedIndex() >= 0) setSelected(getEntry(this.listModel.getSelectedIndex()));
+    }
 
-        public Entry(int index, String label)
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    {
+        return this.listModel.mouseClicked((int) mouseX, (int) mouseY, button) || super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks)
+    {
+        this.listModel.render(ForgeRenderContext.of(poseStack, partialTicks), mouseX, mouseY);
+    }
+
+    /**
+     * Entry type for the list. Simple text + optional icon (ItemStack or texture).
+     */
+    public static class ForgeSimpleListEntry extends ObjectSelectionList.Entry<ForgeSimpleListEntry>
+    {
+        private final CoreList.Entry entryModel;
+
+        public ForgeSimpleListEntry(CoreList.Entry entryModel)
         {
-            this.index = index;
-            this.label = label;
+            this.entryModel = entryModel;
         }
 
         @Override
-        public void render(PoseStack poseStack, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float partialTicks)
+        public void render(PoseStack poseStack, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovered, float partialTicks)
         {
-            Minecraft.getInstance().font.draw(poseStack, label, x + 2, y + 2, 0xFFFFFF);
-        }
-
-        @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button)
-        {
-            ForgeSimpleListWidget.this.setSelected(this);
-            return true;
+            // Not used, rendering is handled by CoreList.Entry
         }
 
         @Override
         public Component getNarration()
         {
-            return new TextComponent("");
+            return new TextComponent(this.entryModel.getLabel());
         }
     }
 }

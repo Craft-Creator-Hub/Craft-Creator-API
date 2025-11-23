@@ -17,7 +17,7 @@ public interface Platform {
 
     IdentifierAdapter<?> getIdentifierAdapter();
 
-    UiAdapter getUiAdapter();
+    UiAdapter<?> getUiAdapter();
 
     RegistryAdapter getRegistryAdapter();
 

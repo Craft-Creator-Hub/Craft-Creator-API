@@ -2,7 +2,6 @@ package fr.en0ri4n.craftcreator.serialize;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.Strictness;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +9,7 @@ import lombok.NoArgsConstructor;
 public class GsonProvider {
 
     private static final Gson GSON = new GsonBuilder()
-            .setStrictness(Strictness.LENIENT)
+            .setLenient()
             .setPrettyPrinting()
             .create();
 

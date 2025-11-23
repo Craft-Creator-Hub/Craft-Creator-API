@@ -4,25 +4,25 @@ import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.CraftCreator;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntity;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockPos;
-import fr.en0ri4n.craftcreator.api.net.BlockEntityUpdateData;
-import fr.en0ri4n.craftcreator.api.net.FetchData;
-import fr.en0ri4n.craftcreator.api.net.UiUpdateData;
+import fr.en0ri4n.craftcreator.api.net.*;
 import fr.en0ri4n.craftcreator.api.platform.NetworkInteractionAdapter;
 import fr.en0ri4n.craftcreator.platform.Forge1182Platform;
 import fr.en0ri4n.craftcreator.platform.blockentity.ForgeGenericBlockEntity;
-import fr.en0ri4n.craftcreator.platform.net.BlockEntityUpdatePacket;
-import fr.en0ri4n.craftcreator.platform.net.FetchDataPacket;
-import fr.en0ri4n.craftcreator.platform.net.NetworkHandler;
-import fr.en0ri4n.craftcreator.platform.net.UiUpdatePacket;
+import fr.en0ri4n.craftcreator.platform.net.*;
 import fr.en0ri4n.craftcreator.platform.ui.screen.ForgeRecipeCreatorScreen;
+import fr.en0ri4n.craftcreator.recipe.utils.RecipeRequestFeedback;
+import fr.en0ri4n.craftcreator.recipe.RecipeManager;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.network.PacketDistributor;
 
 public class ForgeNetworkInteractionAdapter implements NetworkInteractionAdapter<ServerPlayer>
@@ -114,5 +114,46 @@ public class ForgeNetworkInteractionAdapter implements NetworkInteractionAdapter
         }
 
         return gbe;
+    }
+
+    @Override
+    public void sendOpenContainerRequestToServer(OpenContainerRequestData request)
+    {
+        NetworkHandler.INSTANCE.sendToServer(new OpenContainerRequestPacket(request));
+    }
+
+    @Override
+    public void handleServerOpenContainerRequest(ServerPlayer sender, OpenContainerRequestData request)
+    {
+        ServerLevel level = sender.getLevel();
+        BlockPos pos = Forge1182Platform.get().getBlockPosAdapter().fromCore(request.getBlockPos());
+        ForgeGenericBlockEntity blockEntity = (ForgeGenericBlockEntity) level.getBlockEntity(pos);
+
+        // Use NetworkHooks to open the screen; write position so client can recreate menu/lookup BE
+        NetworkHooks.openGui(sender, blockEntity, buf ->
+        {
+            buf.writeBlockPos(pos);
+            buf.writeUtf(request.getContainerId().toString());
+        });
+    }
+
+    @Override
+    public void sendMakeRecipeRequestToServer(MakeRecipeRequestData data)
+    {
+        NetworkHandler.INSTANCE.sendToServer(new MakeRecipeRequestPacket(data));
+    }
+
+    @Override
+    public void handleServerMakeRecipeRequest(ServerPlayer player, MakeRecipeRequestData data)
+    {
+        ServerLevel level = player.getLevel();
+        BlockPos pos = Forge1182Platform.get().getBlockPosAdapter().fromCore(data.getPos());
+        ForgeGenericBlockEntity blockEntity = (ForgeGenericBlockEntity) level.getBlockEntity(pos);
+
+        if(blockEntity == null)
+            return;
+
+        RecipeRequestFeedback feedback = RecipeManager.get().handleMakeRecipeRequest(blockEntity.getCoreEntity(), data.getContainerId());
+        player.sendMessage(new TextComponent(feedback.getFeedback().getMessageKey()), player.getUUID());
     }
 }

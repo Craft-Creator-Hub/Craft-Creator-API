@@ -5,29 +5,26 @@ import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
 import fr.en0ri4n.craftcreator.api.ui.screen.WidgetRenderer;
 import fr.en0ri4n.craftcreator.platform.render.ForgeRenderContext;
 import fr.en0ri4n.craftcreator.platform.ui.container.ForgeRecipeCreatorMenu;
-import net.minecraft.client.Minecraft;
+import lombok.Getter;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.player.Inventory;
 
+@Getter
 public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecipeCreatorMenu> implements WidgetRenderer
 {
     private final ContainerModel<?> model;
 
     public ForgeRecipeCreatorScreen(ForgeRecipeCreatorMenu menu, Inventory playerInv, Component title)
     {
-        super(menu, playerInv, title);
+        super(menu, playerInv, new TextComponent(""));
         this.model = menu.getModel();
         this.imageWidth = model.getLayout().getWidth();
         this.imageHeight = model.getLayout().getHeight();
-    }
-
-    public ContainerModel<?> getModel()
-    {
-        return model;
     }
 
     @Override
@@ -59,17 +56,15 @@ public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecip
     }
 
     @Override
-    protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY)
-    {
-        ForgeRenderContext ctx = new ForgeRenderContext(poseStack, Minecraft.getInstance().renderBuffers().bufferSource(), partialTicks);
-        model.getScreenDefinition().renderBackground(ctx);
-    }
+    protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY) {}
 
     @Override
     public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks)
     {
-        this.renderBackground(poseStack);
+        model.getScreenDefinition().renderBackground(ForgeRenderContext.of(poseStack, partialTicks));
         super.render(poseStack, mouseX, mouseY, partialTicks);
+        model.getScreenDefinition().render(ForgeRenderContext.of(poseStack, partialTicks), mouseX, mouseY);
+        model.getScreenDefinition().renderForeground(ForgeRenderContext.of(poseStack, partialTicks), mouseX, mouseY);
         this.renderTooltip(poseStack, mouseX, mouseY);
     }
 }

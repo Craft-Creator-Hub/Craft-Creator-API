@@ -1,7 +1,6 @@
 package fr.en0ri4n.craftcreator.platform.net;
 
 import fr.en0ri4n.craftcreator.api.CCReferences;
-import fr.en0ri4n.craftcreator.api.net.FetchData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
@@ -28,6 +27,12 @@ public class NetworkHandler {
         // Register server -> client packet (FetchDataPacket)
         INSTANCE.registerMessage(id++, FetchDataPacket.class,
                 FetchDataPacket::encode, FetchDataPacket::decode, FetchDataPacket::handleServer);
+        // Register client -> server packet (OpenContainerRequestPacket)
+        INSTANCE.registerMessage(id++, OpenContainerRequestPacket.class,
+                OpenContainerRequestPacket::encode, OpenContainerRequestPacket::decode, OpenContainerRequestPacket::handleServer);
+        // Register client -> server packet (MakeRecipeRequestPacket)
+        INSTANCE.registerMessage(id++, MakeRecipeRequestPacket.class,
+                MakeRecipeRequestPacket::encode, MakeRecipeRequestPacket::decode, MakeRecipeRequestPacket::handleServer);
     }
 
     private NetworkHandler() {}

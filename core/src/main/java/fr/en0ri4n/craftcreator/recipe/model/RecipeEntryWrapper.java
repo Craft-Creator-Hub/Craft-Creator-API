@@ -1,6 +1,6 @@
-package fr.en0ri4n.craftcreator.api.recipe.model;
+package fr.en0ri4n.craftcreator.recipe.model;
 
-import fr.en0ri4n.craftcreator.api.recipe.utils.RecipeEntry;
+import fr.en0ri4n.craftcreator.recipe.utils.RecipeEntry;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

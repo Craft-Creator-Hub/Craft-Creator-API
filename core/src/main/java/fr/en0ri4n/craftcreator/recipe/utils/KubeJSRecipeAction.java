@@ -1,4 +1,4 @@
-package fr.en0ri4n.craftcreator.api.recipe.utils;
+package fr.en0ri4n.craftcreator.recipe.utils;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

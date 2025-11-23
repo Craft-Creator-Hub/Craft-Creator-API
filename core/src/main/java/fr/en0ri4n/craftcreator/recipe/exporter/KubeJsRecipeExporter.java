@@ -1,22 +1,21 @@
-package fr.en0ri4n.craftcreator.api.kubejs;
+package fr.en0ri4n.craftcreator.recipe.exporter;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.api.mod.SupportedMods;
 import fr.en0ri4n.craftcreator.api.platform.Platform;
-import fr.en0ri4n.craftcreator.api.recipe.model.CraftingGrid;
-import fr.en0ri4n.craftcreator.api.recipe.serialize.CraftingTableRecipeSerializer;
-import fr.en0ri4n.craftcreator.api.recipe.utils.RecipeEntry;
-import fr.en0ri4n.craftcreator.api.recipe.utils.RecipeInfos;
+import fr.en0ri4n.craftcreator.recipe.model.Recipe;
+import fr.en0ri4n.craftcreator.recipe.utils.RecipeRequestFeedback;
 import fr.en0ri4n.craftcreator.serialize.GsonProvider;
+import fr.en0ri4n.craftcreator.utils.Feedback;
 import fr.en0ri4n.craftcreator.utils.Identifier;
-import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 /**
  * Loader-agnostic manager for KubeJS recipe actions (add/remove/modify).
@@ -24,25 +23,17 @@ import java.nio.file.Path;
  *
  * All filesystem locations come from Platform paths. No Forge/Fabric classes here.
  */
-@RequiredArgsConstructor
-public class KubeJsActions {
-
-    /**
-     * Mod whose recipes we are manipulating.
-     * The modId is used in script filenames and logging.
-     */
-    private final SupportedMods mod;
-
-    /**
-     * Get a KubeJsActions manager for the given mod.
-     */
-    public static KubeJsActions forMod(SupportedMods mod) {
-        return new KubeJsActions(mod);
+public class KubeJsRecipeExporter extends AdvancedModRecipeExporter
+{
+    @Override
+    public void loadInternal()
+    {
+        if(!CraftCreatorAPI.get().getPlatform().getServices().IsModLoaded(SupportedMods.KUBEJS))
+        {
+            CraftCreatorAPI.get().getPlatform().getLogger().warn("KubeJS not detected, not loading KubeJsRecipeExporter");
+            return;
+        }
     }
-
-    /* -------------------------------------------------------------------------
-     * Recipe removal
-     * ---------------------------------------------------------------------- */
 
     /**
      * Remove a single recipe by id.
@@ -52,6 +43,7 @@ public class KubeJsActions {
      *   event.remove({ id: 'namespace:path' });
      * });
      */
+    @Override
     public void removeRecipe(Identifier recipeId) {
         JsonObject removeObj = new JsonObject();
         removeObj.addProperty("id", recipeId.toString());
@@ -74,6 +66,7 @@ public class KubeJsActions {
      *   event.remove({ type: 'namespace:path' });
      * });
      */
+    @Override
     public void removeAllOfType(Identifier recipeTypeId) {
         JsonObject removeObj = new JsonObject();
         removeObj.addProperty("type", recipeTypeId.toString());
@@ -88,50 +81,15 @@ public class KubeJsActions {
         appendToScript(snippet);
     }
 
+    @Override
+    public List<Recipe> getRemovedRecipes()
+    {
+        return List.of();
+    }
+
     /* -------------------------------------------------------------------------
      * Recipe addition
      * ---------------------------------------------------------------------- */
-
-    /**
-     * Add a custom crafting table recipe via KubeJS, using the core crafting serializer.
-     *
-     * For shaped recipes, provide a 3x3 CraftingGrid.
-     * For shapeless recipes, provide a MultiInput.
-     *
-     * The resulting JSON is fed into event.custom(...).
-     */
-    public void addCraftingRecipe(Identifier recipeId,
-                                  boolean shaped,
-                                  CraftingGrid shapedGrid,
-                                  RecipeEntry.MultiInput shapelessInputs,
-                                  RecipeEntry result,
-                                  RecipeInfos infos) {
-
-        JsonObject recipeJson;
-        if (shaped) {
-            if (shapedGrid == null) {
-                throw new IllegalArgumentException("CraftingGrid must not be null for shaped recipes");
-            }
-            recipeJson = CraftingTableRecipeSerializer.shaped(
-                    result.getId(), result.getCount(), shapedGrid
-            );
-        } else {
-            if (shapelessInputs == null) {
-                throw new IllegalArgumentException("shapelessInputs must not be null for shapeless recipes");
-            }
-            recipeJson = CraftingTableRecipeSerializer.shapeless(
-                    result.getId(), result.getCount(), shapelessInputs
-            );
-        }
-
-        // KubeJS convention: ensure id is set
-        recipeJson.addProperty("id", recipeId.toString());
-
-        // If you want to embed extra info flags from RecipeInfos, you can do it here.
-        // For now, infos is accepted for future use but not written.
-
-        addCustomRecipe(recipeJson);
-    }
 
     /**
      * Add an arbitrary custom JSON recipe via KubeJS.
@@ -141,7 +99,8 @@ public class KubeJsActions {
      *   event.custom(<json>);
      * });
      */
-    public void addCustomRecipe(JsonObject recipeJson) {
+    @Override
+    public RecipeRequestFeedback addRecipe(JsonObject recipeJson) {
         String snippet = """
             onEvent('recipes', event => {
               event.custom(%s);
@@ -150,6 +109,19 @@ public class KubeJsActions {
             """.formatted(toJson(recipeJson));
 
         appendToScript(snippet);
+        return RecipeRequestFeedback.of(Feedback.KUBEJS_ADDED, true);
+    }
+
+    @Override
+    public RecipeRequestFeedback removeAddedRecipe(Identifier id)
+    {
+        return null;
+    }
+
+    @Override
+    public List<Recipe> getRecipes()
+    {
+        return List.of();
     }
 
     /* -------------------------------------------------------------------------
@@ -222,7 +194,7 @@ public class KubeJsActions {
         Platform platform = CraftCreatorAPI.get().getPlatform();
 
         // kubejs/server_scripts/craftcreator_<modId>_recipes.js
-        String modId = mod.getModId();
+        String modId = "getMod().getModId()";
         Path kubejsDir = platform.getPaths().getGameDirectory()
                 .resolve("kubejs")
                 .resolve("server_scripts");

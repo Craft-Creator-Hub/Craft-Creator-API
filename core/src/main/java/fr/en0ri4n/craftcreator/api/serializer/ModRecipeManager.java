@@ -19,7 +19,7 @@ public abstract class ModRecipeManager
 //    {
 //        if(serializerType == SerializerType.KUBE_JS)
 //        {
-//            String serializedRecipe = kubeJSModifiedRecipe.getBaseLine().format(KubeJSRecipeAction.REMOVED.getDescriptor(), kubeJSModifiedRecipe.toJson());
+//            String serializedRecipe = kubeJSModifiedRecipe.getBaseLine().format(KubeJSRecipeAction.DATAPACK_REMOVED.getDescriptor(), kubeJSModifiedRecipe.toJson());
 //
 //            if(!KubeJSHelper.isModifiedRecipePresent(mod, kubeJSModifiedRecipe)) KubeJSHelper.addModifiedRecipe(mod, serializedRecipe);
 //        }

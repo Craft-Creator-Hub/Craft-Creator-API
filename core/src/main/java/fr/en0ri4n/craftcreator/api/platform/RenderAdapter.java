@@ -5,6 +5,8 @@ import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import fr.en0ri4n.craftcreator.utils.Pair;
 
+import java.util.function.Consumer;
+
 
 /**
  * Loader-agnostic render adapter. All rendering calls receive a core RenderContext instance.
@@ -34,7 +36,11 @@ public interface RenderAdapter
 
     void drawRect(RenderContext ctx, int x, int y, int width, int height, int argb);
 
-    void drawItem(RenderContext ctx, CoreItemStack item, int x, int y);
+    void drawItem(RenderContext ctx, CoreItemStack item, int x, int y, float scale);
 
-    void bindTexture(RenderContext ctx, Identifier backgroundTexture);
+    int getTextWidth(String label);
+
+    int getFontHeight();
+
+    void scale(RenderContext ctx, Consumer<RenderContext> renderCall, float scaleX, float scaleY);
 }

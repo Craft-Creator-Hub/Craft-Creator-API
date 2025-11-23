@@ -34,9 +34,9 @@ public abstract class CoreContainerScreenDefinition<T extends BlockEntityBehavio
     @Override
     public void renderBackground(RenderContext ctx)
     {
+        super.renderBackground(ctx);
         Pair<Integer, Integer> size = getBackgroundTextureSize();
 
-        getCurrentRenderAdapter().bindTexture(ctx, getBackgroundTexture());
         getCurrentRenderAdapter().drawTexture(ctx, getBackgroundTexture(),
                 getGuiLeft(), getGuiTop(), size.getFirst(), size.getSecond(),
                 256, 256,

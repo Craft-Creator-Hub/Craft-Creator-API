@@ -6,7 +6,7 @@ public abstract class CCReferences
 {
     public static final String MOD_ID = "craftcreator";
 
-    protected abstract String getModName();
-    protected abstract String getModVersion();
-    protected abstract Identifier getTranslation(String key);
+    public abstract String getModName();
+    public abstract String getModVersion();
+    public abstract Identifier getTranslation(String key);
 }

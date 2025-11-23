@@ -1,8 +1,6 @@
 package fr.en0ri4n.craftcreator.platform;
 
-import fr.en0ri4n.craftcreator.CraftCreator;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockPos;
-import fr.en0ri4n.craftcreator.api.platform.RegistryAdapter;
 import fr.en0ri4n.craftcreator.api.item.ItemStackAdapter;
 import fr.en0ri4n.craftcreator.api.mod.SupportedModLoaders;
 import fr.en0ri4n.craftcreator.api.mod.SupportedMods;
@@ -12,6 +10,7 @@ import fr.en0ri4n.craftcreator.platform.item.ForgeItemStackAdapter;
 import fr.en0ri4n.craftcreator.platform.item.ForgeTagProvider;
 import fr.en0ri4n.craftcreator.platform.render.ForgeRenderAdapter;
 import fr.en0ri4n.craftcreator.utils.Identifier;
+import net.minecraft.client.gui.components.Widget;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +19,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 
@@ -29,10 +30,12 @@ public class Forge1182Platform implements Platform {
     public static Forge1182Platform get() { return INSTANCE; }
 
     private final LoggerFacade loggerFacade = new LoggerFacade() {
-        @Override public void info(String msg)  { CraftCreator.LOGGER.info(msg); }
-        @Override public void warn(String msg)  { CraftCreator.LOGGER.warn(msg); }
-        @Override public void error(String msg) { CraftCreator.LOGGER.error(msg); }
-        @Override public void error(String msg, Throwable t) { CraftCreator.LOGGER.error(msg, t); }
+        private static Logger LOGGER;
+        @Override public void createLogger(Class<?> clazz) { LOGGER = LoggerFactory.getLogger(clazz); }
+        @Override public void info(String msg)  { LOGGER.info(msg); }
+        @Override public void warn(String msg)  { LOGGER.warn(msg); }
+        @Override public void error(String msg) { LOGGER.error(msg); }
+        @Override public void error(String msg, Throwable t) { LOGGER.error(msg, t); }
     };
 
     private final PathsProvider paths = new PathsProvider() {
@@ -49,6 +52,12 @@ public class Forge1182Platform implements Platform {
         @Override
         public Path getDataDirectory() {
             return FMLLoader.getGamePath().resolve("Craft-Creator");
+        }
+
+        @Override
+        public Path getWorldDirectory(String worldName)
+        {
+            return getGameDirectory().resolve("saves").resolve(worldName);
         }
     };
 
@@ -76,7 +85,7 @@ public class Forge1182Platform implements Platform {
         }
     };
 
-    private final UiAdapter uiAdapter = new ForgeUiAdapter();
+    private final UiAdapter<Widget> uiAdapter = new ForgeUiAdapter();
 
     private final RegistryAdapter registryAdapter = new ForgeRegistryAdapter();
 
@@ -143,7 +152,7 @@ public class Forge1182Platform implements Platform {
     }
 
     @Override
-    public UiAdapter getUiAdapter() {
+    public UiAdapter<Widget> getUiAdapter() {
         return uiAdapter;
     }
 

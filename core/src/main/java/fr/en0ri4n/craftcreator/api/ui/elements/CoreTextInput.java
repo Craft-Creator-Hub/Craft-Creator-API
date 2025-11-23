@@ -1,5 +1,6 @@
 package fr.en0ri4n.craftcreator.api.ui.elements;
 
+import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,5 +28,11 @@ public class CoreTextInput extends CoreUiElement {
     public CoreTextInput(int x, int y, int width, int height,
                          String placeholder, int maxLength) {
         this(null, x, y, width, height, "", placeholder, maxLength, null);
+    }
+
+    @Override
+    public void render(RenderContext ctx, int mouseX, int mouseY)
+    {
+
     }
 }

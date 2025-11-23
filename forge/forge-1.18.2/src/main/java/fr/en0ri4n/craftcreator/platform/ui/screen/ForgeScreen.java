@@ -3,14 +3,15 @@ package fr.en0ri4n.craftcreator.platform.ui.screen;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
 import fr.en0ri4n.craftcreator.api.ui.screen.WidgetRenderer;
-import fr.en0ri4n.craftcreator.platform.adapters.ForgeUiAdapter;
 import fr.en0ri4n.craftcreator.platform.render.ForgeRenderContext;
+import lombok.Getter;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TextComponent;
 
+@Getter
 public class ForgeScreen extends Screen implements WidgetRenderer
 {
     private final CoreScreenDefinition<?> screenDefinition;
@@ -38,15 +39,14 @@ public class ForgeScreen extends Screen implements WidgetRenderer
     @Override
     public void renderBackground(PoseStack pPoseStack)
     {
-        renderBackground(pPoseStack, 0);
         screenDefinition.renderBackground(ForgeRenderContext.of(pPoseStack, 0.0F));
     }
 
     @Override
     public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick)
     {
-        renderBackground(pPoseStack);
+        screenDefinition.renderBackground(ForgeRenderContext.of(pPoseStack, pPartialTick));
         super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
-        screenDefinition.render(ForgeRenderContext.of(pPoseStack, pPartialTick));
+        screenDefinition.render(ForgeRenderContext.of(pPoseStack, pPartialTick), pMouseX, pMouseY);
     }
 }
