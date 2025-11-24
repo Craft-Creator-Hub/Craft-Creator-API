@@ -18,7 +18,6 @@ import java.util.UUID;
 @Getter
 public class CoreBlockEntity
 {
-
     private final UUID uuid;
     private final Identifier typeId; // the definition id
     private final List<CoreItemStack> inventory;
@@ -88,11 +87,6 @@ public class CoreBlockEntity
         Identifier type = Identifier.from(json.get("type").getAsString());
         BlockEntityBehavior behavior = CoreBlockEntityManager.get().getBehavior(type).get();
         CoreBlockEntity entity = new CoreBlockEntity(type, behavior, def.getInventorySize());
-
-        if(json.has("uuid"))
-        {
-            /* ignore - uuid is final; can't set; keep generated */
-        }
 
         if(json.has("inventory"))
         {

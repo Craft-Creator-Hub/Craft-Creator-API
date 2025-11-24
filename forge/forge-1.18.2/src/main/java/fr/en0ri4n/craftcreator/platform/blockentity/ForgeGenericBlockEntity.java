@@ -2,7 +2,6 @@ package fr.en0ri4n.craftcreator.platform.blockentity;
 
 import com.google.gson.JsonParser;
 import fr.en0ri4n.craftcreator.CraftCreator;
-import fr.en0ri4n.craftcreator.api.blockentity.BlockEntityBehavior;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntity;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityDefinition;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityManager;
@@ -23,8 +22,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-
-import java.util.function.Supplier;
 
 /**
  * Generic Forge BlockEntity that stores core block entity JSON in NBT and delegates behavior.
@@ -59,7 +56,6 @@ public class ForgeGenericBlockEntity extends BaseContainerBlockEntity
                 CoreBlockEntityDefinition def = CoreBlockEntityManager.get().getDefinition(typeId);
                 if (def != null) {
                     this.coreEntity = CoreBlockEntity.fromJson(obj, def);
-                    this.coreEntity.getBehavior().onLoad(this.coreEntity, new ForgeBlockEntityContext(level, worldPosition, null));
                 }
             } catch (Exception e) {
                 CraftCreator.LOGGER.error("Failed to load core block entity from JSON: {}", json, e);
@@ -80,21 +76,6 @@ public class ForgeGenericBlockEntity extends BaseContainerBlockEntity
     protected Component getDefaultName()
     {
         return new TranslatableComponent("container.craftcreator." + getCoreEntity().getTypeId().getPath());
-    }
-
-    @Override
-    public void setRemoved() {
-        // call behaviors onRemove
-        if (coreEntity != null) {
-            CoreBlockEntityDefinition def = CoreBlockEntityManager.get().getDefinition(coreEntity.getTypeId());
-            if (def != null) {
-                for (Identifier bId : def.getBehaviors()) {
-                    Supplier<BlockEntityBehavior> sup = CoreBlockEntityManager.get().getBehavior(bId);
-                    if (sup != null) sup.get().onRemove(coreEntity, new ForgeBlockEntityContext(level, worldPosition, null));
-                }
-            }
-        }
-        super.setRemoved();
     }
 
     @Override

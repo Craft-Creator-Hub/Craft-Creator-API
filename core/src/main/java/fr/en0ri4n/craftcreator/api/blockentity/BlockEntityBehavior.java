@@ -3,21 +3,12 @@ package fr.en0ri4n.craftcreator.api.blockentity;
 import com.google.gson.JsonObject;
 
 /**
- * Lifecycle hooks you can register on core block-entity definitions.
- * Implementations can be provided in core for pure logic or supplied by platform
- * if platform interaction is required.
+ * Class representing a behavior that can be attached to a block entity.<br>
+ * Behaviors have custom deserialization/serialization logic.<br>
+ * They are used as storage for custom data to simplify client/server synchronization and persistence
+ * as the client screen and server block entity are synchronized automatically.
  */
 public interface BlockEntityBehavior {
-
-    /**
-     * Called when the entity is loaded (after construction / deserialization).
-     */
-    default void onLoad(CoreBlockEntity entity, BlockEntityContext ctx) {}
-
-    /**
-     * Called when the block is removed/broken.
-     */
-    default void onRemove(CoreBlockEntity entity, BlockEntityContext ctx) {}
 
     /**
      * Called when the entity must serialize any custom data to JSON (for persistence).

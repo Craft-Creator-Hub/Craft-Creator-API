@@ -8,6 +8,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class Identifier
 {
+    public static final Identifier EMPTY = Identifier.fromMod("empty");
+
     private final String namespace;
     private final String path;
 

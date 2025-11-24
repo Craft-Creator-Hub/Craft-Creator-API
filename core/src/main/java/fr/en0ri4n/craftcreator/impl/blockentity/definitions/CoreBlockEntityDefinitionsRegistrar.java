@@ -23,12 +23,12 @@ public class CoreBlockEntityDefinitionsRegistrar
         // Existing crafting table recipe creator definition
         CoreBlockEntityDefinition craftingTableRC = CoreBlockEntityDefinition.builder(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR)
                 .inventorySize(10)
-                .addBehavior(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR)
+                .setBehavior(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR)
                 .build();
 
         CoreBlockEntityDefinition furnaceRC = CoreBlockEntityDefinition.builder(RecipeCreators.FURNACE_RECIPE_CREATOR)
                 .inventorySize(2)
-                .addBehavior(RecipeCreators.FURNACE_RECIPE_CREATOR)
+                .setBehavior(RecipeCreators.FURNACE_RECIPE_CREATOR)
                 .build();
 
         CoreBlockEntityManager.get().registerDefinition(
