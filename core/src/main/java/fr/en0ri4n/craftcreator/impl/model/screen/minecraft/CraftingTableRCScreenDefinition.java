@@ -32,7 +32,7 @@ public class CraftingTableRCScreenDefinition extends RecipeCreatorContainerScree
     public void initElements()
     {
         super.initElements();
-        addElement(shapeDropdown = new CoreDropdown<>("shape_type", getGuiSize().getX(100), getGuiSize().getY(60), 50, 19, Arrays.stream(CraftingTableRCBehavior.CraftingType.values()).toList(), 0, "", this::setCraftingShape)
+        addElement(shapeDropdown = new CoreDropdown<>("shape_type", getGuiSize().getX(100), getGuiSize().getY(60), 50, 19, false, Arrays.stream(CraftingTableRCBehavior.CraftingType.values()).toList(), 0, "", this::setCraftingShape)
         {
             @Override
             public String getSelectedValueAsString()

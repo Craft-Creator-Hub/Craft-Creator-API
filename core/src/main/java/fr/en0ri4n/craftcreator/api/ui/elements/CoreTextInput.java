@@ -103,8 +103,9 @@ public class CoreTextInput extends CoreUiElement
     public void render(RenderContext ctx, int mouseX, int mouseY, float partialTick)
     {
         // Draw label
-        getRenderAdapter().startScale(ctx, 0.8F, 0.8F);
-        getRenderAdapter().drawText(ctx, "Exp.", getBounds().getX(), getBounds().getY(-getRenderAdapter().getFontHeight() - 2), 0xFFFFFFFF);
+        float scale = 6F / 9F;
+        getRenderAdapter().startScale(ctx, scale, scale);
+        getRenderAdapter().drawText(ctx, getLabel(), getBounds().getScaledX(scale), getBounds().getScaledY((int) (-getRenderAdapter().getFontHeight() * scale) - 2, scale), 0xFFFFFFFF);
         getRenderAdapter().endScale(ctx);
         // Draw border
         getRenderAdapter().drawRect(ctx, getBounds().getX(-1), getBounds().getY(-1), getBounds().getWidth() + 2, getBounds().getHeight() + 2, 0xFF000000);
@@ -112,15 +113,15 @@ public class CoreTextInput extends CoreUiElement
         getRenderAdapter().drawRect(ctx, getBounds().getX(), getBounds().getY(), getBounds().getWidth(), getBounds().getHeight(), 0xFF808080);
         // Draw text or placeholder
         String displayText = value.isEmpty() ? placeholder : value;
-        getRenderAdapter().drawText(ctx, displayText, getBounds().getX(4), getBounds().getVerticalCenter(getRenderAdapter().getFontHeight()), getTextColor());
+        getRenderAdapter().drawText(ctx, displayText, getBounds().getX(1), getBounds().getVerticalCenter(getRenderAdapter().getFontHeight()), getTextColor());
         // draw blinking cursor
         if(isFocused())
         {
             long time = System.currentTimeMillis();
             if((time / 500) % 2 == 0)
             {
-                int cursorX = getBounds().getX(4 + getRenderAdapter().getTextWidth(displayText.substring(0, cursorPosition)));
-                getRenderAdapter().drawRect(ctx, cursorX, getBounds().getY(2), 1, getBounds().getHeight(-4), 0xFFFFFFFF);
+                int cursorX = getBounds().getX(1 + getRenderAdapter().getTextWidth(displayText.substring(0, cursorPosition)));
+                getRenderAdapter().drawRect(ctx, cursorX, getBounds().getY(1), 1, getBounds().getHeight(-2), 0xFFFFFFFF);
             }
         }
     }

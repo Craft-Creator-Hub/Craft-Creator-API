@@ -23,7 +23,7 @@ public abstract class RecipeCreatorContainerScreenDefinition<T extends RecipeCre
     @Override
     public void initElements()
     {
-        addElement(recipeTypeDropdown = new CoreDropdown<>("recipe_type_dropdown", getGuiSize().getX(), getGuiSize().getY(), 20, 20, Arrays.stream(SupportedRecipeExporter.values()).toList(), 0,
+        addElement(recipeTypeDropdown = new CoreDropdown<>("recipe_type_dropdown", getGuiSize().getX(), getGuiSize().getY(), 20, 20, false, Arrays.stream(SupportedRecipeExporter.values()).toList(), 0,
                 "Recipe Type", this::onRecipeTypeChanged) {
             @Override
             public String getSelectedValueAsString()

@@ -2,6 +2,7 @@ package fr.en0ri4n.craftcreator.api.ui.elements;
 
 import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.api.platform.RenderAdapter;
+import fr.en0ri4n.craftcreator.api.platform.UiAdapter;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +27,6 @@ public abstract class CoreUiElement {
     /** tooltip text. */
     private final String tooltip;
 
-    private CoreElementListener<?> elementListener;
-
     /** Convenience: auto-generate a random id. */
     protected CoreUiElement(CoreUiElementType type, int x, int y, int width, int height, String tooltip) {
         this(type, UUID.randomUUID().toString(), CoreBounds.of(x, y, width, height), tooltip);
@@ -46,6 +45,11 @@ public abstract class CoreUiElement {
 
     protected RenderAdapter getRenderAdapter() {
         return CraftCreatorAPI.get().getPlatform().getRenderAdapter();
+    }
+
+    protected UiAdapter<?> getUiAdapter()
+    {
+        return CraftCreatorAPI.get().getPlatform().getUiAdapter();
     }
 
     public abstract boolean mouseClicked(int mouseX, int mouseY, int button);

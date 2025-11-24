@@ -9,8 +9,11 @@ import lombok.Getter;
 import java.util.List;
 
 /**
- * Generic, loader-agnostic recipe model used by core.
- * Represents one datapack recipe.
+ * Recipe model used by core for management.
+ * <p/>
+ * This class is only used for "representation", they are directly deserialized from JSON,
+ * but never serialized back. Serialization is handled by each RecipeSerializer implementation using
+ * block entities & behaviors data.
  */
 @Getter
 @AllArgsConstructor
@@ -29,12 +32,12 @@ public class Recipe
     private final Identifier type;
 
     /**
-     * Inputs (items/fluids/blocks) as generic entries; see your existing RecipeEntry hierarchy.
+     * Inputs (items/fluids/blocks)
      */
     private final List<RecipeEntry> inputs;
 
     /**
-     * Outputs as generic entries.
+     * Outputs (items/fluids/blocks)
      */
     private final List<RecipeEntry> outputs;
 

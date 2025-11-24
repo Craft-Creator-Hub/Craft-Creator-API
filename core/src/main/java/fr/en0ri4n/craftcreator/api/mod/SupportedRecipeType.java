@@ -9,9 +9,7 @@ public enum SupportedRecipeType
 {
     CRAFTING_TABLE_SHAPED("minecraft:crafting_shaped"),
     CRAFTING_TABLE_SHAPELESS("minecraft:crafting_shapeless"),
-    FURNACE("minecraft:smelting"),
-    BLAST_FURNACE("minecraft:blasting"),
-    SMOKER("minecraft:smoking"),
+    FURNACE("craftcreator:furnace"),
     STONECUTTER("minecraft:stonecutting"),
     CAMPFIRE("minecraft:campfire_cooking"),
     SMITHING_TABLE("minecraft:smithing"),

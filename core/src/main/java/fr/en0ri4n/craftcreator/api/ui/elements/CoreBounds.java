@@ -3,15 +3,37 @@ package fr.en0ri4n.craftcreator.api.ui.elements;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class CoreBounds
 {
-    private final int x;
-    private final int y;
-    private final int width;
-    private final int height;
+    private int x;
+    private int y;
+    private int width;
+    private int height;
+
+    public int getScaledX(float scale)
+    {
+        return Math.round(x / scale);
+    }
+
+    public int getScaledY(float scale)
+    {
+        return Math.round(y / scale);
+    }
+
+    public int getScaledX(int offset, float scale)
+    {
+        return Math.round((x + offset) / scale);
+    }
+
+    public int getScaledY(int offset, float scale)
+    {
+        return Math.round((y + offset) / scale);
+    }
 
     public int getX(int offset)
     {

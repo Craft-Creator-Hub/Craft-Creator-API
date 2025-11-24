@@ -1,22 +1,19 @@
 {
-	"format_version": "1.9.0",
-	"credit": "Made with Blockbench",
-	"textures": {
-		"0": "craftcreator:block/furnace_recipe_creator",
-		"particle": "craftcreator:block/furnace_recipe_creator"
-	},
-	"elements": [
-		{
-			"from": [0, 0, 0],
-			"to": [16, 16, 16],
-			"faces": {
-				"north": {"uv": [0, 0, 8, 8], "texture": "#0"},
-				"east": {"uv": [8, 0, 16, 8], "texture": "#0"},
-				"south": {"uv": [8, 0, 16, 8], "texture": "#0"},
-				"west": {"uv": [8, 0, 16, 8], "texture": "#0"},
-				"up": {"uv": [8, 8, 16, 16], "texture": "#0"},
-				"down": {"uv": [0, 0, 8, 8], "texture": "#missing"}
-			}
-		}
-	]
+    "variants": {
+        "facing=east": {
+            "model": "craftcreator:block/furnace_recipe_creator",
+            "y": 90
+        },
+        "facing=north": {
+            "model": "craftcreator:block/furnace_recipe_creator"
+        },
+        "facing=south": {
+            "model": "craftcreator:block/furnace_recipe_creator",
+            "y": 180
+        },
+        "facing=west": {
+            "model": "craftcreator:block/furnace_recipe_creator",
+            "y": 270
+        }
+    }
 }

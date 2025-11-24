@@ -1,15 +1,12 @@
 package fr.en0ri4n.craftcreator.impl.model.screen.minecraft;
 
-import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.RecipeCreators;
 import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
-import fr.en0ri4n.craftcreator.api.ui.elements.CoreBounds;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreButton;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreDropdown;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreTextInput;
-import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
 import fr.en0ri4n.craftcreator.api.ui.screen.RecipeCreatorContainerScreenDefinition;
 import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.FurnaceRCBehavior;
 import fr.en0ri4n.craftcreator.utils.Identifier;
@@ -38,18 +35,19 @@ public class FurnaceRCScreenDefinition extends RecipeCreatorContainerScreenDefin
     public void initElements()
     {
         super.initElements();
-        addElement(furnaceTypeDropdown = new CoreDropdown<>("furnace_type", getGuiSize().getX(100), getGuiSize().getY(60), 50, 19, Arrays.stream(FurnaceRCBehavior.FurnaceType.values()).toList(), 0, "", this::setFurnaceType)
+        addElement(furnaceTypeDropdown = new CoreDropdown<>("furnace_type", getGuiSize().getRight(-22), getGuiSize().getY(), 22, 22, true, Arrays.stream(FurnaceRCBehavior.FurnaceType.values()).toList(), 0, "", this::setFurnaceType)
         {
             @Override
             public String getSelectedValueAsString()
             {
                 return switch(getSelectedValue()) {
-                    case FURNACE -> "Furnace";
-                    case BLAST_FURNACE -> "Blast Furnace";
-                    case SMOKER -> "Smoker";
+                    case FURNACE -> "F";
+                    case BLAST_FURNACE -> "B";
+                    case SMOKER -> "S";
                 };
             }
         });
+        addElement(new CoreTextInput("cooking_time_input", CoreTextInput.TextInputType.INTEGER, getGuiSize().getX(10), getGuiSize().getY(35), 30, 10, translate("screen.minecraft_recipe_creator.smelting.field.cooking_time"), String.valueOf(200), "Ticks", "Time it takes to smelt one item in ticks"));
         addElement(experienceInput = new CoreTextInput("experience_input", CoreTextInput.TextInputType.FLOAT, getGuiSize().getX(10), getGuiSize().getY(60), 30, 10, translate("screen.minecraft_recipe_creator.smelting.field.experience"), String.valueOf(0.5F), "XP", "Experience awarded per item smelted"));
     }
 
@@ -76,8 +74,8 @@ public class FurnaceRCScreenDefinition extends RecipeCreatorContainerScreenDefin
     @Override
     public void renderForeground(RenderContext ctx, int mouseX, int mouseY)
     {
-        CoreBounds bounds = CoreBounds.fromRight(getGuiSize().getRight(), getGuiSize().getY(), 22, 22);
-        CoreScreenDefinition.renderTextureWithBounds(ctx, CoreScreenDefinition.GUI_TEXTURE, bounds, false, false);
-        getCurrentRenderAdapter().drawItem(ctx, new CoreItemStack(getBehavior().getFurnaceType().getItemId(), 1), bounds.getX(3), bounds.getY(3), 1F);
+//        CoreBounds bounds = CoreBounds.fromRight(getGuiSize().getRight(), getGuiSize().getY(), 22, 22);
+//        CoreScreenDefinition.renderTextureWithBounds(ctx, CoreScreenDefinition.GUI_TEXTURE, bounds, false, false);
+        getCurrentRenderAdapter().drawItem(ctx, new CoreItemStack(getBehavior().getFurnaceType().getItemId(), 1), furnaceTypeDropdown.getBounds().getX(3), furnaceTypeDropdown.getBounds().getY(3), 1F);
     }
 }

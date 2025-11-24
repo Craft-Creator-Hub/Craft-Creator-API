@@ -8,7 +8,6 @@ import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.TaggableSlotsBlockEnti
 import fr.en0ri4n.craftcreator.recipe.model.CraftingGrid;
 import fr.en0ri4n.craftcreator.recipe.model.Recipe;
 import fr.en0ri4n.craftcreator.recipe.utils.RecipeEntry;
-import fr.en0ri4n.craftcreator.serialize.JsonSerializer;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 
 import java.util.ArrayList;
@@ -16,8 +15,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class RecipeSerializer implements JsonSerializer<CoreBlockEntity>
+public abstract class RecipeSerializer
 {
+    public abstract JsonObject serialize(CoreBlockEntity value);
+
     protected abstract void processInventory(List<RecipeEntry> entries, List<CoreItemStack> inventory, Map<Integer, Identifier> taggedSlots);
 
     public abstract Recipe deserializeToRecipe(JsonObject in);

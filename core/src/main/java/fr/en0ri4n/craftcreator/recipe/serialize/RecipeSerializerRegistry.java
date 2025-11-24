@@ -36,5 +36,6 @@ public class RecipeSerializerRegistry
     public static void registerAll()
     {
         get().register(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR, SupportedRecipeType.CRAFTING_TABLE_SHAPED, new CraftingTableRecipeSerializer());
+        get().register(RecipeCreators.FURNACE_RECIPE_CREATOR, SupportedRecipeType.FURNACE, new FurnaceRecipeSerializer());
     }
 }

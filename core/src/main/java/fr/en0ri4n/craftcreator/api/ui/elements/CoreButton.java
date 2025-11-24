@@ -1,5 +1,6 @@
 package fr.en0ri4n.craftcreator.api.ui.elements;
 
+import fr.en0ri4n.craftcreator.api.platform.UiAdapter;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
 import lombok.Getter;
@@ -32,6 +33,8 @@ public class CoreButton extends CoreUiElement
     public boolean mouseClicked(int mouseX, int mouseY, int button)
     {
         if(!isMouseOver(mouseX, mouseY) || !enabled) return false;
+
+        getUiAdapter().playSound(UiAdapter.UiSound.BUTTON_CLICK);
 
         if(onPress != null)
             onPress.run();

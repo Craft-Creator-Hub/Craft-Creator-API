@@ -1,6 +1,5 @@
 package fr.en0ri4n.craftcreator.api.platform;
 
-import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
 import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreUiElement;
 
@@ -15,4 +14,11 @@ public interface UiAdapter<T> {
     boolean isCtrlKeyDown();
 
     T createWidget(CoreUiElement element);
+
+    void playSound(UiSound sound);
+
+    enum UiSound
+    {
+        BUTTON_CLICK
+    }
 }

@@ -87,15 +87,6 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
         return null;
     }
 
-    /**
-     * Not implemented because recipes are not deserialized into block entities.
-     */
-    @Override
-    public CoreBlockEntity deserialize(JsonObject element)
-    {
-        return null;
-    }
-
     @Override
     public Recipe deserializeToRecipe(JsonObject element)
     {

@@ -8,6 +8,9 @@ import fr.en0ri4n.craftcreator.platform.ui.screen.ForgeScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.sounds.SoundEvents;
 
 public class ForgeUiAdapter implements UiAdapter<Widget>
 {
@@ -35,5 +38,17 @@ public class ForgeUiAdapter implements UiAdapter<Widget>
     public Widget createWidget(CoreUiElement element)
     {
         return new ForgeWidget(element);
+    }
+
+    @Override
+    public void playSound(UiSound sound)
+    {
+        SoundInstance instance;
+        switch(sound)
+        {
+            case BUTTON_CLICK -> instance = SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1F);
+            default -> throw new IllegalArgumentException("Unknown sound: " + sound);
+        }
+        mc.getSoundManager().play(instance);
     }
 }
