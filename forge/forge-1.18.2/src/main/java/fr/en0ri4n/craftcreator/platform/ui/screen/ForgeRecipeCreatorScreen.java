@@ -59,12 +59,15 @@ public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecip
     protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY) {}
 
     @Override
+    protected void renderLabels(PoseStack pPoseStack, int pMouseX, int pMouseY) {}
+
+    @Override
     public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks)
     {
-        model.getScreenDefinition().renderBackground(ForgeRenderContext.of(poseStack, partialTicks));
+        model.getScreenDefinition().renderBackground(ForgeRenderContext.of(poseStack));
         super.render(poseStack, mouseX, mouseY, partialTicks);
-        model.getScreenDefinition().render(ForgeRenderContext.of(poseStack, partialTicks), mouseX, mouseY);
-        model.getScreenDefinition().renderForeground(ForgeRenderContext.of(poseStack, partialTicks), mouseX, mouseY);
+        model.getScreenDefinition().render(ForgeRenderContext.of(poseStack), mouseX, mouseY);
+        model.getScreenDefinition().renderForeground(ForgeRenderContext.of(poseStack), mouseX, mouseY);
         this.renderTooltip(poseStack, mouseX, mouseY);
     }
 }

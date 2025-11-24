@@ -1,4 +1,4 @@
-package fr.en0ri4n.craftcreator.api.init;
+package fr.en0ri4n.craftcreator.impl;
 
 import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.RecipeCreators;
@@ -48,12 +48,17 @@ public class InitManager {
                 ))
                 .build();
 
+        CoreBlockDef furnaceBlock = CoreBlockDef.builder(RecipeCreators.FURNACE_RECIPE_CREATOR)
+                .facing(FacingType.HORIZONTAL)
+                .build();
+
 
         registerBlockItem(CoreBlockItemDef.of(craftingTableBlock, itemOf(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR)));
+        registerBlockItem(CoreBlockItemDef.of(furnaceBlock, itemOf(RecipeCreators.FURNACE_RECIPE_CREATOR)));
     }
 
     private CoreItemDef itemOf(Identifier id) {
-        return CoreItemDef.builder(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR)
+        return CoreItemDef.builder(id)
                 .maxStackSize(10)
                 .build();
     }

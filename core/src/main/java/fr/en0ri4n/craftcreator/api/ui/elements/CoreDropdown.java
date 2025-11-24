@@ -5,6 +5,7 @@ import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
 import lombok.Getter;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Core representation of a dropdown (combo box).
@@ -18,9 +19,9 @@ public class CoreDropdown<T> extends CoreUiElement
      * Index into options; -1 means "none selected".
      */
     private int selectedIndex;
-    private final Runnable onChange;
+    private final Consumer<T> onChange;
 
-    public CoreDropdown(String id, int x, int y, int width, int height, List<T> options, int selectedIndex, String tooltip, Runnable onChange)
+    public CoreDropdown(String id, int x, int y, int width, int height, List<T> options, int selectedIndex, String tooltip, Consumer<T> onChange)
     {
         super(CoreUiElementType.DROPDOWN, id, x, y, width, height, tooltip);
         this.options = List.copyOf(options);
@@ -44,8 +45,7 @@ public class CoreDropdown<T> extends CoreUiElement
     {
         this.selectedIndex = selectedIndex;
         if(onChange != null)
-            onChange.run();
-        sendUpdate();
+            onChange.accept(getSelectedValue());
     }
 
     public void setSelectedValue(T value)
@@ -54,30 +54,35 @@ public class CoreDropdown<T> extends CoreUiElement
         setSelectedIndex(index);
     }
 
-    public void onClick(int mouseX, int mouseY)
+    @Override
+    public boolean mouseClicked(int mouseX, int mouseY, int button)
     {
-        if(!isMouseOver(mouseX, mouseY)) return;
+        if(!isMouseOver(mouseX, mouseY)) return false;
 
         int size = getOptions().size();
-        if(size == 0) return;
+        if(size == 0) return false;
 
         int current = getSelectedIndex();
         int next = (current + 1) % size;
         setSelectedIndex(next);
+
+        return true;
     }
 
     @Override
-    public void render(RenderContext ctx, int mouseX, int mouseY)
+    public void render(RenderContext ctx, int mouseX, int mouseY, float pPartialTick)
     {
-        int actualWidth = Math.max(this.width, getRenderAdapter().getTextWidth(this.getSelectedValueAsString()) + 10);
+        int actualWidth = Math.max(getBounds().getWidth(), getRenderAdapter().getTextWidth(this.getSelectedValueAsString()) + 10);
 
-        int bgColor = this.isMouseOver(mouseX, mouseY) ? 0xFF777777 : 0xFF555555;
-        CoreScreenDefinition.renderTextureWithSize(ctx, CoreScreenDefinition.GUI_TEXTURE, this.x, this.y, actualWidth, this.height, this.isMouseOver(mouseX, mouseY), false);
+        CoreScreenDefinition.renderTextureWithSize(ctx, CoreScreenDefinition.GUI_TEXTURE,
+                getBounds().getX(), getBounds().getY(),
+                actualWidth, getBounds().getHeight(),
+                isMouseOver(mouseX, mouseY), false);
 
         // Draw label centered
         int color = 0xFFFFFFFF;
-        int textX = this.x + (actualWidth - getRenderAdapter().getTextWidth(this.getSelectedValueAsString())) / 2;
-        int textY = this.y + (this.height - getRenderAdapter().getFontHeight()) / 2;
+        int textX = getBounds().getX((actualWidth - getRenderAdapter().getTextWidth(this.getSelectedValueAsString())) / 2);
+        int textY = getBounds().getVerticalCenter(getRenderAdapter().getFontHeight());
         getRenderAdapter().drawText(ctx, getSelectedValueAsString(), textX, textY, color);
     }
 }

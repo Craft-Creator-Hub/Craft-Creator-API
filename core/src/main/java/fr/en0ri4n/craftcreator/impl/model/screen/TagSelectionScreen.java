@@ -39,7 +39,7 @@ public class TagSelectionScreen extends CoreScreenDefinition<TagSelectionScreen.
     public void renderBackground(RenderContext ctx)
     {
         super.renderBackground(ctx);
-        renderTextureWithSize(ctx, GUI_TEXTURE, getGuiLeft(), getGuiTop(), 176, 166, false, false);
+        renderTextureWithSize(ctx, GUI_TEXTURE, getGuiSize().getX(), getGuiSize().getY(), 176, 166, false, false);
     }
 
     @Override
@@ -47,19 +47,16 @@ public class TagSelectionScreen extends CoreScreenDefinition<TagSelectionScreen.
     {
         float scale = 2F;
         int itemWidth = Math.round(16 * scale);
-        getCurrentRenderAdapter().drawItem(ctx, clickedStack, getGuiLeft() + (getGuiSize().getFirst() - itemWidth) / 2, getGuiTop() + getGuiSize().getSecond() - 36, scale);
+        getCurrentRenderAdapter().drawItem(ctx, clickedStack, getGuiSize().getHorizontalCenter(itemWidth), getGuiSize().getBottom(-36), scale);
     }
 
     @Override
-    public void init(WidgetRenderer renderer)
+    public void initElements()
     {
-        cleanScreen();
         // List of tags
-        addElement(tagListElement = new CoreList(getGuiLeft() + 10, getGuiTop() + 10, getGuiSize().getFirst() - 20, getGuiSize().getSecond() - 50, 12, List.of()));
-        addElement(new CoreButton("back_button", getGuiLeft() + 10, getGuiTop() + 135, 50, 20, "Back", this::goBack, "Return to the previous screen"));
-        addElement(new CoreButton("apply_button", getGuiLeft() + 115, getGuiTop() + 135, 50, 20, "Apply", this::apply, "Apply selected tag to the item"));
-
-        super.init(renderer);
+        addElement(tagListElement = new CoreList(getGuiSize().getX(10), getGuiSize().getY(10), getGuiSize().getWidth(-20), getGuiSize().getHeight(-50), 12, List.of()));
+        addElement(new CoreButton("back_button", getGuiSize().getX(10), getGuiSize().getY(135), 50, 20, "Back", this::goBack, "Return to the previous screen"));
+        addElement(new CoreButton("apply_button", getGuiSize().getX(115), getGuiSize().getY(135), 50, 20, "Apply", this::apply, "Apply selected tag to the item"));
     }
 
     private void apply()

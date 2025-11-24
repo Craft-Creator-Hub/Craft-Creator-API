@@ -69,8 +69,8 @@ public abstract class TaggableSlotsContainerScreenDefinition<T extends TaggableS
 
     private void renderTagOverlay(RenderContext ctx, SlotDescriptor slot)
     {
-        int x = getGuiLeft() + slot.getX();
-        int y = getGuiTop() + slot.getY();
+        int x = getGuiSize().getX(slot.getX());
+        int y = getGuiSize().getY(slot.getY());
         Identifier tag = getScreenData().getBehavior().getTaggedSlots().get(slot.getIndex());
         getCurrentRenderAdapter().drawRect(ctx, x, y, 16, 16, getColorForTag(tag.toString()));
     }

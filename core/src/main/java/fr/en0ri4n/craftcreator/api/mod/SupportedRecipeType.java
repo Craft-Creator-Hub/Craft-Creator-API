@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum SupportedRecipeTypes
+public enum SupportedRecipeType
 {
     CRAFTING_TABLE_SHAPED("minecraft:crafting_shaped"),
     CRAFTING_TABLE_SHAPELESS("minecraft:crafting_shapeless"),
@@ -15,10 +15,7 @@ public enum SupportedRecipeTypes
     STONECUTTER("minecraft:stonecutting"),
     CAMPFIRE("minecraft:campfire_cooking"),
     SMITHING_TABLE("minecraft:smithing"),
-    LOOM("minecraft:loom"),
-    CARTOGRAPHY_TABLE("minecraft:cartography"),
-    GRINDSTONE("minecraft:grinding"),
-    BREWING_STAND("minecraft:brewing");
+    GRINDSTONE("minecraft:grinding");
 
     private final String id;
 }

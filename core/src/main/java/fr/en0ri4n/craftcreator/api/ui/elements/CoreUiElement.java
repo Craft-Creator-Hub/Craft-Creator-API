@@ -21,12 +21,7 @@ public abstract class CoreUiElement {
     private final String id;
 
     /** X/Y position in logical screen coordinates. */
-    protected final int x;
-    protected final int y;
-
-    /** Width/height in logical units (pixels or grid units, up to you). */
-    protected final int width;
-    protected final int height;
+    protected final CoreBounds bounds;
 
     /** tooltip text. */
     private final String tooltip;
@@ -35,29 +30,27 @@ public abstract class CoreUiElement {
 
     /** Convenience: auto-generate a random id. */
     protected CoreUiElement(CoreUiElementType type, int x, int y, int width, int height, String tooltip) {
-        this(type, UUID.randomUUID().toString(), x, y, width, height, tooltip);
+        this(type, UUID.randomUUID().toString(), CoreBounds.of(x, y, width, height), tooltip);
     }
 
-    public void setListener(CoreElementListener<?> listener) {
-        elementListener = listener;
-    }
-
-    public void removeListener(CoreElementListener<?> listener) {
-        elementListener = null;
-    }
-
-    public void sendUpdate() {
-        if(elementListener != null)
-            elementListener.update();
+    public CoreUiElement(CoreUiElementType type, String id, int x, int y, int width, int height, String tooltip)
+    {
+        this(type, id, CoreBounds.of(x, y, width, height), tooltip);
     }
 
     protected boolean isMouseOver(int mouseX, int mouseY) {
-        return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
+        return getBounds().contains(mouseX, mouseY);
     }
 
-    public abstract void render(RenderContext ctx, int mouseX, int mouseY);
+    public abstract void render(RenderContext ctx, int mouseX, int mouseY, float partialTick);
 
     protected RenderAdapter getRenderAdapter() {
         return CraftCreatorAPI.get().getPlatform().getRenderAdapter();
     }
+
+    public abstract boolean mouseClicked(int mouseX, int mouseY, int button);
+
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) { return false; }
+
+    public boolean charTyped(char codePoint, int modifiers) { return false; }
 }

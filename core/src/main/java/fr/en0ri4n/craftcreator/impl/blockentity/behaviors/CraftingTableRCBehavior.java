@@ -9,7 +9,6 @@ import lombok.Setter;
 @Setter
 public class CraftingTableRCBehavior extends RecipeCreatorBlockEntityBehavior
 {
-
     public static final String CRAFTING_TYPE_KEY = "crafting_type";
 
     private CraftingType craftingType = CraftingType.SHAPED;

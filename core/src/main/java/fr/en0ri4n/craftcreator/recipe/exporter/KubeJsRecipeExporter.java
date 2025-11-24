@@ -3,7 +3,7 @@ package fr.en0ri4n.craftcreator.recipe.exporter;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.CraftCreatorAPI;
-import fr.en0ri4n.craftcreator.api.mod.SupportedMods;
+import fr.en0ri4n.craftcreator.api.mod.SupportedMod;
 import fr.en0ri4n.craftcreator.api.platform.Platform;
 import fr.en0ri4n.craftcreator.recipe.model.Recipe;
 import fr.en0ri4n.craftcreator.recipe.utils.RecipeRequestFeedback;
@@ -28,7 +28,7 @@ public class KubeJsRecipeExporter extends AdvancedModRecipeExporter
     @Override
     public void loadInternal()
     {
-        if(!CraftCreatorAPI.get().getPlatform().getServices().IsModLoaded(SupportedMods.KUBEJS))
+        if(!CraftCreatorAPI.get().getPlatform().getServices().IsModLoaded(SupportedMod.KUBEJS))
         {
             CraftCreatorAPI.get().getPlatform().getLogger().warn("KubeJS not detected, not loading KubeJsRecipeExporter");
             return;

@@ -39,14 +39,14 @@ public class ForgeScreen extends Screen implements WidgetRenderer
     @Override
     public void renderBackground(PoseStack pPoseStack)
     {
-        screenDefinition.renderBackground(ForgeRenderContext.of(pPoseStack, 0.0F));
+        screenDefinition.renderBackground(ForgeRenderContext.of(pPoseStack));
     }
 
     @Override
     public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick)
     {
-        screenDefinition.renderBackground(ForgeRenderContext.of(pPoseStack, pPartialTick));
+        screenDefinition.renderBackground(ForgeRenderContext.of(pPoseStack));
         super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
-        screenDefinition.render(ForgeRenderContext.of(pPoseStack, pPartialTick), pMouseX, pMouseY);
+        screenDefinition.render(ForgeRenderContext.of(pPoseStack), pMouseX, pMouseY);
     }
 }

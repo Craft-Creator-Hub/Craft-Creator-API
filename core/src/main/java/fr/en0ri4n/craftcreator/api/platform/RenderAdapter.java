@@ -5,8 +5,6 @@ import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import fr.en0ri4n.craftcreator.utils.Pair;
 
-import java.util.function.Consumer;
-
 
 /**
  * Loader-agnostic render adapter. All rendering calls receive a core RenderContext instance.
@@ -32,7 +30,11 @@ public interface RenderAdapter
                      int textureWidth, int textureHeight,
                      int textureX, int textureY, int widthInTexture, int heightInTexture);
 
-    void drawText(RenderContext ctx, String text, int x, int y, int color);
+    void drawText(RenderContext ctx, String text, boolean shadow, int x, int y, int color);
+
+    default void drawText(RenderContext ctx, String text, int x, int y, int color) {
+        drawText(ctx, text, true, x, y, 0xFFFFFFFF);
+    }
 
     void drawRect(RenderContext ctx, int x, int y, int width, int height, int argb);
 
@@ -42,5 +44,7 @@ public interface RenderAdapter
 
     int getFontHeight();
 
-    void scale(RenderContext ctx, Consumer<RenderContext> renderCall, float scaleX, float scaleY);
+    void startScale(RenderContext ctx, float scaleX, float scaleY);
+
+    void endScale(RenderContext ctx);
 }

@@ -2,13 +2,10 @@ package fr.en0ri4n.craftcreator.impl.model.screen.minecraft;
 
 import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.RecipeCreators;
-import fr.en0ri4n.craftcreator.api.net.MakeRecipeRequestData;
-import fr.en0ri4n.craftcreator.api.net.UiUpdateData;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreButton;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreDropdown;
 import fr.en0ri4n.craftcreator.api.ui.screen.RecipeCreatorContainerScreenDefinition;
-import fr.en0ri4n.craftcreator.api.ui.screen.WidgetRenderer;
 import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.CraftingTableRCBehavior;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 
@@ -22,7 +19,7 @@ public class CraftingTableRCScreenDefinition extends RecipeCreatorContainerScree
 
     public CraftingTableRCScreenDefinition(ContainerModel<CraftingTableRCBehavior> parent)
     {
-        super(parent, new CraftingTableRCBehavior(), RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR, "Crafting Table Recipe Creator"); // TODO: localization
+        super(parent, new CraftingTableRCBehavior(), RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR, CraftCreatorAPI.translate("craftcreator.screen.minecraft_recipe_creator.crafting.title"));
     }
 
     @Override
@@ -32,10 +29,10 @@ public class CraftingTableRCScreenDefinition extends RecipeCreatorContainerScree
     }
 
     @Override
-    public void init(WidgetRenderer renderer)
+    public void initElements()
     {
-        cleanScreen();
-        addElement(shapeDropdown = new CoreDropdown<>("shape_type", getGuiLeft() + 100, getGuiTop() + 60, 50, 19, Arrays.stream(CraftingTableRCBehavior.CraftingType.values()).toList(), 0, "", this::setCraftingShape)
+        super.initElements();
+        addElement(shapeDropdown = new CoreDropdown<>("shape_type", getGuiSize().getX(100), getGuiSize().getY(60), 50, 19, Arrays.stream(CraftingTableRCBehavior.CraftingType.values()).toList(), 0, "", this::setCraftingShape)
         {
             @Override
             public String getSelectedValueAsString()
@@ -46,25 +43,24 @@ public class CraftingTableRCScreenDefinition extends RecipeCreatorContainerScree
                 };
             }
         });
-        addElement(new CoreButton("export", getGuiLeft() + 120, getGuiTop() + 10, 40, 19, "Save", this::exportRecipe, "Export the currently selected recipes"));
-        super.init(renderer);
-    }
-
-    private void setCraftingShape()
-    {
-        getScreenData().getBehavior().setCraftingType(shapeDropdown.getSelectedValue());
-        sendUpdates();
-    }
-
-    private void exportRecipe()
-    {
-        CraftCreatorAPI.get().getPlatform().getNetworkInteractionAdapter().sendMakeRecipeRequestToServer(new MakeRecipeRequestData(getParentContainerModel().getBlockEntityPos(), getId()));
     }
 
     @Override
-    public void updateScreen(UiUpdateData data)
+    protected CoreButton getExportButton()
     {
-        super.updateScreen(data);
-        shapeDropdown.setSelectedValue(getScreenData().getBehavior().getCraftingType());
+        return new CoreButton("export", getGuiSize().getX(120), getGuiSize().getY(10), 40, 19, "Save", this::exportRecipe, "Export the currently selected recipes");
+    }
+
+    private void setCraftingShape(CraftingTableRCBehavior.CraftingType type)
+    {
+        getScreenData().getBehavior().setCraftingType(type);
+        sendUpdates();
+    }
+
+    @Override
+    protected void onDataUpdated(CraftingTableRCBehavior behavior)
+    {
+        super.onDataUpdated(behavior);
+        shapeDropdown.setSelectedValue(behavior.getCraftingType());
     }
 }

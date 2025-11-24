@@ -2,9 +2,10 @@ package fr.en0ri4n.craftcreator.platform;
 
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockPos;
 import fr.en0ri4n.craftcreator.api.item.ItemStackAdapter;
-import fr.en0ri4n.craftcreator.api.mod.SupportedModLoaders;
-import fr.en0ri4n.craftcreator.api.mod.SupportedMods;
+import fr.en0ri4n.craftcreator.api.mod.SupportedModLoader;
+import fr.en0ri4n.craftcreator.api.mod.SupportedMod;
 import fr.en0ri4n.craftcreator.api.platform.*;
+import fr.en0ri4n.craftcreator.api.translations.TranslationProvider;
 import fr.en0ri4n.craftcreator.platform.adapters.*;
 import fr.en0ri4n.craftcreator.platform.item.ForgeItemStackAdapter;
 import fr.en0ri4n.craftcreator.platform.item.ForgeTagProvider;
@@ -68,7 +69,7 @@ public class Forge1182Platform implements Platform {
         }
 
         @Override
-        public boolean IsModLoaded(SupportedMods mod) {
+        public boolean IsModLoaded(SupportedMod mod) {
             return ModList.get().isLoaded(mod.getModId());
         }
     };
@@ -112,8 +113,8 @@ public class Forge1182Platform implements Platform {
     private final ForgeTagProvider tagProvider = new ForgeTagProvider();
 
     @Override
-    public SupportedModLoaders getLoader() {
-        return SupportedModLoaders.FORGE;
+    public SupportedModLoader getLoader() {
+        return SupportedModLoader.FORGE;
     }
 
     @Override
@@ -202,5 +203,11 @@ public class Forge1182Platform implements Platform {
     public ForgeTagProvider getTagProvider()
     {
         return tagProvider;
+    }
+
+    @Override
+    public TranslationProvider getTranslationProvider()
+    {
+        return ForgeTranslationProvider.get();
     }
 }

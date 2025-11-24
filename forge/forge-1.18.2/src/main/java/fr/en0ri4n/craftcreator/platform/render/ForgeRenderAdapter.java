@@ -10,6 +10,7 @@ import fr.en0ri4n.craftcreator.platform.item.ForgeItemStackAdapter;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import fr.en0ri4n.craftcreator.utils.Pair;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.resources.ResourceLocation;
@@ -17,7 +18,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Objects;
-import java.util.function.Consumer;
 
 public class ForgeRenderAdapter implements RenderAdapter
 {
@@ -77,7 +77,14 @@ public class ForgeRenderAdapter implements RenderAdapter
     public void drawText(RenderContext ctx, String text, int x, int y, int color)
     {
         ForgeRenderContext forgeRenderContext = ForgeRenderContext.from(ctx);
-        Screen.drawString(forgeRenderContext.poseStack(), mc.font, text, x, y, color);
+        GuiComponent.drawString(forgeRenderContext.poseStack(), mc.font, text, x, y, color);
+    }
+
+    @Override
+    public void drawText(RenderContext ctx, String text, boolean shadow, int x, int y, int color)
+    {
+        ForgeRenderContext forgeRenderContext = ForgeRenderContext.from(ctx);
+        mc.font.drawShadow(forgeRenderContext.poseStack(), text, x, y, color);
     }
 
     @Override
@@ -98,12 +105,17 @@ public class ForgeRenderAdapter implements RenderAdapter
     }
 
     @Override
-    public void scale(RenderContext ctx, Consumer<RenderContext> renderCall, float scaleX, float scaleY)
+    public void startScale(RenderContext ctx, float scaleX, float scaleY)
     {
         ForgeRenderContext forgeRenderContext = ForgeRenderContext.from(ctx);
         forgeRenderContext.poseStack().pushPose();
         forgeRenderContext.poseStack().scale(scaleX, scaleY, 1.0F);
-        renderCall.accept(forgeRenderContext);
+    }
+
+    @Override
+    public void endScale(RenderContext ctx)
+    {
+        ForgeRenderContext forgeRenderContext = ForgeRenderContext.from(ctx);
         forgeRenderContext.poseStack().popPose();
     }
 

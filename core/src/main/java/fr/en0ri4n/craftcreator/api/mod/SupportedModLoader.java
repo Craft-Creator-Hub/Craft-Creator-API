@@ -3,7 +3,8 @@ package fr.en0ri4n.craftcreator.api.mod;
 import lombok.Getter;
 
 @Getter
-public enum SupportedModLoaders {
+public enum SupportedModLoader
+{
     FORGE("forge", "Forge"),
     FABRIC("fabric", "Fabric"),
     NEOFORGE("neoforge", "NeoForge"),;
@@ -11,7 +12,7 @@ public enum SupportedModLoaders {
     private final String modLoaderId;
     private final String modLoaderName;
 
-    SupportedModLoaders(String modLoaderId, String modLoaderName) {
+    SupportedModLoader(String modLoaderId, String modLoaderName) {
         this.modLoaderId = modLoaderId;
         this.modLoaderName = modLoaderName;
     }

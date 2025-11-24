@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntity;
 import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
-import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeTypes;
+import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeType;
 import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.CraftingTableRCBehavior;
 import fr.en0ri4n.craftcreator.recipe.model.CraftingGrid;
 import fr.en0ri4n.craftcreator.recipe.model.Recipe;
@@ -104,11 +104,11 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
         if(element.has("type"))
         {
             String type = element.get("type").getAsString();
-            if(type.equals(SupportedRecipeTypes.CRAFTING_TABLE_SHAPED.getId()))
+            if(type.equals(SupportedRecipeType.CRAFTING_TABLE_SHAPED.getId()))
             {
                 return deserializeShapedRecipe(element);
             }
-            else if(type.equals(SupportedRecipeTypes.CRAFTING_TABLE_SHAPELESS.getId()))
+            else if(type.equals(SupportedRecipeType.CRAFTING_TABLE_SHAPELESS.getId()))
             {
                 return deserializeShapelessRecipe(element);
             }
@@ -252,7 +252,7 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
     {
         JsonObject root = new JsonObject();
         root.addProperty("id", result.getId().getPath() + "_shaped_recipe_" + UUID.randomUUID());
-        root.addProperty("type", SupportedRecipeTypes.CRAFTING_TABLE_SHAPED.getId());
+        root.addProperty("type", SupportedRecipeType.CRAFTING_TABLE_SHAPED.getId());
 
         PatternAndKey pk = buildPatternAndKey(grid);
         root.add("pattern", pk.pattern);
@@ -274,7 +274,7 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
     {
         JsonObject root = new JsonObject();
         root.addProperty("id", output.getId().getPath() + "_shapeless_recipe." + UUID.randomUUID());
-        root.addProperty("type", SupportedRecipeTypes.CRAFTING_TABLE_SHAPELESS.getId());
+        root.addProperty("type", SupportedRecipeType.CRAFTING_TABLE_SHAPELESS.getId());
 
         JsonArray ingredients = new JsonArray();
         for(RecipeEntry entry : inputs.getEntries())

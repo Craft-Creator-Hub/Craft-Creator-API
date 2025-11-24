@@ -1,4 +1,17 @@
 {
+  "craftcreator.screen.minecraft_recipe_creator.smelting.field.experience": "Exp. :",
+  "craftcreator.screen.minecraft_recipe_creator.smelting.field.cooking_time": "Time :",
+
+  "craftcreator.screen.minecraft_recipe_creator.crafting.title": "Crafting Table Recipe Creator",
+  "craftcreator.screen.minecraft_recipe_creator.smelting.title": "Smelting Recipe Creator",
+
+
+
+
+
+
+
+
 	"itemGroup.craftcreator": "§lCraft Creator",
 
 	"key.categories.craft_creator": "Craft Creator",
@@ -47,14 +60,7 @@
 
 	"craftcreator.container.minecraft.furnace.fuel": "§cFire Egg §r§7§o(don't ask why)",
 
-	"craftcreator.screen.minecraft_recipe_creator_screen.field.experience": "Exp. :",
-	"craftcreator.screen.minecraft_recipe_creator_screen.field.cooking_time": "Time :",
-
-	"craftcreator.screen.minecraft_recipe_creator.crafting.title": "Crafting Table Recipe Creator",
 	"craftcreator.screen.minecraft_recipe_creator.stonecutting.title": "Stone Cutter Recipe Creator",
-	"craftcreator.screen.minecraft_recipe_creator.smelting.title": "Furnace Recipe Creator",
-	"craftcreator.screen.minecraft_recipe_creator.blasting.title": "Blast Furnace Recipe Creator",
-	"craftcreator.screen.minecraft_recipe_creator.smoking.title": "Smoker Recipe Creator",
 	"craftcreator.screen.minecraft_recipe_creator.campfire_cooking.title": "Campfire Recipe Creator",
 	"craftcreator.screen.minecraft_recipe_creator.smithing.title": "Smithing Recipe Creator",
 

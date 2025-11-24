@@ -1,6 +1,6 @@
 package fr.en0ri4n.craftcreator.recipe.exporter;
 
-import fr.en0ri4n.craftcreator.api.mod.SupportedSerializationTypes;
+import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeExporter;
 import lombok.Getter;
 
 import java.nio.file.Path;
@@ -13,14 +13,14 @@ public class RecipeExporterRegistry
     private static final RecipeExporterRegistry INSTANCE = new RecipeExporterRegistry();
     public static RecipeExporterRegistry get() { return INSTANCE; }
 
-    private final Map<SupportedSerializationTypes, ModRecipeExporter> recipeExporters = new HashMap<>();
+    private final Map<SupportedRecipeExporter, ModRecipeExporter> recipeExporters = new HashMap<>();
 
-    private void registerExporter(SupportedSerializationTypes mod, ModRecipeExporter exporter)
+    private void registerExporter(SupportedRecipeExporter mod, ModRecipeExporter exporter)
     {
         recipeExporters.put(mod, exporter);
     }
 
-    public ModRecipeExporter getExporter(SupportedSerializationTypes mod)
+    public ModRecipeExporter getExporter(SupportedRecipeExporter mod)
     {
         return recipeExporters.get(mod);
     }
@@ -44,7 +44,7 @@ public class RecipeExporterRegistry
 
     public static void registerAll()
     {
-        get().registerExporter(SupportedSerializationTypes.MINECRAFT_DATAPACK, new DatapackRecipeExporter());
-        get().registerExporter(SupportedSerializationTypes.KUBE_JS, new KubeJsRecipeExporter());
+        get().registerExporter(SupportedRecipeExporter.MINECRAFT_DATAPACK, new DatapackRecipeExporter());
+        get().registerExporter(SupportedRecipeExporter.KUBE_JS, new KubeJsRecipeExporter());
     }
 }

@@ -14,5 +14,6 @@ public class CoreBlockEntityBehaviorsRegistrar
     public static void init()
     {
         CoreBlockEntityManager.get().registerBehavior(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR, CraftingTableRCBehavior::new);
+        CoreBlockEntityManager.get().registerBehavior(RecipeCreators.FURNACE_RECIPE_CREATOR, FurnaceRCBehavior::new);
     }
 }

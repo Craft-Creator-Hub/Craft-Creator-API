@@ -25,6 +25,12 @@ public class CoreBlockEntityManager {
 
     public static CoreBlockEntityManager get() { return INSTANCE; }
 
+    public synchronized void registerDefinition(CoreBlockEntityDefinition... defs) {
+        for (CoreBlockEntityDefinition def : defs) {
+            registerDefinition(def);
+        }
+    }
+
     public synchronized void registerDefinition(CoreBlockEntityDefinition def) {
         checkNotLocked();
         definitions.put(def.getId().toString(), def);

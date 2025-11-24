@@ -2,10 +2,11 @@ package fr.en0ri4n.craftcreator.api.platform;
 
 import fr.en0ri4n.craftcreator.api.item.ItemStackAdapter;
 import fr.en0ri4n.craftcreator.api.item.tag.TagProvider;
-import fr.en0ri4n.craftcreator.api.mod.SupportedModLoaders;
+import fr.en0ri4n.craftcreator.api.mod.SupportedModLoader;
+import fr.en0ri4n.craftcreator.api.translations.TranslationProvider;
 
 public interface Platform {
-    SupportedModLoaders getLoader();          // "Forge", "Fabric", "NeoForge", etc.
+    SupportedModLoader getLoader();          // "Forge", "Fabric", "NeoForge", etc.
     String getMinecraftVersion();    // "1.18.2", "1.20.1", etc.
 
     boolean isClient();
@@ -34,4 +35,6 @@ public interface Platform {
     NetworkInteractionAdapter<?> getNetworkInteractionAdapter();
 
     TagProvider getTagProvider();
+
+    TranslationProvider getTranslationProvider();
 }

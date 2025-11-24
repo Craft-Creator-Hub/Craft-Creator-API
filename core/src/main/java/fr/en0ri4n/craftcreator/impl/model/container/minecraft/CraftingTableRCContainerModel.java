@@ -9,12 +9,12 @@ import fr.en0ri4n.craftcreator.impl.model.screen.minecraft.CraftingTableRCScreen
 import lombok.Getter;
 
 @Getter
-public class CraftingTableRecipeCreatorContainerModel extends ContainerModel<CraftingTableRCBehavior>
+public class CraftingTableRCContainerModel extends ContainerModel<CraftingTableRCBehavior>
 {
     private final ContainerLayout layout;
     private final CraftingTableRCScreenDefinition screen;
 
-    public CraftingTableRecipeCreatorContainerModel()
+    public CraftingTableRCContainerModel()
     {
         ContainerLayout layout = new ContainerLayout();
         int idx = 0;

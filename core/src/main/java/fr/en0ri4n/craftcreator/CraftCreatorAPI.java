@@ -1,13 +1,12 @@
 package fr.en0ri4n.craftcreator;
 
 import fr.en0ri4n.craftcreator.api.CCReferences;
-import fr.en0ri4n.craftcreator.api.init.InitManager;
+import fr.en0ri4n.craftcreator.impl.InitManager;
 import fr.en0ri4n.craftcreator.api.platform.Platform;
 import fr.en0ri4n.craftcreator.impl.blockentity.definitions.CoreBlockEntityDefinitionsRegistrar;
 import fr.en0ri4n.craftcreator.impl.model.ContainerModels;
 import fr.en0ri4n.craftcreator.recipe.exporter.RecipeExporterRegistry;
 import fr.en0ri4n.craftcreator.recipe.serialize.RecipeSerializerRegistry;
-import fr.en0ri4n.craftcreator.serialize.SerializerRegistry;
 import fr.en0ri4n.craftcreator.utils.CoreLogger;
 import fr.en0ri4n.craftcreator.utils.CraftCreatorException;
 import lombok.AccessLevel;
@@ -54,11 +53,8 @@ public class CraftCreatorAPI {
                 platform.getMinecraftVersion(),
                 platform.getClass().getName()));
 
-        // register serializers
-        SerializerRegistry.registerAll();
-
         // register recipe serializers
-        RecipeSerializerRegistry.register();
+        RecipeSerializerRegistry.registerAll();
 
         // register exporters
         RecipeExporterRegistry.registerAll();
@@ -73,5 +69,9 @@ public class CraftCreatorAPI {
         ContainerModels.get().registerAll();
 
         CraftCreatorAPI.LOGGER.info("CraftCreatorAPI[%s][%s-%s] initialized successfully.".formatted(ApiReferences.VERSION, platform.getLoader().getModLoaderName(), platform.getMinecraftVersion()));
+    }
+
+    public static String translate(String key, Object... args) {
+        return get().getPlatform().getTranslationProvider().translate(CCReferences.MOD_ID + "." + key, args);
     }
 }

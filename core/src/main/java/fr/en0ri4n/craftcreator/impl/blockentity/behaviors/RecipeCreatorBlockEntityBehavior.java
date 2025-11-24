@@ -2,7 +2,7 @@ package fr.en0ri4n.craftcreator.impl.blockentity.behaviors;
 
 import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntity;
-import fr.en0ri4n.craftcreator.api.mod.SupportedSerializationTypes;
+import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeExporter;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,14 +15,14 @@ import lombok.Setter;
 @Setter
 public abstract class RecipeCreatorBlockEntityBehavior extends TaggableSlotsBlockEntityBehavior
 {
-    private SupportedSerializationTypes serializationType;
+    private SupportedRecipeExporter serializationType = SupportedRecipeExporter.MINECRAFT_DATAPACK;
 
     @Override
     public void load(CoreBlockEntity entity, JsonObject in)
     {
         super.load(entity, in);
         if(in.has("serializationType"))
-            this.serializationType = SupportedSerializationTypes.valueOf(in.get("serializationType").getAsString().toUpperCase());
+            this.serializationType = SupportedRecipeExporter.valueOf(in.get("serializationType").getAsString().toUpperCase());
     }
 
     @Override

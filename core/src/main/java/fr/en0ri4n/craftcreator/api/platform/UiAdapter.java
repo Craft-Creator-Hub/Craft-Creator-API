@@ -14,5 +14,5 @@ public interface UiAdapter<T> {
 
     boolean isCtrlKeyDown();
 
-    T createWidget(CoreUiElement element, int leftPos, int topPos, CoreScreenDefinition<?> model);
+    T createWidget(CoreUiElement element);
 }

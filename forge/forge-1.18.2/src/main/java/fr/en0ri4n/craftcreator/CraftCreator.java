@@ -1,6 +1,6 @@
 package fr.en0ri4n.craftcreator;
 
-import fr.en0ri4n.craftcreator.api.init.InitManager;
+import fr.en0ri4n.craftcreator.impl.InitManager;
 import fr.en0ri4n.craftcreator.platform.Forge1182Platform;
 import fr.en0ri4n.craftcreator.platform.adapters.ForgeRegistryAdapter;
 import fr.en0ri4n.craftcreator.recipe.exporter.RecipeExporterRegistry;

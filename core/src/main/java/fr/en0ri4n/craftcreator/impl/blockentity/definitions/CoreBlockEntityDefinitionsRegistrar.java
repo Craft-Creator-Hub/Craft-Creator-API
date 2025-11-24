@@ -11,9 +11,6 @@ import lombok.NoArgsConstructor;
  * Register core block-entity definitions.
  * This class executes a static registration so the definitions are available
  * when platform adapters run InitManager/BlockEntity registration.
- * <p>
- * Make sure this class is referenced during mod startup (for example from
- * CraftCreatorAPI.initialize).
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CoreBlockEntityDefinitionsRegistrar
@@ -24,9 +21,20 @@ public class CoreBlockEntityDefinitionsRegistrar
         CoreBlockEntityBehaviorsRegistrar.init();
 
         // Existing crafting table recipe creator definition
-        CoreBlockEntityDefinition def = CoreBlockEntityDefinition.builder(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR).inventorySize(10).addBehavior(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR).build();
+        CoreBlockEntityDefinition craftingTableRC = CoreBlockEntityDefinition.builder(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR)
+                .inventorySize(10)
+                .addBehavior(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR)
+                .build();
 
-        CoreBlockEntityManager.get().registerDefinition(def);
+        CoreBlockEntityDefinition furnaceRC = CoreBlockEntityDefinition.builder(RecipeCreators.FURNACE_RECIPE_CREATOR)
+                .inventorySize(2)
+                .addBehavior(RecipeCreators.FURNACE_RECIPE_CREATOR)
+                .build();
+
+        CoreBlockEntityManager.get().registerDefinition(
+                craftingTableRC,
+                furnaceRC
+        );
 
         CoreBlockEntityManager.get().lock();
     }

@@ -19,10 +19,6 @@ import java.util.function.Consumer;
  * Rendering is done entirely via RenderAdapter / RenderContext passed from the platform.
  * Input events are also handled via simple methods (mouseClicked/mouseScrolled) so the
  * platform screen can forward events into this core widget.
- * <p>
- * This class intentionally avoids any platform types (no PoseStack, no ItemStack).
- * Entries may include an Identifier for an icon; the platform's RenderAdapter implementation
- * decides how to render that icon (or ignore it).
  */
 public class CoreList extends CoreUiElement
 {
@@ -122,7 +118,6 @@ public class CoreList extends CoreUiElement
             ensureIndexVisible(idx);
         }
         selectionListener.accept(getSelected());
-        sendUpdate();
     }
 
     public void scrollBy(int delta)
@@ -171,7 +166,7 @@ public class CoreList extends CoreUiElement
      * @param mouseY       mouse y relative to the screen
      */
     @Override
-    public void render(RenderContext ctx, int mouseX, int mouseY)
+    public void render(RenderContext ctx, int mouseX, int mouseY, float pPartialTick)
     {
         if(ctx == null) return;
 

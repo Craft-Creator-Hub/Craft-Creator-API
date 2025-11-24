@@ -5,9 +5,9 @@ import fr.en0ri4n.craftcreator.api.net.UiUpdateData;
 import fr.en0ri4n.craftcreator.api.platform.RenderAdapter;
 import fr.en0ri4n.craftcreator.api.platform.UiAdapter;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
+import fr.en0ri4n.craftcreator.api.ui.elements.CoreBounds;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreUiElement;
 import fr.en0ri4n.craftcreator.utils.Identifier;
-import fr.en0ri4n.craftcreator.utils.Pair;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -24,34 +24,25 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
     private final Identifier id;
     private final String title;
     private final T screenData;
-    private final Pair<Integer, Integer> guiSize;
+    private final CoreBounds size;
     private final List<CoreUiElement> elements = new ArrayList<>();
 
-    public CoreScreenDefinition(Identifier id, String title, T data, Pair<Integer, Integer> guiSize)
+    public CoreScreenDefinition(Identifier id, String title, T data, CoreBounds size)
     {
         this.id = id;
         this.title = title;
         this.screenData = data;
-        this.guiSize = guiSize;
+        this.size = size;
+    }
+
+    public CoreBounds getGuiSize()
+    {
+        return CoreBounds.centerScreen(getSize(), getCurrentRenderAdapter().getScreenWidth(), getCurrentRenderAdapter().getScreenHeight());
     }
 
     public CoreScreenDefinition(Identifier id, String title, T data)
     {
-        this(id, title, data, Pair.of(176, 166));
-    }
-
-    protected int getGuiLeft()
-    {
-        int screenWidth = getCurrentRenderAdapter().getScreenWidth();
-        int guiWidth = getGuiSize().getFirst();
-        return (screenWidth - guiWidth) / 2;
-    }
-
-    protected int getGuiTop()
-    {
-        int screenHeight = getCurrentRenderAdapter().getScreenHeight();
-        int guiHeight = getGuiSize().getSecond();
-        return (screenHeight - guiHeight) / 2;
+        this(id, title, data, CoreBounds.ofSize(176, 166));
     }
 
     public void addElement(CoreUiElement element)
@@ -64,18 +55,18 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
         getCurrentRenderAdapter().drawRect(ctx, 0, 0, getCurrentRenderAdapter().getScreenWidth(), getCurrentRenderAdapter().getScreenHeight(), 0xD0101010);
     }
 
-    public void render(RenderContext ctx, int mouseX, int mouseY)
+    public void render(RenderContext ctx, int mouseX, int mouseY) { /* Default implementation does nothing */ }
+
+    public void renderForeground(RenderContext ctx, int mouseX, int mouseY)
     {
-        int x = (getGuiLeft() + (getGuiSize().getFirst() - getCurrentRenderAdapter().getTextWidth(getTitle())) / 2);
-        int y = getGuiTop() - 12;
+        int x = getGuiSize().getHorizontalCenter(getCurrentRenderAdapter().getTextWidth(getTitle()));
+        int y = getGuiSize().getY() - 12;
         getCurrentRenderAdapter().drawText(ctx, getTitle(), x, y, 0xFFFFFF);
     }
 
-    public void renderForeground(RenderContext ctx, int mouseX, int mouseY) { /* Default implementation does nothing */ }
-
-    public Pair<Integer, Integer> getBackgroundTextureSize()
+    public CoreBounds getBackgroundTextureSize()
     {
-        return Pair.of(176, 166);
+        return CoreBounds.ofSize(176, 166);
     }
 
     /**
@@ -83,14 +74,23 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
      * You need to add widgets to the {@link CoreScreenDefinition} BEFORE calling this method.
      * @param widgetRenderer The widget renderer to use for adding widgets to the screen.
      */
-    public void init(WidgetRenderer widgetRenderer)
+    public final void init(WidgetRenderer widgetRenderer)
     {
+        cleanScreen();
+        initElements();
         getElements().stream()
                 .map(element ->
-                        getCurrentUiAdapter().createWidget(element, getGuiLeft(), getGuiTop(), this))
+                        getCurrentUiAdapter().createWidget(element))
                 .forEach(widgetRenderer::addWidgetToScreen);
 
         fetchData();
+    }
+
+    protected void initElements() { /* Default implementation does nothing */ }
+
+    public static void renderTextureWithBounds(RenderContext ctx, Identifier texture, CoreBounds bounds, boolean isHovered, boolean isDisabled)
+    {
+        renderTextureWithSize(ctx, texture, bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), isHovered, isDisabled);
     }
 
     /**
@@ -122,6 +122,11 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
         adapter.drawTexture(ctx, texture, left + 5, top + height - 5, width - 10, 5, textureWidth, textureHeight, 5, baseY + 11, 1, 5);
         // Bottom right
         adapter.drawTexture(ctx, texture, left + width - 5, top + height - 5, 5, 5, textureWidth, textureHeight, 11, baseY + 11, 5, 5);
+    }
+
+    protected static String translate(String key, Object... args)
+    {
+        return CraftCreatorAPI.translate(key, args);
     }
 
     public RenderAdapter getCurrentRenderAdapter()

@@ -11,7 +11,6 @@ import lombok.Setter;
 @Getter
 public class CoreButton extends CoreUiElement
 {
-
     private final String label;
 
     /**
@@ -29,18 +28,21 @@ public class CoreButton extends CoreUiElement
         this.onPress = onPress;
     }
 
-    public void onClick(int pMouseX, int pMouseY)
+    @Override
+    public boolean mouseClicked(int mouseX, int mouseY, int button)
     {
-        if(!isMouseOver(pMouseX, pMouseY) || !enabled) return;
+        if(!isMouseOver(mouseX, mouseY) || !enabled) return false;
 
         if(onPress != null)
             onPress.run();
+
+        return true;
     }
 
     @Override
-    public void render(RenderContext ctx, int mouseX, int mouseY)
+    public void render(RenderContext ctx, int mouseX, int mouseY, float partialTick)
     {
-        CoreScreenDefinition.renderTextureWithSize(ctx, CoreScreenDefinition.GUI_TEXTURE, getX(), getY(), getWidth(), getHeight(), isMouseOver(mouseX, mouseY), !enabled);
-        getRenderAdapter().drawText(ctx, label, getX() + (getWidth() - getRenderAdapter().getTextWidth(label)) / 2, getY() + (getHeight() - getRenderAdapter().getFontHeight()) / 2, enabled ? 0xFFFFFF : 0xAAAAAA);
+        CoreScreenDefinition.renderTextureWithSize(ctx, CoreScreenDefinition.GUI_TEXTURE, getBounds().getX(), getBounds().getY(), getBounds().getWidth(), getBounds().getHeight(), isMouseOver(mouseX, mouseY), !enabled);
+        getRenderAdapter().drawText(ctx, label, getBounds().getHorizontalCenter(getRenderAdapter().getTextWidth(label)), getBounds().getVerticalCenter(getRenderAdapter().getFontHeight()), enabled ? 0xFFFFFF : 0xAAAAAA);
     }
 }

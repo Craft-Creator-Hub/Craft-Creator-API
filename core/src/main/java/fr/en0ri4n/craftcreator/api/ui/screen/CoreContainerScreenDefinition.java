@@ -5,10 +5,11 @@ import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.api.blockentity.BlockEntityBehavior;
 import fr.en0ri4n.craftcreator.api.net.BlockEntityUpdateData;
 import fr.en0ri4n.craftcreator.api.net.FetchData;
+import fr.en0ri4n.craftcreator.api.net.UiUpdateData;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
+import fr.en0ri4n.craftcreator.api.ui.elements.CoreBounds;
 import fr.en0ri4n.craftcreator.utils.Identifier;
-import fr.en0ri4n.craftcreator.utils.Pair;
 import lombok.Getter;
 
 /**
@@ -21,7 +22,7 @@ public abstract class CoreContainerScreenDefinition<T extends BlockEntityBehavio
 
     public CoreContainerScreenDefinition(ContainerModel<T> parent, T behavior, Identifier id, String title)
     {
-        super(id, title, new CoreContainerScreenData<>(behavior), Pair.of(parent.getLayout().getWidth(), parent.getLayout().getHeight()));
+        super(id, title, new CoreContainerScreenData<>(behavior), CoreBounds.ofSize(parent.getLayout().getWidth(), parent.getLayout().getHeight()));
         this.parentContainerModel = parent;
     }
 
@@ -35,12 +36,12 @@ public abstract class CoreContainerScreenDefinition<T extends BlockEntityBehavio
     public void renderBackground(RenderContext ctx)
     {
         super.renderBackground(ctx);
-        Pair<Integer, Integer> size = getBackgroundTextureSize();
+        CoreBounds size = getBackgroundTextureSize();
 
         getCurrentRenderAdapter().drawTexture(ctx, getBackgroundTexture(),
-                getGuiLeft(), getGuiTop(), size.getFirst(), size.getSecond(),
+                getGuiSize().getX(), getGuiSize().getY(), size.getWidth(), size.getHeight(),
                 256, 256,
-                0, 0, getParentContainerModel().getLayout().getWidth(), getParentContainerModel().getLayout().getHeight());
+                0, 0, getGuiSize().getWidth(), getGuiSize().getHeight());
     }
 
     public abstract Identifier getBackgroundTexture();
@@ -52,6 +53,20 @@ public abstract class CoreContainerScreenDefinition<T extends BlockEntityBehavio
         getScreenData().getBehavior().save(null, payload);
         CraftCreatorAPI.get().getPlatform().getNetworkInteractionAdapter().sendDataUpdateToServer(new BlockEntityUpdateData(parentContainerModel.getBlockEntityPos(), getId(), payload));
     }
+
+    @Override
+    public final void updateScreen(UiUpdateData data)
+    {
+        super.updateScreen(data);
+        onDataUpdated(getScreenData().getBehavior());
+    }
+
+    protected T getBehavior()
+    {
+        return getScreenData().getBehavior();
+    }
+
+    protected abstract void onDataUpdated(T behavior);
 
     @Getter
     public static class CoreContainerScreenData<T extends BlockEntityBehavior> implements ScreenData
