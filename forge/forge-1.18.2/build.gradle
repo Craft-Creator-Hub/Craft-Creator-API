@@ -153,10 +153,6 @@ dependencies {
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 
-    dependsOn(':core:classes')
-
-    from(project(":core").sourceSets.main.output)
-
     manifest {
         attributes([
                 "Specification-Title"     : "${craftcreator_name}",
