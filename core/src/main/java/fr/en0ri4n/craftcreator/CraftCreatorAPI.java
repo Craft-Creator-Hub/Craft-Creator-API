@@ -5,6 +5,7 @@ import fr.en0ri4n.craftcreator.impl.InitManager;
 import fr.en0ri4n.craftcreator.api.platform.Platform;
 import fr.en0ri4n.craftcreator.impl.blockentity.definitions.CoreBlockEntityDefinitionsRegistrar;
 import fr.en0ri4n.craftcreator.impl.model.ContainerModels;
+import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreators;
 import fr.en0ri4n.craftcreator.recipe.exporter.RecipeExporterRegistry;
 import fr.en0ri4n.craftcreator.recipe.serialize.RecipeSerializerRegistry;
 import fr.en0ri4n.craftcreator.utils.CoreLogger;
@@ -52,6 +53,9 @@ public class CraftCreatorAPI {
                 platform.getLoader().getModLoaderName(),
                 platform.getMinecraftVersion(),
                 platform.getClass().getName()));
+
+        // register recipe creators, contains every definitions/serializers/behaviors needed
+        RecipeCreators.registerAll();
 
         // register recipe serializers
         RecipeSerializerRegistry.registerAll();

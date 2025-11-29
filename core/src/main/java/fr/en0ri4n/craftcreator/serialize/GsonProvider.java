@@ -8,12 +8,20 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class GsonProvider {
 
-    private static final Gson GSON = new GsonBuilder()
+    private static final Gson PRETTY_GSON = new GsonBuilder()
             .setLenient()
             .setPrettyPrinting()
             .create();
 
-    public static Gson gson() {
-        return GSON;
+    private static final Gson COMPACT_GSON = new GsonBuilder()
+            .setLenient()
+            .create();
+
+    public static Gson prettyGson() {
+        return PRETTY_GSON;
+    }
+
+    public static Gson compactGson() {
+        return COMPACT_GSON;
     }
 }

@@ -2,8 +2,11 @@ package fr.en0ri4n.craftcreator.recipe.serialize;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntity;
 import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
+import fr.en0ri4n.craftcreator.api.mod.SupportedVersion;
+import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.RecipeCreatorBlockEntityBehavior;
 import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.TaggableSlotsBlockEntityBehavior;
 import fr.en0ri4n.craftcreator.recipe.model.CraftingGrid;
 import fr.en0ri4n.craftcreator.recipe.model.Recipe;
@@ -14,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public abstract class RecipeSerializer
 {
@@ -31,13 +35,25 @@ public abstract class RecipeSerializer
         return entries;
     }
 
-    public boolean canSerializeRecipe(CoreBlockEntity cbe)
+    public boolean isBlockDataValid(CoreBlockEntity cbe)
     {
-        TaggableSlotsBlockEntityBehavior behavior = (TaggableSlotsBlockEntityBehavior) cbe.getBehavior();
-        return behavior != null && !behavior.getTaggedSlots().isEmpty();
+        RecipeCreatorBlockEntityBehavior behavior = (RecipeCreatorBlockEntityBehavior) cbe.getBehavior();
+        return behavior != null;
     }
 
     /* ---------------- internal helpers ---------------- */
+
+    /**
+     * Create base recipe JSON object with type, id and name.
+     */
+    protected JsonObject createBaseRecipeObject(Identifier type, String name)
+    {
+        JsonObject obj = new JsonObject();
+        obj.addProperty("type", type.toString());
+        obj.addProperty("id", UUID.randomUUID().toString());
+        obj.addProperty("name", name);
+        return obj;
+    }
 
     /**
      * Helper to parse a single ingredient JSON object into a RecipeEntry.
@@ -55,11 +71,11 @@ public abstract class RecipeSerializer
                 String tagStr = obj.get("tag").getAsString();
                 Identifier tagId = Identifier.from(tagStr);
                 int count = obj.has("count") ? obj.get("count").getAsInt() : 1;
-                RecipeEntry e = RecipeEntry.itemTag(tagId, count);
-                return e;
+                return RecipeEntry.itemTag(tagId, count);
             }
-            catch(Exception ignored)
+            catch(Exception e)
             {
+                CraftCreatorAPI.LOGGER.error("Failed to parse ingredient tag: " + obj, e);
             }
         }
 
@@ -70,11 +86,11 @@ public abstract class RecipeSerializer
                 String itemStr = obj.get("item").getAsString();
                 Identifier itemId = Identifier.from(itemStr);
                 int count = obj.has("count") ? obj.get("count").getAsInt() : 1;
-                RecipeEntry e = RecipeEntry.item(itemId, count);
-                return e;
+                return RecipeEntry.item(itemId, count);
             }
-            catch(Exception ignored)
+            catch(Exception e)
             {
+                CraftCreatorAPI.LOGGER.error("Failed to parse ingredient item: " + obj, e);
             }
         }
 
@@ -82,6 +98,44 @@ public abstract class RecipeSerializer
         if(obj.has("ingredient") && obj.get("ingredient").isJsonObject())
         {
             return parseIngredientObject(obj.getAsJsonObject("ingredient"));
+        }
+
+        CraftCreatorAPI.LOGGER.warn("Ingredient object missing 'item' or 'tag': " + obj);
+        return null;
+    }
+
+    protected String getIdIdentifier()
+    {
+        return SupportedVersion.isGreaterOrEquals(SupportedVersion.V1_21_2) ? "id" : "item";
+    }
+
+    /**
+     * Parse ingredient object for Minecraft versions 1.21.2 and above.
+     * In these versions, ingredients are a simple array of ingredient objects, and tags begins with '#'.
+     * @param obj the ingredient string
+     * @return the parsed RecipeEntry, or null if parsing failed
+     */
+    protected RecipeEntry parseIngredientNewVersion(String obj)
+    {
+        if(obj == null || obj.isEmpty()) return null;
+
+        try
+        {
+            if(obj.startsWith("#"))
+            {
+                String tagStr = obj.substring(1);
+                Identifier tagId = Identifier.from(tagStr);
+                return RecipeEntry.itemTag(tagId, 1);
+            }
+            else
+            {
+                Identifier itemId = Identifier.from(obj);
+                return RecipeEntry.item(itemId, 1);
+            }
+        }
+        catch(Exception ignored)
+        {
+            CraftCreatorAPI.LOGGER.error("Failed to parse ingredient: " + obj);
         }
 
         return null;
@@ -93,10 +147,10 @@ public abstract class RecipeSerializer
     protected RecipeEntry parseResultObject(JsonObject obj)
     {
         if(obj == null) return null;
-        if(!obj.has("item")) return null;
+        if(!obj.has(getIdIdentifier())) return null;
         try
         {
-            Identifier itemId = Identifier.from(obj.get("item").getAsString());
+            Identifier itemId = Identifier.from(obj.get(getIdIdentifier()).getAsString());
             int count = obj.has("count") ? obj.get("count").getAsInt() : 1;
             return RecipeEntry.item(itemId, count);
         }
@@ -153,11 +207,51 @@ public abstract class RecipeSerializer
             }
         }
 
+        // Clear empty rows and columns
+        for(int y = 0; y < grid.getHeight(); y++)
+        {
+            boolean emptyRow = true;
+            for(int x = 0; x < grid.getWidth(); x++)
+            {
+                if(matrix[x][y] != ' ')
+                {
+                    emptyRow = false;
+                    break;
+                }
+            }
+            if(emptyRow)
+            {
+                for(int x = 0; x < grid.getWidth(); x++)
+                {
+                    matrix[x][y] = '\0';
+                }
+            }
+        }
+        for(int x = 0; x < grid.getWidth(); x++)
+        {
+            boolean emptyCol = true;
+            for(int y = 0; y < grid.getHeight(); y++)
+            {
+                if(matrix[x][y] != ' ')
+                {
+                    emptyCol = false;
+                    break;
+                }
+            }
+            if(emptyCol)
+            {
+                for(int y = 0; y < grid.getHeight(); y++)
+                {
+                    matrix[x][y] = '\0';
+                }
+            }
+        }
+
         // Build pattern array
         JsonArray pattern = new JsonArray();
         for(int y = 0; y < grid.getHeight(); y++)
         {
-            pattern.add(new String(matrix[y]));
+            pattern.add(new String(matrix[y]).replaceAll("\0", ""));
         }
 
         // Build key object
@@ -173,16 +267,24 @@ public abstract class RecipeSerializer
         {
             String ingredientKey = e.getValue().toString();
             String valueId = e.getKey();
-            JsonObject ing = new JsonObject();
-            if(valueId.startsWith("#"))
+
+            if(SupportedVersion.isGreaterOrEquals(SupportedVersion.V1_21_2))
             {
-                ing.addProperty("tag", valueId.substring(1));
+                key.addProperty(ingredientKey, valueId);
             }
             else
             {
-                ing.addProperty("item", valueId);
+                JsonObject ing = new JsonObject();
+                if(valueId.startsWith("#"))
+                {
+                    ing.addProperty("tag", valueId.substring(1));
+                }
+                else
+                {
+                    ing.addProperty("item", valueId);
+                }
+                key.add(ingredientKey, ing);
             }
-            key.add(ingredientKey, ing);
         }
         return key;
     }

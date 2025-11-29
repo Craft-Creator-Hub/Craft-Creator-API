@@ -1,12 +1,11 @@
 package fr.en0ri4n.craftcreator.impl.model.screen.minecraft;
 
-import fr.en0ri4n.craftcreator.CraftCreatorAPI;
-import fr.en0ri4n.craftcreator.RecipeCreators;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
-import fr.en0ri4n.craftcreator.api.ui.elements.CoreButton;
+import fr.en0ri4n.craftcreator.api.ui.elements.CoreBounds;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreDropdown;
 import fr.en0ri4n.craftcreator.api.ui.screen.RecipeCreatorContainerScreenDefinition;
 import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.CraftingTableRCBehavior;
+import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreators;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 
 import java.util.Arrays;
@@ -19,7 +18,7 @@ public class CraftingTableRCScreenDefinition extends RecipeCreatorContainerScree
 
     public CraftingTableRCScreenDefinition(ContainerModel<CraftingTableRCBehavior> parent)
     {
-        super(parent, new CraftingTableRCBehavior(), RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR, CraftCreatorAPI.translate("craftcreator.screen.minecraft_recipe_creator.crafting.title"));
+        super(parent, new CraftingTableRCBehavior(), RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR_ID, translate("screen.minecraft_recipe_creator.crafting.title"));
     }
 
     @Override
@@ -29,9 +28,9 @@ public class CraftingTableRCScreenDefinition extends RecipeCreatorContainerScree
     }
 
     @Override
-    public void initElements()
+    public void initElements(int screenWidth, int screenHeight)
     {
-        super.initElements();
+        super.initElements(screenWidth, screenHeight);
         addElement(shapeDropdown = new CoreDropdown<>("shape_type", getGuiSize().getX(100), getGuiSize().getY(60), 50, 19, false, Arrays.stream(CraftingTableRCBehavior.CraftingType.values()).toList(), 0, "", this::setCraftingShape)
         {
             @Override
@@ -46,9 +45,9 @@ public class CraftingTableRCScreenDefinition extends RecipeCreatorContainerScree
     }
 
     @Override
-    protected CoreButton getExportButton()
+    protected CoreBounds getExportButtonBounds()
     {
-        return new CoreButton("export", getGuiSize().getX(120), getGuiSize().getY(10), 40, 19, "Save", this::exportRecipe, "Export the currently selected recipes");
+        return CoreBounds.ofPos(getGuiSize().getX(120), getGuiSize().getY(10));
     }
 
     private void setCraftingShape(CraftingTableRCBehavior.CraftingType type)

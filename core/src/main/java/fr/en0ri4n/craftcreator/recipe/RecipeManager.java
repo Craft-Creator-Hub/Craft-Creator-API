@@ -17,10 +17,10 @@ public class RecipeManager
 
     public RecipeRequestFeedback handleMakeRecipeRequest(CoreBlockEntity coreBlockEntity, Identifier containerId)
     {
-        RecipeSerializer serializer = RecipeSerializerRegistry.get().get(containerId);
+        RecipeSerializer serializer = RecipeSerializerRegistry.get().getByRecipeTypeId(containerId);
         RecipeCreatorBlockEntityBehavior behavior = (RecipeCreatorBlockEntityBehavior) coreBlockEntity.getBehavior();
 
-        if(!serializer.canSerializeRecipe(coreBlockEntity))
+        if(!serializer.isBlockDataValid(coreBlockEntity))
             return RecipeRequestFeedback.of(Feedback.INVALID_BLOCK_DATA, false);
 
         JsonObject recipeJson = serializer.serialize(coreBlockEntity);

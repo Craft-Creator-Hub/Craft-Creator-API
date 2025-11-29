@@ -25,6 +25,12 @@ public class ForgeWidget extends AbstractWidget implements Widget
     }
 
     @Override
+    public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta)
+    {
+        return this.coreUiElement.mouseScrolled(pMouseX, pMouseY, pDelta);
+    }
+
+    @Override
     public boolean charTyped(char pCodePoint, int pModifiers)
     {
         return this.coreUiElement.charTyped(pCodePoint, pModifiers);

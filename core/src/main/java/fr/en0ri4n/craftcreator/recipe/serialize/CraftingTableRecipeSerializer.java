@@ -3,9 +3,10 @@ package fr.en0ri4n.craftcreator.recipe.serialize;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntity;
 import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
-import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeType;
+import fr.en0ri4n.craftcreator.api.mod.SupportedVersion;
 import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.CraftingTableRCBehavior;
 import fr.en0ri4n.craftcreator.recipe.model.CraftingGrid;
 import fr.en0ri4n.craftcreator.recipe.model.Recipe;
@@ -22,6 +23,9 @@ import java.util.UUID;
 @NoArgsConstructor
 public class CraftingTableRecipeSerializer extends RecipeSerializer
 {
+    public static final CraftingTableRecipeSerializer INSTANCE = new CraftingTableRecipeSerializer();
+    public static RecipeSerializer get() { return INSTANCE; }
+
     @Override
     protected void processInventory(List<RecipeEntry> entries, List<CoreItemStack> inventory, Map<Integer, Identifier> taggedSlots)
     {
@@ -95,11 +99,11 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
         if(element.has("type"))
         {
             String type = element.get("type").getAsString();
-            if(type.equals(SupportedRecipeType.CRAFTING_TABLE_SHAPED.getId()))
+            if(type.equals(CraftingTableRCBehavior.CraftingType.SHAPED.getRecipeTypeId().toString()))
             {
                 return deserializeShapedRecipe(element);
             }
-            else if(type.equals(SupportedRecipeType.CRAFTING_TABLE_SHAPELESS.getId()))
+            else if(type.equals(CraftingTableRCBehavior.CraftingType.SHAPELESS.getRecipeTypeId().toString()))
             {
                 return deserializeShapelessRecipe(element);
             }
@@ -113,7 +117,9 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
 
         try
         {
-            Identifier id = Identifier.from(element.has("id") ? element.get("id").getAsString() : "unknown");
+            Identifier id = Identifier.fromMod(element.has("id") ? element.get("id").getAsString() : "unknown");
+
+            String name = element.has("name") ? element.get("name").getAsString() : "shapeless_recipe";
 
             // parse type
             Identifier type = Identifier.from(element.get("type").getAsString());
@@ -125,13 +131,26 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
                 JsonArray ingredients = element.getAsJsonArray("ingredients");
                 for(JsonElement el : ingredients)
                 {
-                    if(!el.isJsonObject()) continue;
-                    JsonObject obj = el.getAsJsonObject();
-                    RecipeEntry entry = parseIngredientObject(obj);
-                    if(entry != null)
+                    if(SupportedVersion.isGreaterOrEquals(SupportedVersion.V1_21_2))
                     {
-                        entry.setType(RecipeEntry.EntryType.INPUT);
-                        inputs.add(entry);
+                        String ingredientStr = el.getAsString();
+                        RecipeEntry entry = parseIngredientNewVersion(ingredientStr);
+                        if(entry != null)
+                        {
+                            entry.setType(RecipeEntry.EntryType.INPUT);
+                            inputs.add(entry);
+                        }
+                    }
+                    else
+                    {
+                        if(!el.isJsonObject()) continue;
+                        JsonObject obj = el.getAsJsonObject();
+                        RecipeEntry entry = parseIngredientObject(obj);
+                        if(entry != null)
+                        {
+                            entry.setType(RecipeEntry.EntryType.INPUT);
+                            inputs.add(entry);
+                        }
                     }
                 }
             }
@@ -149,11 +168,11 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
                 }
             }
 
-            return new Recipe(id, type, inputs, outputs, RecipeInfos.create());
+            return new Recipe(id, name, type, inputs, outputs, RecipeInfos.create());
         }
         catch(Exception ex)
         {
-            // on error, return EMPTY
+            CraftCreatorAPI.LOGGER.error("Failed to deserialize shapeless recipe: " + ex.getMessage());
             return Recipe.EMPTY;
         }
     }
@@ -164,7 +183,9 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
 
         try
         {
-            Identifier id = Identifier.from(element.has("id") ? element.get("id").getAsString() : "unknown");
+            Identifier id = Identifier.fromMod(element.has("id") ? element.get("id").getAsString() : "unknown");
+
+            String name = element.has("name") ? element.get("name").getAsString() : "shaped_recipe";
 
             Identifier type = Identifier.from(element.get("type").getAsString());
 
@@ -228,7 +249,7 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
                 }
             }
 
-            return new Recipe(id, type, inputs, outputs, RecipeInfos.create());
+            return new Recipe(id, name, type, inputs, outputs, RecipeInfos.create());
         }
         catch(Exception ex)
         {
@@ -242,8 +263,10 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
     public JsonObject shaped(RecipeEntry result, CraftingGrid grid)
     {
         JsonObject root = new JsonObject();
-        root.addProperty("id", result.getId().getPath() + "_shaped_recipe_" + UUID.randomUUID());
-        root.addProperty("type", SupportedRecipeType.CRAFTING_TABLE_SHAPED.getId());
+        root.addProperty("id", UUID.randomUUID().toString());
+        root.addProperty("name", result.getId().getPath() + "_shaped");
+
+        root.addProperty("type", CraftingTableRCBehavior.CraftingType.SHAPED.getRecipeTypeId().toString());
 
         PatternAndKey pk = buildPatternAndKey(grid);
         root.add("pattern", pk.pattern);
@@ -264,8 +287,9 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
     public JsonObject shapeless(RecipeEntry output, RecipeEntry.MultiInput inputs)
     {
         JsonObject root = new JsonObject();
-        root.addProperty("id", output.getId().getPath() + "_shapeless_recipe." + UUID.randomUUID());
-        root.addProperty("type", SupportedRecipeType.CRAFTING_TABLE_SHAPELESS.getId());
+        root.addProperty("id", UUID.randomUUID().toString());
+        root.addProperty("name", output.getId().getPath() + "_shapeless");
+        root.addProperty("type", CraftingTableRCBehavior.CraftingType.SHAPELESS.getRecipeTypeId().toString());
 
         JsonArray ingredients = new JsonArray();
         for(RecipeEntry entry : inputs.getEntries())

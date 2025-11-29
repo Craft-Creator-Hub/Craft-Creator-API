@@ -40,6 +40,8 @@ public interface RenderAdapter
 
     void drawItem(RenderContext ctx, CoreItemStack item, int x, int y, float scale);
 
+    void drawTooltip(RenderContext ctx, String tooltip, int mouseX, int mouseY);
+
     int getTextWidth(String label);
 
     int getFontHeight();

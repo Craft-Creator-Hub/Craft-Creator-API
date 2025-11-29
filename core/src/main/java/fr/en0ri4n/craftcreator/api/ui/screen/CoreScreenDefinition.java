@@ -72,12 +72,12 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
     /**
      * Initializes the screen. This method needs to be called by the platform-specific screen implementation.<br>
      * You need to add widgets to the {@link CoreScreenDefinition} BEFORE calling this method.
-     * @param widgetRenderer The widget renderer to use for adding widgets to the screen.
+     * @param widgetRenderer The widget renderer to use for adding widgets to the actual screen.
      */
-    public final void init(WidgetRenderer widgetRenderer)
+    public final void init(WidgetRenderer widgetRenderer, int screenWidth, int screenHeight)
     {
         cleanScreen();
-        initElements();
+        initElements(screenWidth, screenHeight);
         getElements().stream()
                 .map(element ->
                         getCurrentUiAdapter().createWidget(element))
@@ -86,7 +86,7 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
         fetchData();
     }
 
-    protected void initElements() { /* Default implementation does nothing */ }
+    protected void initElements(int screenWidth, int screenHeight) { /* Default implementation does nothing */ }
 
     public static void renderTextureWithBounds(RenderContext ctx, Identifier texture, CoreBounds bounds, boolean isHovered, boolean isDisabled)
     {
@@ -129,12 +129,12 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
         return CraftCreatorAPI.translate(key, args);
     }
 
-    public RenderAdapter getCurrentRenderAdapter()
+    protected static RenderAdapter getCurrentRenderAdapter()
     {
         return CraftCreatorAPI.get().getPlatform().getRenderAdapter();
     }
 
-    public UiAdapter<?> getCurrentUiAdapter()
+    protected static UiAdapter<?> getCurrentUiAdapter()
     {
         return CraftCreatorAPI.get().getPlatform().getUiAdapter();
     }

@@ -27,7 +27,7 @@ public class ForgeScreen extends Screen implements WidgetRenderer
     {
         super.init();
 
-        screenDefinition.init(this);
+        screenDefinition.init(this, this.width, this.height);
     }
 
     @Override
@@ -48,5 +48,6 @@ public class ForgeScreen extends Screen implements WidgetRenderer
         screenDefinition.renderBackground(ForgeRenderContext.of(pPoseStack));
         super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
         screenDefinition.render(ForgeRenderContext.of(pPoseStack), pMouseX, pMouseY);
+        screenDefinition.renderForeground(ForgeRenderContext.of(pPoseStack), pMouseX, pMouseY);
     }
 }

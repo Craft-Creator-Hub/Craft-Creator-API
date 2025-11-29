@@ -14,6 +14,8 @@ import java.util.Map;
 
 public class FurnaceRecipeSerializer extends RecipeSerializer
 {
+    private static final FurnaceRecipeSerializer INSTANCE = new FurnaceRecipeSerializer();
+    public static FurnaceRecipeSerializer get() { return INSTANCE; }
     @Override
     protected void processInventory(List<RecipeEntry> entries, List<CoreItemStack> inventory, Map<Integer, Identifier> taggedSlots)
     {
@@ -39,7 +41,8 @@ public class FurnaceRecipeSerializer extends RecipeSerializer
     @Override
     public Recipe deserializeToRecipe(JsonObject in)
     {
-        Identifier recipeId = in.has("id") ? Identifier.from(in.get("id").getAsString()) : Identifier.from("craftcreator:unknown_furnace_recipe");
+        Identifier recipeId = in.has("id") ? Identifier.fromMod(in.get("id").getAsString()) : Identifier.fromMod("craftcreator:unknown_furnace_recipe");
+        String name = in.has("name") ? in.get("name").getAsString() : "furnace_recipe";
         Identifier typeId = Identifier.from(in.get("type").getAsString());
         RecipeEntry inputEntry = parseIngredientObject(in.getAsJsonObject("ingredient"));
         RecipeEntry outputEntry = RecipeEntry.item(Identifier.from(in.get("result").getAsString()), 1);
@@ -49,14 +52,12 @@ public class FurnaceRecipeSerializer extends RecipeSerializer
         RecipeInfos infos = RecipeInfos.create();
         infos.addParameter(new RecipeInfos.RecipeParameterNumber("experience", experience, true));
         infos.addParameter(new RecipeInfos.RecipeParameterNumber("cookingtime", cookingTime, true));
-        return new Recipe(recipeId, typeId, List.of(inputEntry), List.of(outputEntry), infos);
+        return new Recipe(recipeId, name, typeId, List.of(inputEntry), List.of(outputEntry), infos);
     }
 
     @Override
     public JsonObject serialize(CoreBlockEntity value)
     {
-        JsonObject out = new JsonObject();
-
         FurnaceRCBehavior behavior = (FurnaceRCBehavior) value.getBehavior();
         List<RecipeEntry> entries = processBlockEntity(value);
 
@@ -70,7 +71,8 @@ public class FurnaceRecipeSerializer extends RecipeSerializer
                 .findFirst()
                 .orElse(RecipeEntry.EMPTY);
 
-        out.addProperty("type", behavior.getFurnaceType().getRecipeTypeId().toString());
+        JsonObject out = createBaseRecipeObject(behavior.getFurnaceType().getRecipeTypeId(), outputEntry.getId().getPath() + "_from_" + behavior.getFurnaceType().getRecipeTypeId().getPath());
+
         out.add("ingredient", singletonItemJson(inputEntry));
 
         out.addProperty("result", outputEntry.getId().toString());

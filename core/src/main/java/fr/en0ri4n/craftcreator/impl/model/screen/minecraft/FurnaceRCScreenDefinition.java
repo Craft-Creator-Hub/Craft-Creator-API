@@ -1,14 +1,14 @@
 package fr.en0ri4n.craftcreator.impl.model.screen.minecraft;
 
-import fr.en0ri4n.craftcreator.RecipeCreators;
 import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
-import fr.en0ri4n.craftcreator.api.ui.elements.CoreButton;
+import fr.en0ri4n.craftcreator.api.ui.elements.CoreBounds;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreDropdown;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreTextInput;
 import fr.en0ri4n.craftcreator.api.ui.screen.RecipeCreatorContainerScreenDefinition;
 import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.FurnaceRCBehavior;
+import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreators;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 
 import java.util.Arrays;
@@ -22,7 +22,7 @@ public class FurnaceRCScreenDefinition extends RecipeCreatorContainerScreenDefin
 
     public FurnaceRCScreenDefinition(ContainerModel<FurnaceRCBehavior> parent)
     {
-        super(parent, new FurnaceRCBehavior(), RecipeCreators.FURNACE_RECIPE_CREATOR, translate("screen.minecraft_recipe_creator.smelting.title"));
+        super(parent, new FurnaceRCBehavior(), RecipeCreators.FURNACE_RECIPE_CREATOR_ID, translate("screen.minecraft_recipe_creator.smelting.title"));
     }
 
     @Override
@@ -32,19 +32,15 @@ public class FurnaceRCScreenDefinition extends RecipeCreatorContainerScreenDefin
     }
 
     @Override
-    public void initElements()
+    public void initElements(int screenWidth, int screenHeight)
     {
-        super.initElements();
+        super.initElements(screenWidth, screenHeight);
         addElement(furnaceTypeDropdown = new CoreDropdown<>("furnace_type", getGuiSize().getRight(-22), getGuiSize().getY(), 22, 22, true, Arrays.stream(FurnaceRCBehavior.FurnaceType.values()).toList(), 0, "", this::setFurnaceType)
         {
             @Override
             public String getSelectedValueAsString()
             {
-                return switch(getSelectedValue()) {
-                    case FURNACE -> "F";
-                    case BLAST_FURNACE -> "B";
-                    case SMOKER -> "S";
-                };
+                return "";
             }
         });
         addElement(new CoreTextInput("cooking_time_input", CoreTextInput.TextInputType.INTEGER, getGuiSize().getX(10), getGuiSize().getY(35), 30, 10, translate("screen.minecraft_recipe_creator.smelting.field.cooking_time"), String.valueOf(200), "Ticks", "Time it takes to smelt one item in ticks"));
@@ -58,9 +54,9 @@ public class FurnaceRCScreenDefinition extends RecipeCreatorContainerScreenDefin
     }
 
     @Override
-    protected CoreButton getExportButton()
+    protected CoreBounds getExportButtonBounds()
     {
-        return new CoreButton("export", getGuiSize().getX(120), getGuiSize().getY(10), 40, 19, "Save", this::exportRecipe, "Export the currently selected recipes");
+        return CoreBounds.ofPos(getGuiSize().getRight(-26), getGuiSize().getY(60));
     }
 
     @Override

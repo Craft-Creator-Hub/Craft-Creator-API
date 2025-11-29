@@ -13,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -102,6 +103,14 @@ public class ForgeRenderAdapter implements RenderAdapter
         RenderSystem.getModelViewStack().scale(scale, scale, 1.0F);
         mc.getItemRenderer().renderAndDecorateItem(platformStack, (int) (x / scale), (int) (y / scale));
         RenderSystem.getModelViewStack().popPose();
+    }
+
+    @Override
+    public void drawTooltip(RenderContext ctx, String tooltip, int mouseX, int mouseY)
+    {
+        ForgeRenderContext forgeRenderContext = ForgeRenderContext.from(ctx);
+        assert mc.screen != null;
+        mc.screen.renderTooltip(forgeRenderContext.poseStack(), new TextComponent(tooltip), mouseX, mouseY);
     }
 
     @Override

@@ -2,6 +2,8 @@ package fr.en0ri4n.craftcreator.impl.blockentity.behaviors;
 
 import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntity;
+import fr.en0ri4n.craftcreator.utils.Identifier;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -31,8 +33,12 @@ public class CraftingTableRCBehavior extends RecipeCreatorBlockEntityBehavior
         }
     }
 
+    @Getter
+    @AllArgsConstructor
     public enum CraftingType {
-        SHAPED,
-        SHAPELESS
+        SHAPED(Identifier.from("minecraft:crafting_shaped")),
+        SHAPELESS(Identifier.from("minecraft:crafting_shapeless"));
+
+        private final Identifier recipeTypeId;
     }
 }

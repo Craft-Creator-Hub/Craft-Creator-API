@@ -1,7 +1,9 @@
 package fr.en0ri4n.craftcreator.impl;
 
 import fr.en0ri4n.craftcreator.CraftCreatorAPI;
-import fr.en0ri4n.craftcreator.RecipeCreators;
+import fr.en0ri4n.craftcreator.impl.model.screen.RecipeManagementScreen;
+import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreator;
+import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreators;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockDef;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockItemDef;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreItemDef;
@@ -9,6 +11,7 @@ import fr.en0ri4n.craftcreator.api.init.definitions.FacingType;
 import fr.en0ri4n.craftcreator.api.init.shapes.CoreFacing;
 import fr.en0ri4n.craftcreator.api.init.shapes.CoreShapes;
 import fr.en0ri4n.craftcreator.api.platform.RegistryAdapter;
+import fr.en0ri4n.craftcreator.utils.CoreKeybind;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -25,36 +28,45 @@ import java.util.Objects;
  * or setup; later the platform calls runRegistrations(adapter) to perform actual registration.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class InitManager {
-
+public class InitManager
+{
     private static final InitManager INSTANCE = new InitManager();
     public static InitManager get() {
         return INSTANCE;
     }
 
+    // Keybind
+    public static final CoreKeybind OPEN_MANAGEMENT_SCREEN_KEYBIND = new CoreKeybind("key.open_recipe_management_screen",
+                                                                                     75,
+                                                                                     "key.category.name",
+                                                                                     () -> CraftCreatorAPI.get().getPlatform().getUiAdapter().openScreen(new RecipeManagementScreen()));
+
+
+    public static final CoreBlockDef CRAFTING_TABLE_RECIPE_CREATOR_BLOCK = CoreBlockDef.builder(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR_ID)
+                                                                                       .facing(FacingType.HORIZONTAL)
+                                                                                       .facingShapes(Map.of(
+                                                                                               CoreFacing.WEST, CoreShapes.MinecraftRecipeCreatorShapes.SHAPE_WEST,
+                                                                                               CoreFacing.EAST, CoreShapes.MinecraftRecipeCreatorShapes.SHAPE_EAST,
+                                                                                               CoreFacing.NORTH, CoreShapes.MinecraftRecipeCreatorShapes.SHAPE_NORTH,
+                                                                                               CoreFacing.SOUTH, CoreShapes.MinecraftRecipeCreatorShapes.SHAPE_SOUTH
+                                                                                       ))
+                                                                                       .build();
+
+    public static final CoreBlockDef FURNACE_RECIPE_CREATOR_BLOCK = CoreBlockDef.builder(RecipeCreators.FURNACE_RECIPE_CREATOR_ID)
+                                                                                .facing(FacingType.HORIZONTAL)
+                                                                                .build();
+
     private final List<CoreBlockItemDef> blockItemDefs = new ArrayList<>();
     private boolean locked = false;
 
-    public void registerAll() {
+    public void registerAll()
+    {
         CraftCreatorAPI.LOGGER.info("Registering core blocks and items...");
 
-        CoreBlockDef craftingTableBlock = CoreBlockDef.builder(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR)
-                .facing(FacingType.HORIZONTAL)
-                .facingShapes(Map.of(
-                        CoreFacing.WEST, CoreShapes.MinecraftRecipeCreatorShapes.SHAPE_WEST,
-                        CoreFacing.EAST, CoreShapes.MinecraftRecipeCreatorShapes.SHAPE_EAST,
-                        CoreFacing.NORTH, CoreShapes.MinecraftRecipeCreatorShapes.SHAPE_NORTH,
-                        CoreFacing.SOUTH, CoreShapes.MinecraftRecipeCreatorShapes.SHAPE_SOUTH
-                ))
-                .build();
-
-        CoreBlockDef furnaceBlock = CoreBlockDef.builder(RecipeCreators.FURNACE_RECIPE_CREATOR)
-                .facing(FacingType.HORIZONTAL)
-                .build();
-
-
-        registerBlockItem(CoreBlockItemDef.of(craftingTableBlock, itemOf(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR)));
-        registerBlockItem(CoreBlockItemDef.of(furnaceBlock, itemOf(RecipeCreators.FURNACE_RECIPE_CREATOR)));
+        for(RecipeCreator<?> recipeCreator : RecipeCreators.ALL_RECIPE_CREATORS)
+        {
+            registerBlockAndItem(CoreBlockItemDef.of(recipeCreator.getRecipeCreatorBlock(), itemOf(recipeCreator.getId())));
+        }
     }
 
     private CoreItemDef itemOf(Identifier id) {
@@ -66,7 +78,7 @@ public class InitManager {
     /**
      * Register a combined block + block-item definition. Must be called before runRegistrations.
      */
-    public synchronized void registerBlockItem(CoreBlockItemDef def) {
+    public synchronized void registerBlockAndItem(CoreBlockItemDef def) {
         checkNotLocked();
         Objects.requireNonNull(def, "CoreBlockItemDef cannot be null");
         blockItemDefs.add(def);

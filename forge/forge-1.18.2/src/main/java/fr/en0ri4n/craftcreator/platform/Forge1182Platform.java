@@ -4,6 +4,7 @@ import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockPos;
 import fr.en0ri4n.craftcreator.api.item.ItemStackAdapter;
 import fr.en0ri4n.craftcreator.api.mod.SupportedModLoader;
 import fr.en0ri4n.craftcreator.api.mod.SupportedMod;
+import fr.en0ri4n.craftcreator.api.mod.SupportedVersion;
 import fr.en0ri4n.craftcreator.api.platform.*;
 import fr.en0ri4n.craftcreator.api.translations.TranslationProvider;
 import fr.en0ri4n.craftcreator.platform.adapters.*;
@@ -118,8 +119,9 @@ public class Forge1182Platform implements Platform {
     }
 
     @Override
-    public String getMinecraftVersion() {
-        return FMLLoader.versionInfo().mcVersion();
+    public SupportedVersion getMinecraftVersion()
+    {
+        return SupportedVersion.V1_18_2;
     }
 
     @Override

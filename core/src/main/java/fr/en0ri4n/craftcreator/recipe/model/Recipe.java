@@ -19,12 +19,17 @@ import java.util.List;
 @AllArgsConstructor
 public class Recipe
 {
-    public static final Recipe EMPTY = new Recipe(Identifier.fromMod("empty"), Identifier.fromMod("no_type"), List.of(), List.of(), RecipeInfos.create());
+    public static final Recipe EMPTY = new Recipe(Identifier.fromMod("empty"), "empty", Identifier.fromMod("no_type"), List.of(), List.of(), RecipeInfos.create());
 
     /**
-     * The datapack recipe id, e.g. "craftcreator:iron_from_custom"
+     * The datapack recipe uuid, e.g. "123e4567-e89b-12d3-a456-426614174000"
      */
     private final Identifier id;
+
+    /**
+     * The recipe name, e.g. "iron_ingot_from_smelting"
+     */
+    private final String name;
 
     /**
      * The recipe type, e.g. "minecraft:smelting", "botania:mana_infusion"

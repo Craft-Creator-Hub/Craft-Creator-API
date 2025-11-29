@@ -17,7 +17,9 @@ public enum Feedback
     DATAPACK_PATH_INVALID("serializer.message.recipe.datapack_file_invalid"),
     DATAPACK_FILE_ERROR("serializer.message.recipe.datapack_file_error"),
 
-    KUBEJS_ADDED("serializer.message.recipe.kubejs_added");
+    KUBEJS_ADDED("serializer.message.recipe.kubejs_added"),
+
+    RECIPE_ALREADY_EXISTS("serializer.message.recipe.already_exists"),;
 
     private final String messageKey;
 }

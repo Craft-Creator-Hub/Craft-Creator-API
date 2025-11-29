@@ -43,7 +43,14 @@ public abstract class CoreUiElement {
 
     public abstract void render(RenderContext ctx, int mouseX, int mouseY, float partialTick);
 
-    protected RenderAdapter getRenderAdapter() {
+    /**
+     * Render additional foreground elements, such as tooltips.<br>
+     * Need to be called by {@link fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition#renderForeground(RenderContext, int, int)}, of the parent screen.
+     */
+    public void renderForeground(RenderContext ctx, int mouseX, int mouseY)
+    { /* Not implemented by default */ }
+
+    protected static RenderAdapter getRenderAdapter() {
         return CraftCreatorAPI.get().getPlatform().getRenderAdapter();
     }
 
@@ -57,4 +64,6 @@ public abstract class CoreUiElement {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) { return false; }
 
     public boolean charTyped(char codePoint, int modifiers) { return false; }
+
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) { return false; }
 }

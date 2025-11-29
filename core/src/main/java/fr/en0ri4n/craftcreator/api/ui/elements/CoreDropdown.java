@@ -1,5 +1,6 @@
 package fr.en0ri4n.craftcreator.api.ui.elements;
 
+import fr.en0ri4n.craftcreator.api.platform.UiAdapter;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
 import lombok.Getter;
@@ -48,12 +49,12 @@ public class CoreDropdown<T> extends CoreUiElement
         this.selectedIndex = selectedIndex;
         if(onChange != null)
             onChange.accept(getSelectedValue());
-        calculateNewBounds();
+        if(!hasFixedWidth)
+            calculateNewBounds();
     }
 
     private void calculateNewBounds()
     {
-        if(hasFixedWidth) return;
         int actualWidth = getRenderAdapter().getTextWidth(this.getSelectedValueAsString()) + 10;
         getBounds().setWidth(actualWidth);
         // Adjust x
@@ -78,6 +79,8 @@ public class CoreDropdown<T> extends CoreUiElement
         int current = getSelectedIndex();
         int next = (current + 1) % size;
         setSelectedIndex(next);
+
+        getUiAdapter().playSound(UiAdapter.UiSound.BUTTON_CLICK);
 
         return true;
     }

@@ -1,6 +1,7 @@
 package fr.en0ri4n.craftcreator.impl.blockentity.definitions;
 
-import fr.en0ri4n.craftcreator.RecipeCreators;
+import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreator;
+import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreators;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityDefinition;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityManager;
 import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.CoreBlockEntityBehaviorsRegistrar;
@@ -15,26 +16,25 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CoreBlockEntityDefinitionsRegistrar
 {
+    public static final CoreBlockEntityDefinition CRAFTING_TABLE_RECIPE_CREATOR_DEFINITION = CoreBlockEntityDefinition.builder(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR_ID)
+                                                                                                                      .inventorySize(10)
+                                                                                                                      .setBehavior(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR_ID)
+                                                                                                                      .build();
+
+    public static final CoreBlockEntityDefinition FURNACE_RECIPE_CREATOR_DEFINITION = CoreBlockEntityDefinition.builder(RecipeCreators.FURNACE_RECIPE_CREATOR_ID)
+                                                                                                                  .inventorySize(2)
+                                                                                                                  .setBehavior(RecipeCreators.FURNACE_RECIPE_CREATOR_ID)
+                                                                                                                  .build();
+
     public static void init()
     {
         // Register core block-entity behaviors first
         CoreBlockEntityBehaviorsRegistrar.init();
 
-        // Existing crafting table recipe creator definition
-        CoreBlockEntityDefinition craftingTableRC = CoreBlockEntityDefinition.builder(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR)
-                .inventorySize(10)
-                .setBehavior(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR)
-                .build();
-
-        CoreBlockEntityDefinition furnaceRC = CoreBlockEntityDefinition.builder(RecipeCreators.FURNACE_RECIPE_CREATOR)
-                .inventorySize(2)
-                .setBehavior(RecipeCreators.FURNACE_RECIPE_CREATOR)
-                .build();
-
-        CoreBlockEntityManager.get().registerDefinition(
-                craftingTableRC,
-                furnaceRC
-        );
+        for(RecipeCreator<?> recipeCreator : RecipeCreators.ALL_RECIPE_CREATORS)
+        {
+            CoreBlockEntityManager.get().registerDefinition(recipeCreator.getBlockEntityDefinition());
+        }
 
         CoreBlockEntityManager.get().lock();
     }

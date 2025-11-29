@@ -18,4 +18,6 @@ public interface TagProvider {
      * Never return null; return an empty list if no tags exist.
      */
     List<Identifier> getTags(CoreItemStack coreStack);
+
+    List<CoreItemStack> getItemsInTag(Identifier tagId);
 }

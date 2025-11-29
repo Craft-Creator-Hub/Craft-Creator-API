@@ -15,6 +15,11 @@ public class CoreBounds
     private int width;
     private int height;
 
+    public static CoreBounds ofPos(int x, int y)
+    {
+        return new CoreBounds(x, y, 0, 0);
+    }
+
     public int getScaledX(float scale)
     {
         return Math.round(x / scale);

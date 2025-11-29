@@ -219,7 +219,7 @@ public class KubeJsRecipeExporter extends AdvancedModRecipeExporter
     }
 
     private String toJson(JsonElement element) {
-        return GsonProvider.gson().toJson(element);
+        return GsonProvider.prettyGson().toJson(element);
     }
 
     private static String indent(String text, int spaces) {

@@ -6,12 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 
 /**
- * Concrete Forge render context that wraps the PoseStack and an optional MultiBufferSource.
- * Create one each frame inside Screen.render(...) and pass it down to core rendering code.
- *
- * Example usage in a Screen:
- *   ForgeRenderContext ctx = new ForgeRenderContext(poseStack, mc.renderBuffers().bufferSource(), partialTicks);
- *   CraftCreatorAPI.getInstance().getPlatform().getRenderAdapter().renderTexture(ctx, ...);
+ * Concrete Forge render context that wraps the PoseStack and BufferSource.
  */
 public class ForgeRenderContext implements RenderContext {
 

@@ -6,6 +6,7 @@ import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
 import fr.en0ri4n.craftcreator.api.net.BlockEntityUpdateData;
 import fr.en0ri4n.craftcreator.api.net.OpenContainerRequestData;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
+import fr.en0ri4n.craftcreator.api.ui.elements.CoreBounds;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreButton;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreList;
 import fr.en0ri4n.craftcreator.api.ui.screen.*;
@@ -23,12 +24,11 @@ public class TagSelectionScreen extends CoreScreenDefinition<TagSelectionScreen.
     private final CoreItemStack clickedStack;
     private final List<Identifier> availableTags;
     private final Integer clickedIndex;
-    private CoreList tagListElement;
+    private CoreList<String> tagListElement;
 
     public TagSelectionScreen(TaggableSlotsContainerScreenDefinition<?> parent, Pair<Integer, CoreItemStack> clickedStack)
     {
-        super(Identifier.fromMod("tag_selection_screen"), "Tag Selection Screen", new TagSelectionScreenData()); // TODO: localization
-        getScreenData().load(parent.getScreenData().save());
+        super(Identifier.fromMod("tag_selection_screen"), translate("screen.tag_selection.title"), new TagSelectionScreenData(), CoreBounds.ofSize(176 * 2, 166));
         this.parent = parent;
         this.clickedStack = clickedStack.getSecond();
         this.clickedIndex = clickedStack.getFirst();
@@ -39,24 +39,28 @@ public class TagSelectionScreen extends CoreScreenDefinition<TagSelectionScreen.
     public void renderBackground(RenderContext ctx)
     {
         super.renderBackground(ctx);
-        renderTextureWithSize(ctx, GUI_TEXTURE, getGuiSize().getX(), getGuiSize().getY(), 176, 166, false, false);
+        parent.render(ctx, 0, 0);
+        getCurrentRenderAdapter().drawRect(ctx, 0, 0, getCurrentRenderAdapter().getScreenWidth(), getCurrentRenderAdapter().getScreenHeight(), 0xD0101010);
+        renderTextureWithSize(ctx, GUI_TEXTURE, getGuiSize().getX(), getGuiSize().getY(), getGuiSize().getWidth(), getGuiSize().getHeight(), false, false);
     }
 
     @Override
     public void render(RenderContext ctx, int mouseX, int mouseY)
     {
-        float scale = 2F;
-        int itemWidth = Math.round(16 * scale);
-        getCurrentRenderAdapter().drawItem(ctx, clickedStack, getGuiSize().getHorizontalCenter(itemWidth), getGuiSize().getBottom(-36), scale);
+        float scale = 1.6F;
+        int itemSize = Math.round(16 * scale);
+        getCurrentRenderAdapter().drawItem(ctx, clickedStack, getGuiSize().getHorizontalCenter(itemSize), getGuiSize().getBottom(-itemSize - 6), scale);
     }
 
     @Override
-    public void initElements()
+    public void initElements(int screenWidth, int screenHeight)
     {
+        getScreenData().load(parent.getScreenData().save()); // Load existing data from parent
+
         // List of tags
-        addElement(tagListElement = new CoreList(getGuiSize().getX(10), getGuiSize().getY(10), getGuiSize().getWidth(-20), getGuiSize().getHeight(-50), 12, List.of()));
+        addElement(tagListElement = new CoreList<>(getGuiSize().getX(10), getGuiSize().getY(10), getGuiSize().getWidth(-20), 8, 14, List.of()));
         addElement(new CoreButton("back_button", getGuiSize().getX(10), getGuiSize().getY(135), 50, 20, "Back", this::goBack, "Return to the previous screen"));
-        addElement(new CoreButton("apply_button", getGuiSize().getX(115), getGuiSize().getY(135), 50, 20, "Apply", this::apply, "Apply selected tag to the item"));
+        addElement(new CoreButton("apply_button", getGuiSize().getRight(-60), getGuiSize().getY(135), 50, 20, "Apply", this::apply, "Apply selected tag to the item"));
     }
 
     private void apply()
@@ -79,7 +83,7 @@ public class TagSelectionScreen extends CoreScreenDefinition<TagSelectionScreen.
     {
         this.availableTags.clear();
         this.availableTags.addAll(CraftCreatorAPI.get().getPlatform().getTagProvider().getTags(this.clickedStack));
-        this.tagListElement.setEntries(this.availableTags.stream().map(id -> new CoreList.Entry(id.toString(), id.toString(), null)).toList());
+        this.tagListElement.setEntries(this.availableTags.stream().map(id -> new CoreList.Entry<>(id.toString(), id.toString(), null)).toList());
     }
 
     @Override

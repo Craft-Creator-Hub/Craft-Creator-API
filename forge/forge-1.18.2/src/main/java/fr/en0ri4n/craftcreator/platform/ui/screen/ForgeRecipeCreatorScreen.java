@@ -32,7 +32,7 @@ public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecip
     {
         super.init();
 
-        model.getScreenDefinition().init(this);
+        model.getScreenDefinition().init(this, this.width, this.height);
     }
 
     @Override
