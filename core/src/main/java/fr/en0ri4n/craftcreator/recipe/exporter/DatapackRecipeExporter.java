@@ -61,7 +61,7 @@ public class DatapackRecipeExporter extends ModRecipeExporter
         }
 
         // Create folders
-        File dataDir = new File(datapackDir, "data/" + ApiReferences.MOD_ID + "/recipe");
+        File dataDir = new File(datapackDir, "data/" + ApiReferences.MOD_ID + "/recipes");
 
         if(!dataDir.exists())
             dataDir.mkdirs();
