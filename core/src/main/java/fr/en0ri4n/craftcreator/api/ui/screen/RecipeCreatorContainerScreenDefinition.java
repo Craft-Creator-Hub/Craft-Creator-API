@@ -4,7 +4,7 @@ import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeExporter;
 import fr.en0ri4n.craftcreator.api.net.MakeRecipeRequestData;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
-import fr.en0ri4n.craftcreator.api.ui.elements.CoreBounds;
+import fr.en0ri4n.craftcreator.api.ui.elements.Core2DBounds;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreDropdown;
 import fr.en0ri4n.craftcreator.api.ui.elements.ExportButton;
 import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.RecipeCreatorBlockEntityBehavior;
@@ -38,9 +38,9 @@ public abstract class RecipeCreatorContainerScreenDefinition<T extends RecipeCre
         addElement(new ExportButton("export_button", getExportButtonBounds().getX(), getExportButtonBounds().getY(), this::exportRecipe, "Export Recipe"));
     }
 
-    protected CoreBounds getExportButtonBounds()
+    protected Core2DBounds getExportButtonBounds()
     {
-        return CoreBounds.ofPos(getGuiSize().getRight(-26), getGuiSize().getY(60));
+        return Core2DBounds.ofPos(getGuiSize().getRight(-26), getGuiSize().getY(60));
     }
 
     @Override

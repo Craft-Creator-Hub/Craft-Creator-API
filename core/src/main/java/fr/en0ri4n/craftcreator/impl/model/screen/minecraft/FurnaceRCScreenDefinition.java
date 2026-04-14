@@ -3,7 +3,7 @@ package fr.en0ri4n.craftcreator.impl.model.screen.minecraft;
 import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
-import fr.en0ri4n.craftcreator.api.ui.elements.CoreBounds;
+import fr.en0ri4n.craftcreator.api.ui.elements.Core2DBounds;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreDropdown;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreTextInput;
 import fr.en0ri4n.craftcreator.api.ui.screen.RecipeCreatorContainerScreenDefinition;
@@ -54,9 +54,9 @@ public class FurnaceRCScreenDefinition extends RecipeCreatorContainerScreenDefin
     }
 
     @Override
-    protected CoreBounds getExportButtonBounds()
+    protected Core2DBounds getExportButtonBounds()
     {
-        return CoreBounds.ofPos(getGuiSize().getRight(-26), getGuiSize().getY(60));
+        return Core2DBounds.ofPos(getGuiSize().getRight(-26), getGuiSize().getY(60));
     }
 
     @Override

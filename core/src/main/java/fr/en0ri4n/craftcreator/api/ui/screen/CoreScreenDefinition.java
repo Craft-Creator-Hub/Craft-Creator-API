@@ -5,7 +5,7 @@ import fr.en0ri4n.craftcreator.api.net.UiUpdateData;
 import fr.en0ri4n.craftcreator.api.platform.RenderAdapter;
 import fr.en0ri4n.craftcreator.api.platform.UiAdapter;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
-import fr.en0ri4n.craftcreator.api.ui.elements.CoreBounds;
+import fr.en0ri4n.craftcreator.api.ui.elements.Core2DBounds;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreUiElement;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.Getter;
@@ -24,10 +24,10 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
     private final Identifier id;
     private final String title;
     private final T screenData;
-    private final CoreBounds size;
+    private final Core2DBounds size;
     private final List<CoreUiElement> elements = new ArrayList<>();
 
-    public CoreScreenDefinition(Identifier id, String title, T data, CoreBounds size)
+    public CoreScreenDefinition(Identifier id, String title, T data, Core2DBounds size)
     {
         this.id = id;
         this.title = title;
@@ -35,14 +35,14 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
         this.size = size;
     }
 
-    public CoreBounds getGuiSize()
+    public Core2DBounds getGuiSize()
     {
-        return CoreBounds.centerScreen(getSize(), getCurrentRenderAdapter().getScreenWidth(), getCurrentRenderAdapter().getScreenHeight());
+        return Core2DBounds.centerScreen(getSize(), getCurrentRenderAdapter().getScreenWidth(), getCurrentRenderAdapter().getScreenHeight());
     }
 
     public CoreScreenDefinition(Identifier id, String title, T data)
     {
-        this(id, title, data, CoreBounds.ofSize(176, 166));
+        this(id, title, data, Core2DBounds.ofSize(176, 166));
     }
 
     public void addElement(CoreUiElement element)
@@ -64,9 +64,9 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
         getCurrentRenderAdapter().drawText(ctx, getTitle(), x, y, 0xFFFFFF);
     }
 
-    public CoreBounds getBackgroundTextureSize()
+    public Core2DBounds getBackgroundTextureSize()
     {
-        return CoreBounds.ofSize(176, 166);
+        return Core2DBounds.ofSize(176, 166);
     }
 
     /**
@@ -88,7 +88,7 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
 
     protected void initElements(int screenWidth, int screenHeight) { /* Default implementation does nothing */ }
 
-    public static void renderTextureWithBounds(RenderContext ctx, Identifier texture, CoreBounds bounds, boolean isHovered, boolean isDisabled)
+    public static void renderTextureWithBounds(RenderContext ctx, Identifier texture, Core2DBounds bounds, boolean isHovered, boolean isDisabled)
     {
         renderTextureWithSize(ctx, texture, bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), isHovered, isDisabled);
     }

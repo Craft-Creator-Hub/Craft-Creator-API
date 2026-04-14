@@ -8,7 +8,7 @@ import fr.en0ri4n.craftcreator.api.net.FetchData;
 import fr.en0ri4n.craftcreator.api.net.UiUpdateData;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
-import fr.en0ri4n.craftcreator.api.ui.elements.CoreBounds;
+import fr.en0ri4n.craftcreator.api.ui.elements.Core2DBounds;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.Getter;
 
@@ -22,21 +22,21 @@ public abstract class CoreContainerScreenDefinition<T extends BlockEntityBehavio
 
     public CoreContainerScreenDefinition(ContainerModel<T> parent, T behavior, Identifier id, String title)
     {
-        super(id, title, new CoreContainerScreenData<>(behavior), CoreBounds.ofSize(parent.getLayout().getWidth(), parent.getLayout().getHeight()));
+        super(id, title, new CoreContainerScreenData<>(behavior), Core2DBounds.ofSize(parent.getLayout().getWidth(), parent.getLayout().getHeight()));
         this.parentContainerModel = parent;
     }
 
     @Override
     public void fetchData()
     {
-        CraftCreatorAPI.get().getPlatform().getNetworkInteractionAdapter().fetchData(new FetchData(getParentContainerModel().getBlockEntityPos(), getId()));
+        CraftCreatorAPI.getNetworkAdapter().fetchData(new FetchData(getParentContainerModel().getBlockEntityPos(), getId()));
     }
 
     @Override
     public void renderBackground(RenderContext ctx)
     {
         super.renderBackground(ctx);
-        CoreBounds size = getBackgroundTextureSize();
+        Core2DBounds size = getBackgroundTextureSize();
 
         getCurrentRenderAdapter().drawTexture(ctx, getBackgroundTexture(),
                 getGuiSize().getX(), getGuiSize().getY(), size.getWidth(), size.getHeight(),

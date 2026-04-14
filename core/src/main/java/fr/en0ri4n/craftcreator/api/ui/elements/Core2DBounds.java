@@ -8,16 +8,16 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class CoreBounds
+public class Core2DBounds
 {
     private int x;
     private int y;
     private int width;
     private int height;
 
-    public static CoreBounds ofPos(int x, int y)
+    public static Core2DBounds ofPos(int x, int y)
     {
-        return new CoreBounds(x, y, 0, 0);
+        return new Core2DBounds(x, y, 0, 0);
     }
 
     public int getScaledX(float scale)
@@ -101,29 +101,29 @@ public class CoreBounds
         return getVerticalCenter() - offset / 2;
     }
 
-    public static CoreBounds ofSize(int width, int height) {
-        return new CoreBounds(0, 0, width, height);
+    public static Core2DBounds ofSize(int width, int height) {
+        return new Core2DBounds(0, 0, width, height);
     }
 
-    public static CoreBounds of(int x, int y, int width, int height) {
-        return new CoreBounds(x, y, width, height);
-    }  public static CoreBounds ofVertices(int right, int top, int bottom, int left) {
-        return new CoreBounds(right, top, left - right, bottom - top);
+    public static Core2DBounds of(int x, int y, int width, int height) {
+        return new Core2DBounds(x, y, width, height);
+    }  public static Core2DBounds ofVertices(int right, int top, int bottom, int left) {
+        return new Core2DBounds(right, top, left - right, bottom - top);
     }
 
-    public static CoreBounds square(int x, int y, int size) {
-        return new CoreBounds(x, y, size, size);
+    public static Core2DBounds square(int x, int y, int size) {
+        return new Core2DBounds(x, y, size, size);
     }
 
-    public static CoreBounds fromRight(int right, int y, int width, int height) {
-        return new CoreBounds(right - width, y, width, height);
+    public static Core2DBounds fromRight(int right, int y, int width, int height) {
+        return new Core2DBounds(right - width, y, width, height);
     }
 
-    public static CoreBounds centerScreen(CoreBounds bounds, int screenWidth, int screenHeight) {
+    public static Core2DBounds centerScreen(Core2DBounds bounds, int screenWidth, int screenHeight) {
         int width = bounds.getWidth();
         int height = bounds.getHeight();
         int x = (screenWidth - width) / 2;
         int y = (screenHeight - height) / 2;
-        return new CoreBounds(x, y, width, height);
+        return new Core2DBounds(x, y, width, height);
     }
 }

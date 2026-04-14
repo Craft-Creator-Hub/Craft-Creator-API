@@ -6,7 +6,7 @@ import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
 import fr.en0ri4n.craftcreator.api.net.BlockEntityUpdateData;
 import fr.en0ri4n.craftcreator.api.net.OpenContainerRequestData;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
-import fr.en0ri4n.craftcreator.api.ui.elements.CoreBounds;
+import fr.en0ri4n.craftcreator.api.ui.elements.Core2DBounds;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreButton;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreList;
 import fr.en0ri4n.craftcreator.api.ui.screen.*;
@@ -28,7 +28,7 @@ public class TagSelectionScreen extends CoreScreenDefinition<TagSelectionScreen.
 
     public TagSelectionScreen(TaggableSlotsContainerScreenDefinition<?> parent, Pair<Integer, CoreItemStack> clickedStack)
     {
-        super(Identifier.fromMod("tag_selection_screen"), translate("screen.tag_selection.title"), new TagSelectionScreenData(), CoreBounds.ofSize(176 * 2, 166));
+        super(Identifier.fromMod("tag_selection_screen"), translate("screen.tag_selection.title"), new TagSelectionScreenData(), Core2DBounds.ofSize(176 * 2, 166));
         this.parent = parent;
         this.clickedStack = clickedStack.getSecond();
         this.clickedIndex = clickedStack.getFirst();

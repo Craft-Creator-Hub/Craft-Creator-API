@@ -22,19 +22,19 @@ public abstract class CoreUiElement {
     private final String id;
 
     /** X/Y position in logical screen coordinates. */
-    protected final CoreBounds bounds;
+    protected final Core2DBounds bounds;
 
     /** tooltip text. */
     private final String tooltip;
 
     /** Convenience: auto-generate a random id. */
     protected CoreUiElement(CoreUiElementType type, int x, int y, int width, int height, String tooltip) {
-        this(type, UUID.randomUUID().toString(), CoreBounds.of(x, y, width, height), tooltip);
+        this(type, UUID.randomUUID().toString(), Core2DBounds.of(x, y, width, height), tooltip);
     }
 
     public CoreUiElement(CoreUiElementType type, String id, int x, int y, int width, int height, String tooltip)
     {
-        this(type, id, CoreBounds.of(x, y, width, height), tooltip);
+        this(type, id, Core2DBounds.of(x, y, width, height), tooltip);
     }
 
     protected boolean isMouseOver(int mouseX, int mouseY) {

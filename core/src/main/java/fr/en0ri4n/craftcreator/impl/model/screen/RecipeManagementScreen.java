@@ -3,7 +3,7 @@ package fr.en0ri4n.craftcreator.impl.model.screen;
 import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeExporter;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
-import fr.en0ri4n.craftcreator.api.ui.elements.CoreBounds;
+import fr.en0ri4n.craftcreator.api.ui.elements.Core2DBounds;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreList;
 import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
 import fr.en0ri4n.craftcreator.api.ui.screen.ScreenData;
@@ -21,7 +21,7 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
 
     public RecipeManagementScreen()
     {
-        super(Identifier.fromMod("recipe_management_screen"), translate("screen.recipe_management_screen.title"), new RecipeManagementScreenData(), CoreBounds.of(0, 0, getCurrentRenderAdapter().getScreenWidth(), getCurrentRenderAdapter().getScreenHeight()));
+        super(Identifier.fromMod("recipe_management_screen"), translate("screen.recipe_management_screen.title"), new RecipeManagementScreenData(), Core2DBounds.of(0, 0, getCurrentRenderAdapter().getScreenWidth(), getCurrentRenderAdapter().getScreenHeight()));
     }
 
     @Override
