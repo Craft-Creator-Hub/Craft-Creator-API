@@ -29,7 +29,7 @@ public abstract class CoreContainerScreenDefinition<T extends BlockEntityBehavio
     @Override
     public void fetchData()
     {
-        CraftCreatorAPI.getNetworkAdapter().fetchData(new FetchData(getParentContainerModel().getBlockEntityPos(), getId()));
+        CraftCreatorAPI.get().getPlatform().getNetworkInteractionAdapter().fetchData(new FetchData(getParentContainerModel().getBlockEntityPos(), getId()));
     }
 
     @Override
