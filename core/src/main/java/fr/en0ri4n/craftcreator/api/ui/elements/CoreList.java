@@ -1,6 +1,8 @@
 package fr.en0ri4n.craftcreator.api.ui.elements;
 
+import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
+import fr.en0ri4n.craftcreator.api.platform.RenderAdapter;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.Getter;
@@ -188,8 +190,10 @@ public class CoreList<T> extends CoreUiElement
     {
         if(ctx == null) return;
 
-        getRenderAdapter().drawRect(ctx, x, y, width, height, 0xFF1F2933);
+        getRenderAdapter().drawRect(ctx, getBounds().getX(), getBounds().getY(), getBounds().getWidth(), getBounds().getHeight(), 0xFF1F2933);
         getRenderAdapter().drawRect(ctx, x + getOffset(), y + getOffset(), width - getOffset() * 2, height - getOffset() * 2, 0xFF0F1416);
+
+        if(entries.isEmpty() || getContentHeight() <= 0) return;
 
         int firstIndex = scrollOffset / itemHeight;
         int lastIndex = Math.min(entries.size() - 1, (scrollOffset + getContentHeight() - 1) / itemHeight);
@@ -199,6 +203,7 @@ public class CoreList<T> extends CoreUiElement
         int contentRight = x + width - getOffset() - getScrollBarWidth();
         int contentTop = getContentTop();
         int contentBottom = contentTop + getContentHeight();
+
         if(mouseX >= contentLeft && mouseX < contentRight && mouseY >= contentTop && mouseY < contentBottom)
         {
             int relY = mouseY - contentTop + scrollOffset;
@@ -355,6 +360,11 @@ public class CoreList<T> extends CoreUiElement
 
             getRenderAdapter().drawRect(ctx, mouseX + 12, mouseY + 12, 100, 40, 0xCC000000);
             getRenderAdapter().drawText(ctx, "Entry: " + label, mouseX + 16, mouseY + 16, 0xFFFFFFFF);
+        }
+
+        protected RenderAdapter getRenderAdapter()
+        {
+            return CraftCreatorAPI.get().getPlatform().getRenderAdapter();
         }
     }
 }

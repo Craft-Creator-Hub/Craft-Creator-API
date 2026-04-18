@@ -28,7 +28,10 @@ public class TagSelectionScreen extends CoreScreenDefinition<TagSelectionScreen.
 
     public TagSelectionScreen(TaggableSlotsContainerScreenDefinition<?> parent, Pair<Integer, CoreItemStack> clickedStack)
     {
-        super(Identifier.fromMod("tag_selection_screen"), translate("screen.tag_selection.title"), new TagSelectionScreenData(), Core2DBounds.ofSize(176 * 2, 166));
+        super(Identifier.fromMod("tag_selection_screen"),
+              translate("screen.tag_selector.title"),
+              new TagSelectionScreenData(),
+              Core2DBounds.ofSize(176 * 2, 166));
         this.parent = parent;
         this.clickedStack = clickedStack.getSecond();
         this.clickedIndex = clickedStack.getFirst();
@@ -38,7 +41,6 @@ public class TagSelectionScreen extends CoreScreenDefinition<TagSelectionScreen.
     @Override
     public void renderBackground(RenderContext ctx)
     {
-        super.renderBackground(ctx);
         parent.render(ctx, 0, 0);
         getCurrentRenderAdapter().drawRect(ctx, 0, 0, getCurrentRenderAdapter().getScreenWidth(), getCurrentRenderAdapter().getScreenHeight(), 0xD0101010);
         renderTextureWithSize(ctx, GUI_TEXTURE, getGuiSize().getX(), getGuiSize().getY(), getGuiSize().getWidth(), getGuiSize().getHeight(), false, false);
@@ -58,7 +60,7 @@ public class TagSelectionScreen extends CoreScreenDefinition<TagSelectionScreen.
         getScreenData().load(parent.getScreenData().save()); // Load existing data from parent
 
         // List of tags
-        addElement(tagListElement = new CoreList<>(getGuiSize().getX(10), getGuiSize().getY(10), getGuiSize().getWidth(-20), 8, 14, List.of()));
+        addElement(tagListElement = new CoreList<>(getGuiSize().getX(10), getGuiSize().getY(10), getGuiSize().getWidth(-20), getGuiSize().getHeight(-50), 14, List.of()));
         addElement(new CoreButton("back_button", getGuiSize().getX(10), getGuiSize().getY(135), 50, 20, "Back", this::goBack, "Return to the previous screen"));
         addElement(new CoreButton("apply_button", getGuiSize().getRight(-60), getGuiSize().getY(135), 50, 20, "Apply", this::apply, "Apply selected tag to the item"));
     }
