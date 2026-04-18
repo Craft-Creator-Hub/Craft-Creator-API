@@ -7,6 +7,7 @@ import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
 import fr.en0ri4n.craftcreator.api.ui.elements.Core2DBounds;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreDropdown;
 import fr.en0ri4n.craftcreator.api.ui.elements.ExportButton;
+import fr.en0ri4n.craftcreator.api.ui.elements.RecipeSettingsButton;
 import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.RecipeCreatorBlockEntityBehavior;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 
@@ -35,7 +36,13 @@ public abstract class RecipeCreatorContainerScreenDefinition<T extends RecipeCre
                 };
             }
         });
-        addElement(new ExportButton("export_button", getExportButtonBounds().getX(), getExportButtonBounds().getY(), this::exportRecipe, "Export Recipe"));
+        addElement(new RecipeSettingsButton("recipe_settings_button", getRecipeSettingsButtonBounds(), this::openRecipeSettingsScreen, "Recipe Settings"));
+        addElement(new ExportButton("export_button", getExportButtonBounds(), this::exportRecipe, "Export Recipe"));
+    }
+
+    protected Core2DBounds getRecipeSettingsButtonBounds()
+    {
+        return Core2DBounds.ofPos(getGuiSize().getX(20), getGuiSize().getY(60));
     }
 
     protected Core2DBounds getExportButtonBounds()
@@ -53,6 +60,11 @@ public abstract class RecipeCreatorContainerScreenDefinition<T extends RecipeCre
     {
         getScreenData().getBehavior().setSerializationType(recipeExporter);
         sendUpdates();
+    }
+
+    protected void openRecipeSettingsScreen()
+    {
+        // By default, do nothing as not all recipe creators will have settings. Specific implementations can override this to open a settings screen.
     }
 
     protected void exportRecipe()
