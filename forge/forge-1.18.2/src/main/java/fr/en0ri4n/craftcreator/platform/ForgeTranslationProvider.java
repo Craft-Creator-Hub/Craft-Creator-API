@@ -1,7 +1,7 @@
 package fr.en0ri4n.craftcreator.platform;
 
 import fr.en0ri4n.craftcreator.api.translations.TranslationProvider;
-import net.minecraft.locale.Language;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public class ForgeTranslationProvider implements TranslationProvider
 {
@@ -15,6 +15,6 @@ public class ForgeTranslationProvider implements TranslationProvider
     @Override
     public String translate(String key, Object... args)
     {
-        return Language.getInstance().getOrDefault(key).formatted(args);
+        return new TranslatableComponent(key, args).getString();
     }
 }
