@@ -17,7 +17,7 @@ public class CraftingTableRCScreenDefinition extends RecipeCreatorContainerScree
 
     public CraftingTableRCScreenDefinition(ContainerModel<CraftingTableRCBehavior> parent)
     {
-        super(parent, new CraftingTableRCBehavior(), RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR_ID, translate("screen.minecraft_recipe_creator.crafting.title"));
+        super(parent, new CraftingTableRCBehavior(), RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR_ID, "screen.minecraft_recipe_creator.crafting.title");
     }
 
     @Override

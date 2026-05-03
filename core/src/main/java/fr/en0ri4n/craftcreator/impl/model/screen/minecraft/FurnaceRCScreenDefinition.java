@@ -22,7 +22,7 @@ public class FurnaceRCScreenDefinition extends RecipeCreatorContainerScreenDefin
 
     public FurnaceRCScreenDefinition(ContainerModel<FurnaceRCBehavior> parent)
     {
-        super(parent, new FurnaceRCBehavior(), RecipeCreators.FURNACE_RECIPE_CREATOR_ID, translate("screen.minecraft_recipe_creator.smelting.title"));
+        super(parent, new FurnaceRCBehavior(), RecipeCreators.FURNACE_RECIPE_CREATOR_ID, "screen.minecraft_recipe_creator.smelting.title");
     }
 
     @Override
@@ -79,8 +79,11 @@ public class FurnaceRCScreenDefinition extends RecipeCreatorContainerScreenDefin
     @Override
     public void renderForeground(RenderContext ctx, int mouseX, int mouseY)
     {
-//        CoreBounds bounds = CoreBounds.fromRight(getGuiSize().getRight(), getGuiSize().getY(), 22, 22);
-//        CoreScreenDefinition.renderTextureWithBounds(ctx, CoreScreenDefinition.GUI_TEXTURE, bounds, false, false);
-        getCurrentRenderAdapter().drawItem(ctx, new CoreItemStack(getBehavior().getFurnaceType().getItemId(), 1), furnaceTypeDropdown.getBounds().getX(3), furnaceTypeDropdown.getBounds().getY(3), 1F);
+        super.renderForeground(ctx, mouseX, mouseY);
+        getCurrentRenderAdapter().drawItem(ctx,
+                                           new CoreItemStack(getBehavior().getFurnaceType().getItemId(), 1),
+                                           furnaceTypeDropdown.getBounds().getX(3),
+                                           furnaceTypeDropdown.getBounds().getY(3),
+                                           1F);
     }
 }
