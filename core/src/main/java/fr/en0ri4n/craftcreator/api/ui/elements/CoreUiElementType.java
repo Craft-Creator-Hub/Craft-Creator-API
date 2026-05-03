@@ -5,5 +5,6 @@ public enum CoreUiElementType
     BUTTON,
     TEXT_INPUT,
     DROPDOWN,
-    LIST
+    LIST,
+    WIDGET_LIST
 }
