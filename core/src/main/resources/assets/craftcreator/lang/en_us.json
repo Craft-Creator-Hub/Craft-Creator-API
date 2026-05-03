@@ -1,6 +1,6 @@
 {
-  "craftcreator.screen.minecraft_recipe_creator.smelting.field.experience": "Exp. :",
-  "craftcreator.screen.minecraft_recipe_creator.smelting.field.cooking_time": "Time :",
+  "craftcreator.screen.minecraft_recipe_creator.smelting.field.experience": "Experience:",
+  "craftcreator.screen.minecraft_recipe_creator.smelting.field.cooking_time": "Cooking Time:",
 
   "craftcreator.screen.minecraft_recipe_creator.crafting.title": "Crafting Table Recipe Creator",
   "craftcreator.screen.minecraft_recipe_creator.smelting.title": "Smelting Recipe Creator",
