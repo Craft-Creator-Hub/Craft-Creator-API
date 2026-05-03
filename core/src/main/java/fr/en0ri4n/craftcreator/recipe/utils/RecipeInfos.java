@@ -131,6 +131,10 @@ public class RecipeInfos {
             this.type = type;
             this.name = name;
         }
+
+        public String getRawValue() {
+            return null;
+        }
     }
 
     public static class RecipeParameterNumber extends RecipeParameter {
@@ -147,6 +151,12 @@ public class RecipeInfos {
         public Number getNumberValue() {
             return value;
         }
+
+        @Override
+        public String getRawValue()
+        {
+            return value.toString();
+        }
     }
 
     public static class RecipeParameterBoolean extends RecipeParameter {
@@ -160,6 +170,12 @@ public class RecipeInfos {
         public boolean getBoolean() {
             return value;
         }
+
+        @Override
+        public String getRawValue()
+        {
+            return Boolean.toString(value);
+        }
     }
 
     @Getter
@@ -170,6 +186,12 @@ public class RecipeInfos {
             super(RecipeParameterType.MAP, name);
             this.map = map;
         }
+
+        @Override
+        public String getRawValue()
+        {
+            return "Map(" + map.size() + " entries)";
+        }
     }
 
     @Getter
@@ -179,6 +201,12 @@ public class RecipeInfos {
         public RecipeParameterIntList(String name, List<Integer> list) {
             super(RecipeParameterType.INT_LIST, name);
             this.list = list;
+        }
+
+        @Override
+        public String getRawValue()
+        {
+            return "IntList(" + list.size() + " elements)";
         }
     }
 

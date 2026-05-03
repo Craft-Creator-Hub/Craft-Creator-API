@@ -14,6 +14,7 @@ import fr.en0ri4n.craftcreator.utils.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagementScreen.RecipeManagementScreenData>
 {
@@ -21,7 +22,7 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
 
     public RecipeManagementScreen()
     {
-        super(Identifier.fromMod("recipe_management_screen"), translate("screen.recipe_management_screen.title"), new RecipeManagementScreenData(), Core2DBounds.of(0, 0, getCurrentRenderAdapter().getScreenWidth(), getCurrentRenderAdapter().getScreenHeight()));
+        super(Identifier.fromMod("recipe_management_screen"), "screen.recipe_management_screen.title", new RecipeManagementScreenData(), Core2DBounds.of(0, 0, getCurrentRenderAdapter().getScreenWidth(), getCurrentRenderAdapter().getScreenHeight()));
     }
 
     @Override
@@ -44,7 +45,31 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
 
     protected List<CoreList.Entry<Recipe>> transformRecipesToEntries(List<Recipe> recipes)
     {
-        return recipes.stream().map(recipe -> new CoreList.Entry<>(recipe.getName(), recipe, recipe.getOutputs().get(0).getId(), (e) -> {})).toList();
+        return recipes.stream().<CoreList.Entry<Recipe>>map(recipe -> new RecipeEntry(recipe.getName(), recipe, recipe.getOutputs().get(0).getId(), (e) -> {})).toList();
+    }
+
+    public static class RecipeEntry extends CoreList.Entry<Recipe>
+    {
+        public RecipeEntry(String displayName, Recipe data, Identifier id, Consumer<CoreList.Entry<Recipe>> onClick)
+        {
+            super(displayName, data, id, onClick);
+        }
+
+        @Override
+        public void renderForeground(RenderContext ctx, int index, int x, int y, int width, int itemHeight, int mouseX, int mouseY, boolean selected, boolean hovered)
+        {
+            int relativeX = mouseX + 12;
+            int relativeY = mouseY + 12;
+            getRenderAdapter().drawRect(ctx, relativeX, relativeY, 100, 40, 0xCC004B96);
+            getRenderAdapter().drawText(ctx, "Type: " + getValue().getType(), relativeX += 3, relativeY += 3, 0xFFFFFFFF);
+            getRenderAdapter().drawText(ctx, "Input(s):", relativeX, relativeY += 16, 0xFFFFFFFF);
+            for(int i = 0; i < getValue().getInputs().size(); i++)
+                getRenderAdapter().drawText(ctx, "- " + getValue().getInputs().get(i).getId(), relativeX + 12, relativeY += 12, 0xFFFFFFFF);
+            getRenderAdapter().drawText(ctx, "Output: " + getValue().getOutputs().get(0).getId(), relativeX, relativeY += 16, 0xFFFFFFFF);
+            getRenderAdapter().drawText(ctx, "Recipe Parameters:" + (getValue().getInfos().getParameters().isEmpty() ? " None" : ""), relativeX, relativeY += 16, 0xFFFFFFFF);
+            for(int i = 0; i < getValue().getInfos().getParameters().size(); i++)
+                getRenderAdapter().drawText(ctx, "- " + getValue().getInfos().getParameters().get(i).getName() + ": " + getValue().getInfos().getParameters().get(i).getRawValue(), relativeX + 12, relativeY += 12, 0xFFFFFFFF);
+        }
     }
 
     public static class RecipeManagementScreenData implements ScreenData
