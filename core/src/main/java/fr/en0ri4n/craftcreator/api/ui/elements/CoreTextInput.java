@@ -72,6 +72,12 @@ public class CoreTextInput extends CoreUiElement
     {
         if(isFocused())
         {
+            if(getInputType() == TextInputType.INTEGER && !Character.isDigit(codePoint))
+                return true; // ignore non-digit input for integer type
+            if(getInputType() == TextInputType.FLOAT)
+                if(!Character.isDigit(codePoint) && codePoint != '.' || (codePoint == '.' && value.contains(".")))
+                    return true; // ignore non-digit and non-dot input for float type
+
             String newValue = value.substring(0, cursorPosition) + codePoint + value.substring(cursorPosition);
             if(newValue.length() <= maxLength)
             {
