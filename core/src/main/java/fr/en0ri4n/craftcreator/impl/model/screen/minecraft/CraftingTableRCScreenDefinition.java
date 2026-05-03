@@ -1,7 +1,6 @@
 package fr.en0ri4n.craftcreator.impl.model.screen.minecraft;
 
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
-import fr.en0ri4n.craftcreator.api.ui.elements.Core2DBounds;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreDropdown;
 import fr.en0ri4n.craftcreator.api.ui.screen.RecipeCreatorContainerScreenDefinition;
 import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.CraftingTableRCBehavior;
@@ -42,12 +41,6 @@ public class CraftingTableRCScreenDefinition extends RecipeCreatorContainerScree
                 };
             }
         });
-    }
-
-    @Override
-    protected Core2DBounds getExportButtonBounds()
-    {
-        return Core2DBounds.ofPos(getGuiSize().getX(120), getGuiSize().getY(10));
     }
 
     private void setCraftingShape(CraftingTableRCBehavior.CraftingType type)
