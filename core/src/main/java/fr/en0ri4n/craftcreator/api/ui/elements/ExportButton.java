@@ -1,6 +1,7 @@
 package fr.en0ri4n.craftcreator.api.ui.elements;
 
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
+import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 
 public class ExportButton extends CoreButton
@@ -16,10 +17,16 @@ public class ExportButton extends CoreButton
     public void render(RenderContext ctx, int mouseX, int mouseY, float partialTick)
     {
         getRenderAdapter().drawTexture(ctx,
+                                       CoreScreenDefinition.GUI_TEXTURE,
+                                       getBounds().getX(), getBounds().getY(),
+                                       20, 20, 16, 48,
+                                       0, isMouseOver(mouseX, mouseY) ? 16 : !isEnabled() ? 32 : 0,
+                                       16, 16);
+        getRenderAdapter().drawTexture(ctx,
                                        BUTTON_TEXTURE,
                                        getBounds().getX(), getBounds().getY(),
-                                       20, 20, 20, 60,
-                                       0, isMouseOver(mouseX, mouseY) ? 20 : !isEnabled() ? 40 : 0,
+                                       20, 20, 20, 20,
+                                       0, 0,
                                        20, 20);
     }
 }
