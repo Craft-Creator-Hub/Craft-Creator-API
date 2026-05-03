@@ -31,7 +31,7 @@ public class CoreButtonWidgetList extends CoreUiElement
 
     private int getOffset()
     {
-        return 4;
+        return 5;
     }
 
     private int getScrollBarWidth()
