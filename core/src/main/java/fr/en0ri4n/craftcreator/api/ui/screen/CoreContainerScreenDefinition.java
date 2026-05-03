@@ -46,9 +46,17 @@ public abstract class CoreContainerScreenDefinition<T extends BlockEntityBehavio
 
     public abstract Identifier getBackgroundTexture();
 
+    /**
+     * Fills the behavior with the current values of the screen's elements. This is called before sending the data to the server, to make sure the behavior is up to date with the screen's state.
+     * @param behavior The behavior to fill with the screen's data. It is the same instance as the one returned by getScreenData().getBehavior(), so modifying it will modify the screen data directly.
+     */
+    protected void fillBehavior(T behavior) { /* By default, the behavior is already filled with the data sent by the server when opening the screen, so no need to do anything here. But in some cases, you might want to fill it with some updated values. */ }
+
     @Override
     public void sendUpdates()
     {
+        fillBehavior(getScreenData().getBehavior());
+
         JsonObject payload = new JsonObject();
         getScreenData().getBehavior().save(null, payload);
         CraftCreatorAPI.get().getPlatform().getNetworkInteractionAdapter().sendDataUpdateToServer(new BlockEntityUpdateData(parentContainerModel.getBlockEntityPos(), getId(), payload));

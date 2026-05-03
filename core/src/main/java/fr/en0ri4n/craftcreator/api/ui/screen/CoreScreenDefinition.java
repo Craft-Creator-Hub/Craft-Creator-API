@@ -162,7 +162,7 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
 
     public void onClose()
     {
-        cleanScreen();
         sendUpdates();
+        cleanScreen();
     }
 }
