@@ -18,7 +18,7 @@ public class RecipeSettingsButton extends CoreButton
         getRenderAdapter().drawTexture(ctx,
                                        BUTTON_TEXTURE,
                                        getBounds().getX(), getBounds().getY(),
-                                       40, 40, 40, 120,
+                                       20, 20, 40, 120,
                                        0, isMouseOver(mouseX, mouseY) ? 40 : !isEnabled() ? 80 : 0,
                                        40, 40);
     }

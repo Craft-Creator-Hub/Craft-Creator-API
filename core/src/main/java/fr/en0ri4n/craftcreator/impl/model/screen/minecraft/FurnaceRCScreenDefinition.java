@@ -3,7 +3,6 @@ package fr.en0ri4n.craftcreator.impl.model.screen.minecraft;
 import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
-import fr.en0ri4n.craftcreator.api.ui.elements.Core2DBounds;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreDropdown;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreTextInput;
 import fr.en0ri4n.craftcreator.api.ui.screen.RecipeCreatorContainerScreenDefinition;
@@ -18,6 +17,7 @@ public class FurnaceRCScreenDefinition extends RecipeCreatorContainerScreenDefin
     private static final Identifier BACKGROUND_TEXTURE = Identifier.fromMod("textures/gui/container/minecraft/furnace_recipe_creator.png");
 
     private CoreDropdown<FurnaceRCBehavior.FurnaceType> furnaceTypeDropdown;
+    private CoreTextInput cookingTimeInput;
     private CoreTextInput experienceInput;
 
     public FurnaceRCScreenDefinition(ContainerModel<FurnaceRCBehavior> parent)
@@ -43,20 +43,28 @@ public class FurnaceRCScreenDefinition extends RecipeCreatorContainerScreenDefin
                 return "";
             }
         });
-        addElement(new CoreTextInput("cooking_time_input", CoreTextInput.TextInputType.INTEGER, getGuiSize().getX(10), getGuiSize().getY(35), 30, 10, translate("screen.minecraft_recipe_creator.smelting.field.cooking_time"), String.valueOf(200), "Ticks", "Time it takes to smelt one item in ticks"));
-        addElement(experienceInput = new CoreTextInput("experience_input", CoreTextInput.TextInputType.FLOAT, getGuiSize().getX(10), getGuiSize().getY(60), 30, 10, translate("screen.minecraft_recipe_creator.smelting.field.experience"), String.valueOf(0.5F), "XP", "Experience awarded per item smelted"));
+    }
+
+    @Override
+    protected void addSettings()
+    {
+        addRecipeSetting(translate("screen.minecraft_recipe_creator.smelting.field.cooking_time"),
+                         cookingTimeInput = new CoreTextInput("cooking_time_input", CoreTextInput.TextInputType.INTEGER, getGuiSize().getX(10), getGuiSize().getY(35), 30, 10, "", String.valueOf(200), "Ticks", "Time it takes to smelt one item in ticks"));
+        addRecipeSetting(translate("screen.minecraft_recipe_creator.smelting.field.experience"),
+                         experienceInput = new CoreTextInput("experience_input", CoreTextInput.TextInputType.FLOAT, getGuiSize().getX(10), getGuiSize().getY(60), 30, 10, "", String.valueOf(0.5F), "XP", "Experience awarded per item smelted"));
     }
 
     private void setFurnaceType(FurnaceRCBehavior.FurnaceType type)
     {
         getScreenData().getBehavior().setFurnaceType(type);
-        sendUpdates();
     }
 
     @Override
-    protected Core2DBounds getExportButtonBounds()
+    protected void fillBehavior(FurnaceRCBehavior behavior)
     {
-        return Core2DBounds.ofPos(getGuiSize().getRight(-26), getGuiSize().getY(60));
+        behavior.setFurnaceType(furnaceTypeDropdown.getSelectedValue());
+        behavior.setCookingTime(Integer.parseInt(cookingTimeInput.getValue()));
+        behavior.setExperience(Float.parseFloat(experienceInput.getValue()));
     }
 
     @Override
@@ -64,6 +72,7 @@ public class FurnaceRCScreenDefinition extends RecipeCreatorContainerScreenDefin
     {
         super.onDataUpdated(behavior);
         furnaceTypeDropdown.setSelectedValue(behavior.getFurnaceType());
+        cookingTimeInput.setValue(String.valueOf(behavior.getCookingTime()));
         experienceInput.setValue(String.valueOf(behavior.getExperience()));
     }
 
