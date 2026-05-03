@@ -78,6 +78,8 @@ public class CoreButtonWidgetList extends CoreUiElement
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta)
     {
+        if(!isVisible()) return false;
+
         int steps = 0;
         if(delta > 0) steps = -20;
         else if(delta < 0) steps = 20;
@@ -93,6 +95,8 @@ public class CoreButtonWidgetList extends CoreUiElement
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers)
     {
+        if(!isVisible()) return false;
+
         for(WidgetEntry entry : entries)
         {
             if(entry.widget.keyPressed(keyCode, scanCode, modifiers))
@@ -104,6 +108,8 @@ public class CoreButtonWidgetList extends CoreUiElement
     @Override
     public boolean charTyped(char codePoint, int modifiers)
     {
+        if(!isVisible()) return false;
+
         for(WidgetEntry entry : entries)
         {
             if(entry.widget.charTyped(codePoint, modifiers))
@@ -115,7 +121,7 @@ public class CoreButtonWidgetList extends CoreUiElement
     @Override
     public void render(RenderContext ctx, int mouseX, int mouseY, float partialTick)
     {
-        if(ctx == null) return;
+        if(ctx == null || !isVisible()) return;
 
         int x = getBounds().getX();
         int y = getBounds().getY();
@@ -152,6 +158,8 @@ public class CoreButtonWidgetList extends CoreUiElement
     @Override
     public void renderForeground(RenderContext ctx, int mouseX, int mouseY)
     {
+        if(!isVisible()) return;
+
         int contentTop = getContentTop();
         int contentLeft = getBounds().getX() + getOffset();
         int contentWidth = getBounds().getWidth() - getOffset() * 2 - getScrollBarWidth() - itemSpacing;
@@ -197,6 +205,8 @@ public class CoreButtonWidgetList extends CoreUiElement
     @Override
     public boolean mouseClicked(int mouseX, int mouseY, int button)
     {
+        if(!isVisible()) return false;
+
         int x = getBounds().getX();
         int width = getBounds().getWidth();
         int contentLeft = x + getOffset();

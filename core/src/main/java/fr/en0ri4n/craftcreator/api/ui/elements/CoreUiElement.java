@@ -6,6 +6,7 @@ import fr.en0ri4n.craftcreator.api.platform.UiAdapter;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.util.UUID;
 
@@ -27,6 +28,10 @@ public abstract class CoreUiElement {
     /** tooltip text. */
     private final String tooltip;
 
+    /** Whether the element is currently visible. */
+    @Setter
+    private boolean isVisible = true;
+
     /** Convenience: auto-generate a random id. */
     protected CoreUiElement(CoreUiElementType type, int x, int y, int width, int height, String tooltip) {
         this(type, UUID.randomUUID().toString(), Core2DBounds.of(x, y, width, height), tooltip);
@@ -37,7 +42,9 @@ public abstract class CoreUiElement {
         this(type, id, Core2DBounds.of(x, y, width, height), tooltip);
     }
 
-    protected boolean isMouseOver(int mouseX, int mouseY) {
+    protected boolean isMouseOver(int mouseX, int mouseY)
+    {
+        if(!isVisible) return false;
         return getBounds().contains(mouseX, mouseY);
     }
 
