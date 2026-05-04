@@ -2,6 +2,9 @@ package fr.en0ri4n.craftcreator.api.ui.elements;
 
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
+import fr.en0ri4n.craftcreator.utils.Identifier;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,12 +12,22 @@ import java.util.List;
 public class CoreButtonWidgetList extends CoreUiElement
 {
     private final List<WidgetEntry> entries = new ArrayList<>();
+    private final Identifier buttonTexture;
     private int scrollOffset = 0;
     private final int itemSpacing = 4;
+    
+    @Getter
+    @Setter
+    private boolean isOpen = false;
+    private final Core2DBounds buttonBounds;
 
-    public CoreButtonWidgetList(String id, int x, int y, int width, int height, String tooltip)
+    public CoreButtonWidgetList(String id, int x, int y, int width, int height, Core2DBounds buttonBounds, Identifier buttonTexture, String tooltip)
     {
         super(CoreUiElementType.WIDGET_LIST, id, x, y, width, height, tooltip);
+        this.buttonTexture = buttonTexture;
+        buttonBounds.setX(x + width - 20);
+        buttonBounds.setY(y);
+        this.buttonBounds = buttonBounds;
     }
 
     public void addWidget(String label, CoreUiElement widget)
@@ -78,7 +91,7 @@ public class CoreButtonWidgetList extends CoreUiElement
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta)
     {
-        if(!isVisible()) return false;
+        if(!isVisible() || !isOpen()) return false;
 
         int steps = 0;
         if(delta > 0) steps = -20;
@@ -95,7 +108,7 @@ public class CoreButtonWidgetList extends CoreUiElement
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers)
     {
-        if(!isVisible()) return false;
+        if(!isVisible() || !isOpen()) return false;
 
         for(WidgetEntry entry : entries)
         {
@@ -108,7 +121,7 @@ public class CoreButtonWidgetList extends CoreUiElement
     @Override
     public boolean charTyped(char codePoint, int modifiers)
     {
-        if(!isVisible()) return false;
+        if(!isVisible() || !isOpen()) return false;
 
         for(WidgetEntry entry : entries)
         {
@@ -118,10 +131,33 @@ public class CoreButtonWidgetList extends CoreUiElement
         return super.charTyped(codePoint, modifiers);
     }
 
+    public void setOpen(boolean open)
+    {
+        isOpen = open;
+        buttonBounds.setX(getBounds().getX() + (!isOpen ? getBounds().getWidth() : 0) - buttonBounds.getWidth());
+    }
+
     @Override
     public void render(RenderContext ctx, int mouseX, int mouseY, float partialTick)
     {
         if(ctx == null || !isVisible()) return;
+
+        // Render the button background
+        CoreScreenDefinition.renderTextureWithSize(ctx, CoreScreenDefinition.GUI_TEXTURE, buttonBounds.getX(), buttonBounds.getY(), buttonBounds.getWidth(), buttonBounds.getHeight(), false, false);
+        getRenderAdapter().drawTexture(ctx,
+                buttonTexture, 
+                buttonBounds.getX() + 4, 
+                buttonBounds.getY() + 4,
+                12,
+                12, 
+                24,
+                24,
+                0,
+                0,
+                24,
+                24);
+        
+        if(!isOpen()) return;
 
         int x = getBounds().getX();
         int y = getBounds().getY();
@@ -159,6 +195,12 @@ public class CoreButtonWidgetList extends CoreUiElement
     public void renderForeground(RenderContext ctx, int mouseX, int mouseY)
     {
         if(!isVisible()) return;
+        
+        if(!isOpen())
+        {
+            getRenderAdapter().drawRect(ctx, getBounds().getX(), getBounds().getY(), getBounds().getWidth(), getBounds().getHeight(), 0x55FFFFFF);
+            return;
+        }
 
         int contentTop = getContentTop();
         int contentLeft = getBounds().getX() + getOffset();
@@ -206,6 +248,12 @@ public class CoreButtonWidgetList extends CoreUiElement
     public boolean mouseClicked(int mouseX, int mouseY, int button)
     {
         if(!isVisible()) return false;
+        
+        if(button == 0 && buttonBounds.contains(mouseX, mouseY))
+        {
+            setOpen(!isOpen);            
+            return true;
+        }
 
         int x = getBounds().getX();
         int width = getBounds().getWidth();

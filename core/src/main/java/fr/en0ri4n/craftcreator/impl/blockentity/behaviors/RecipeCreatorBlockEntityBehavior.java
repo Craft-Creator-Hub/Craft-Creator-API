@@ -5,6 +5,7 @@ import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntity;
 import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeExporter;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 /**
  * Base behavior for recipe creator block entities.
@@ -16,6 +17,8 @@ import lombok.Setter;
 public abstract class RecipeCreatorBlockEntityBehavior extends TaggableSlotsBlockEntityBehavior
 {
     private SupportedRecipeExporter serializationType = SupportedRecipeExporter.MINECRAFT_DATAPACK;
+    @Accessors(fluent = true)
+    private boolean hasSettingsOpen = false;
 
     @Override
     public void load(CoreBlockEntity entity, JsonObject in)
@@ -23,6 +26,8 @@ public abstract class RecipeCreatorBlockEntityBehavior extends TaggableSlotsBloc
         super.load(entity, in);
         if(in.has("serializationType"))
             this.serializationType = SupportedRecipeExporter.valueOf(in.get("serializationType").getAsString().toUpperCase());
+        if(in.has("hasSettingsOpen"))
+            this.hasSettingsOpen = in.get("hasSettingsOpen").getAsBoolean();
     }
 
     @Override
@@ -31,5 +36,6 @@ public abstract class RecipeCreatorBlockEntityBehavior extends TaggableSlotsBloc
         super.save(entity, out);
         if(this.serializationType != null)
             out.addProperty("serializationType", this.serializationType.name().toLowerCase());
+        out.addProperty("hasSettingsOpen", this.hasSettingsOpen);
     }
 }

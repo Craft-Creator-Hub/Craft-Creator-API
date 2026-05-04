@@ -54,6 +54,12 @@ public class FurnaceRCScreenDefinition extends RecipeCreatorContainerScreenDefin
                          experienceInput = new CoreTextInput("experience_input", CoreTextInput.TextInputType.FLOAT, getGuiSize().getX(10), getGuiSize().getY(60), 30, 10, "", String.valueOf(0.5F), "XP", "Experience awarded per item smelted"));
     }
 
+    @Override
+    protected boolean hasRecipeSettings()
+    {
+        return true;
+    }
+
     private void setFurnaceType(FurnaceRCBehavior.FurnaceType type)
     {
         getScreenData().getBehavior().setFurnaceType(type);
@@ -62,6 +68,7 @@ public class FurnaceRCScreenDefinition extends RecipeCreatorContainerScreenDefin
     @Override
     protected void fillBehavior(FurnaceRCBehavior behavior)
     {
+        super.fillBehavior(behavior);
         behavior.setFurnaceType(furnaceTypeDropdown.getSelectedValue());
         behavior.setCookingTime(Integer.parseInt(cookingTimeInput.getValue()));
         behavior.setExperience(Float.parseFloat(experienceInput.getValue()));

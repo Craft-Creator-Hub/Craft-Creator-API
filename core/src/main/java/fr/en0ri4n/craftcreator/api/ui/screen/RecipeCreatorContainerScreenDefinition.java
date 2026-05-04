@@ -41,9 +41,12 @@ public abstract class RecipeCreatorContainerScreenDefinition<T extends RecipeCre
         //addElement(new RecipeSettingsButton("recipe_settings_button", getRecipeSettingsButtonBounds(), this::openRecipeSettingsScreen, "Recipe Settings"));
         addElement(new ExportButton("export_button", getExportButtonBounds(), this::exportRecipe, "Export Recipe"));
 
-        addElement(settingsList = new CoreButtonWidgetList("example_button_list", getGuiSize().getX(-100), getGuiSize().getY(), 100, 100, "HELLO"));
+        addElement(settingsList = new CoreButtonWidgetList("example_button_list", getGuiSize().getX(-100), getGuiSize().getY(), 100, 100, Core2DBounds.ofSize(20, 20), Identifier.fromMod("textures/gui/widgets/settings.png"), "HELLO"));
+        settingsList.setVisible(hasRecipeSettings());
         addSettings();
     }
+    
+    protected abstract boolean hasRecipeSettings();
 
     /**
      * Allows adding custom settings buttons to the screen. By default, does nothing as not all recipe creators will have settings. Specific implementations can override this to add settings buttons to the settings list.
@@ -67,9 +70,17 @@ public abstract class RecipeCreatorContainerScreenDefinition<T extends RecipeCre
     }
 
     @Override
+    protected void fillBehavior(T behavior)
+    {
+        behavior.setSerializationType(recipeTypeDropdown.getSelectedValue());
+        behavior.hasSettingsOpen(settingsList.isOpen());
+    }
+
+    @Override
     protected void onDataUpdated(T behavior)
     {
-        recipeTypeDropdown.setSelectedValue(getScreenData().getBehavior().getSerializationType());
+        recipeTypeDropdown.setSelectedValue(behavior.getSerializationType());
+        settingsList.setOpen(behavior.hasSettingsOpen());
     }
 
     private void onRecipeTypeChanged(SupportedRecipeExporter recipeExporter)

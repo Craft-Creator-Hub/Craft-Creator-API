@@ -43,6 +43,12 @@ public class CraftingTableRCScreenDefinition extends RecipeCreatorContainerScree
         });
     }
 
+    @Override
+    protected boolean hasRecipeSettings()
+    {
+        return false;
+    }
+
     private void setCraftingShape(CraftingTableRCBehavior.CraftingType type)
     {
         getScreenData().getBehavior().setCraftingType(type);
