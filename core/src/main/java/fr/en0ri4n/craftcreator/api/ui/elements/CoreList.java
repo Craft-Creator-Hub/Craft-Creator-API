@@ -330,15 +330,15 @@ public class CoreList<T> extends CoreUiElement
         {
             if(selected)
             {
-                getRenderAdapter().drawRect(ctx, x + 6, entryTop + 2, width - 12, itemHeight - 4, 0xAA2B8AE6);
+                getRenderAdapter().drawRect(ctx, x, entryTop + 2, width, itemHeight - 4, 0xAA2B8AE6);
             }
             else if(hovered)
             {
-                getRenderAdapter().drawRect(ctx, x + 6, entryTop + 2, width - 12, itemHeight - 4, 0x552B8AE6);
+                getRenderAdapter().drawRect(ctx, x + 6, entryTop + 2, width - 6, itemHeight - 4, 0x552B8AE6);
             }
             else if((index & 1) == 0)
             {
-                getRenderAdapter().drawRect(ctx, x + 6, entryTop + 2, width - 12, itemHeight - 4, 0xFF0D1112);
+                getRenderAdapter().drawRect(ctx, x + 6, entryTop + 2, width - 6, itemHeight - 4, 0xFF0D1112);
             }
 
             float iconX = x + 10f;
