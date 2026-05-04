@@ -1,5 +1,6 @@
 package fr.en0ri4n.craftcreator.api.ui.elements;
 
+import fr.en0ri4n.craftcreator.api.platform.UiAdapter;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
 import fr.en0ri4n.craftcreator.utils.Identifier;
@@ -248,7 +249,8 @@ public class CoreButtonWidgetList extends CoreUiElement
         
         if(button == 0 && buttonBounds.contains(mouseX, mouseY))
         {
-            setOpen(!isOpen);            
+            setOpen(!isOpen);
+            getUiAdapter().playSound(UiAdapter.UiSound.BUTTON_CLICK);
             return true;
         }
 
