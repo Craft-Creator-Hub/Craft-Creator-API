@@ -4,7 +4,9 @@ import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeExporter;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.api.ui.elements.Core2DBounds;
+import fr.en0ri4n.craftcreator.api.ui.elements.CoreButton;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreList;
+import fr.en0ri4n.craftcreator.api.ui.elements.CoreTextInput;
 import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
 import fr.en0ri4n.craftcreator.api.ui.screen.ScreenData;
 import fr.en0ri4n.craftcreator.recipe.exporter.ModRecipeExporter;
@@ -13,11 +15,14 @@ import fr.en0ri4n.craftcreator.recipe.model.Recipe;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagementScreen.RecipeManagementScreenData>
 {
+    private final Map<RecipeListType, CoreButton> recipeListTypeButtons = new HashMap<>();
     private CoreList<Recipe> recipeListElement;
 
     public RecipeManagementScreen()
@@ -28,7 +33,42 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
     @Override
     protected void initElements(int screenWidth, int screenHeight)
     {
-        addElement(recipeListElement = new CoreList<>(10, 10, 180, screenHeight - 20, 20, transformRecipesToEntries(RecipeManagementScreenData.loadedRecipes)));
+        addElement(recipeListElement = new CoreList<>(10, 55, 180, screenHeight - 90, 20, transformRecipesToEntries(RecipeManagementScreenData.loadedRecipes)));
+        
+        recipeListTypeButtons.clear();
+        
+        int relativeX = 10;
+        int width = 85;
+        int height = 18;
+        addElement(addRecipeListTypeButton(RecipeListType.RECIPES, new CoreButton("Recipes", relativeX, 10, width, height, "All",
+                () -> setCurrentRecipeListType(RecipeListType.RECIPES), "Export all loaded recipes to a Minecraft datapack in the exports folder.")));
+        addElement(addRecipeListTypeButton(RecipeListType.ADDED_RECIPES, new CoreButton("Added", relativeX + width + 10, 10, width, height, "Added",
+                () -> setCurrentRecipeListType(RecipeListType.ADDED_RECIPES), "View the list of recipes you've added during this session.")));
+        addElement(addRecipeListTypeButton(RecipeListType.MODIFIED_RECIPES, new CoreButton("Modified", relativeX, 30, width, height, "Modified",
+                () -> setCurrentRecipeListType(RecipeListType.MODIFIED_RECIPES), "View the list of recipes you've modified during this session.")));
+        addElement(addRecipeListTypeButton(RecipeListType.DELETED_RECIPES, new CoreButton("Deleted", relativeX + width + 10, 30, width, height, "Deleted",
+                () -> setCurrentRecipeListType(RecipeListType.DELETED_RECIPES), "View the list of recipes you've deleted during this session.")));
+        
+        setCurrentRecipeListType(RecipeListType.RECIPES);
+        
+        addElement(new CoreTextInput("search", CoreTextInput.TextInputType.STRING, 10, screenHeight - 30, 180, height, "Search...", "", "Recipe...", 64, "Type to search"));
+    }
+    
+    private CoreButton addRecipeListTypeButton(RecipeListType type, CoreButton button)
+    {
+        recipeListTypeButtons.put(type, button);
+        return button;
+    }
+    
+    private void setCurrentRecipeListType(RecipeListType type)
+    {        
+        recipeListTypeButtons.forEach((t, b) -> b.setEnabled(t != type));
+        
+        switch (type)
+        {
+            case RECIPES -> this.recipeListElement.setEntries(transformRecipesToEntries(RecipeManagementScreenData.loadedRecipes));
+            case ADDED_RECIPES, MODIFIED_RECIPES, DELETED_RECIPES -> this.recipeListElement.setEntries(new ArrayList<>());
+        }
     }
 
     @Override
@@ -87,5 +127,13 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
 
         @Override
         public JsonObject save() { return new JsonObject(); }
+    }
+    
+    public enum RecipeListType
+    {
+        RECIPES,
+        ADDED_RECIPES,
+        MODIFIED_RECIPES,
+        DELETED_RECIPES,
     }
 }
