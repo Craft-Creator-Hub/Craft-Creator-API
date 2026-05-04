@@ -5,6 +5,7 @@ import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeExporter;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.api.ui.elements.Core2DBounds;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreButton;
+import fr.en0ri4n.craftcreator.api.ui.elements.CoreDropdown;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreList;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreTextInput;
 import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagementScreen.RecipeManagementScreenData>
@@ -33,25 +35,44 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
     @Override
     protected void initElements(int screenWidth, int screenHeight)
     {
-        addElement(recipeListElement = new CoreList<>(10, 55, 180, screenHeight - 90, 20, transformRecipesToEntries(RecipeManagementScreenData.loadedRecipes)));
+        addElement(recipeListElement = new CoreList<>(10, 75, 180, screenHeight - 120, 20, transformRecipesToEntries(RecipeManagementScreenData.loadedRecipes)));
         
         recipeListTypeButtons.clear();
-        
+
+        addElement(new CoreDropdown<>("recipe_exporter_dropdown", getGuiSize().getRight(-130), getGuiSize().getBottom(-30), 120, 18, true, List.of(SupportedRecipeExporter.values()), 0, "Exporter", (selected) -> {
+            if(selected != null)
+                RecipeManagementScreenData.loadRecipes(selected);
+        }));
+
+        int relativeY = 30;
         int relativeX = 10;
         int width = 85;
         int height = 18;
-        addElement(addRecipeListTypeButton(RecipeListType.RECIPES, new CoreButton("Recipes", relativeX, 10, width, height, "All",
+        addElement(addRecipeListTypeButton(RecipeListType.RECIPES, new CoreButton("Recipes", relativeX, relativeY, width, height, "All",
                 () -> setCurrentRecipeListType(RecipeListType.RECIPES), "Export all loaded recipes to a Minecraft datapack in the exports folder.")));
-        addElement(addRecipeListTypeButton(RecipeListType.ADDED_RECIPES, new CoreButton("Added", relativeX + width + 10, 10, width, height, "Added",
+        addElement(addRecipeListTypeButton(RecipeListType.ADDED_RECIPES, new CoreButton("Added", relativeX + width + 10, relativeY, width, height, "Added",
                 () -> setCurrentRecipeListType(RecipeListType.ADDED_RECIPES), "View the list of recipes you've added during this session.")));
-        addElement(addRecipeListTypeButton(RecipeListType.MODIFIED_RECIPES, new CoreButton("Modified", relativeX, 30, width, height, "Modified",
+        addElement(addRecipeListTypeButton(RecipeListType.MODIFIED_RECIPES, new CoreButton("Modified", relativeX, relativeY + 20, width, height, "Modified",
                 () -> setCurrentRecipeListType(RecipeListType.MODIFIED_RECIPES), "View the list of recipes you've modified during this session.")));
-        addElement(addRecipeListTypeButton(RecipeListType.DELETED_RECIPES, new CoreButton("Deleted", relativeX + width + 10, 30, width, height, "Deleted",
+        addElement(addRecipeListTypeButton(RecipeListType.DELETED_RECIPES, new CoreButton("Deleted", relativeX + width + 10, relativeY + 20, width, height, "Deleted",
                 () -> setCurrentRecipeListType(RecipeListType.DELETED_RECIPES), "View the list of recipes you've deleted during this session.")));
         
         setCurrentRecipeListType(RecipeListType.RECIPES);
         
-        addElement(new CoreTextInput("search", CoreTextInput.TextInputType.STRING, 10, screenHeight - 30, 180, height, "Search...", "", "Recipe...", 64, "Type to search"));
+        addElement(new CoreTextInput("search", CoreTextInput.TextInputType.STRING, 10, screenHeight - 30, 180, height, "Search for recipes", "", "Recipe...", 64, "Type to search"));
+
+        addElement(new CoreButton("close", getGuiSize().getHorizontalCenter(80), screenHeight - 30, 80, height, "Close", this::closeScreen, null));
+    }
+
+    private void closeScreen()
+    {
+        getCurrentUiAdapter().closeScreen();
+    }
+
+    private Recipe getCurrentSelectedRecipe()
+    {
+        Optional<CoreList.Entry<Recipe>> selectedEntry = recipeListElement.getSelected();
+        return selectedEntry.map(CoreList.Entry::getValue).orElse(null);
     }
     
     private CoreButton addRecipeListTypeButton(RecipeListType type, CoreButton button)
@@ -72,9 +93,33 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
     }
 
     @Override
+    public void render(RenderContext ctx, int mouseX, int mouseY)
+    {
+        getCurrentRenderAdapter().drawRect(ctx, getGuiSize().getX(200), getGuiSize().getY(30), getGuiSize().getX(getGuiSize().getWidth(-210)), getGuiSize().getX(getGuiSize().getHeight(-75)), 0x80000000);
+
+        int relativeX = recipeListElement.getBounds().getRight() + 10;
+
+        if(getCurrentSelectedRecipe() != null)
+        {
+            getCurrentRenderAdapter().drawText(ctx, "ID: " + getCurrentSelectedRecipe().getName(), relativeX, getGuiSize().getY(55), 0xFFFFFF);
+            getCurrentRenderAdapter().drawText(ctx, "Type: " + getCurrentSelectedRecipe().getType(), relativeX, getGuiSize().getY(75), 0xFFFFFF);
+            getCurrentRenderAdapter().drawText(ctx, "Inputs:", relativeX, getGuiSize().getY(95), 0xFFFFFF);
+            for(int i = 0; i < getCurrentSelectedRecipe().getInputs().size(); i++)
+                getCurrentRenderAdapter().drawText(ctx, "- " + getCurrentSelectedRecipe().getInputs().get(i).getId(), relativeX + 10, getGuiSize().getY(115 + i * 20), 0xFFFFFF);
+            getCurrentRenderAdapter().drawText(ctx, "Output: " + getCurrentSelectedRecipe().getOutputs().get(0).getId(), relativeX, getGuiSize().getY(135 + getCurrentSelectedRecipe().getInputs().size() * 20), 0xFFFFFF);
+        }
+    }
+
+    @Override
     public void renderForeground(RenderContext ctx, int mouseX, int mouseY)
     {
         this.recipeListElement.renderForeground(ctx, mouseX, mouseY);
+
+        String title = translate(getTitle());
+        int titleWidth = getCurrentRenderAdapter().getTextWidth(title);
+        getCurrentRenderAdapter().drawText(ctx, title, getGuiSize().getHorizontalCenter(titleWidth), getGuiSize().getY(10), 0xFFFFFF);
+
+        super.renderForeground(ctx, mouseX, mouseY);
     }
 
     @Override
