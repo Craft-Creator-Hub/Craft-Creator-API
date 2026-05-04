@@ -114,20 +114,20 @@ public class CoreTextInput extends CoreUiElement
         getRenderAdapter().drawText(ctx, getLabel(), getBounds().getScaledX(scale), getBounds().getScaledY((int) (-getRenderAdapter().getFontHeight() * scale) - 2, scale), 0xFFFFFFFF);
         getRenderAdapter().endScale(ctx);
         // Draw border
-        getRenderAdapter().drawRect(ctx, getBounds().getX(-1), getBounds().getY(-1), getBounds().getWidth() + 2, getBounds().getHeight() + 2, 0xFF000000);
+        getRenderAdapter().drawRect(ctx, getBounds().getX(-1), getBounds().getY(-1), getBounds().getWidth() + 2, getBounds().getHeight() + 2, 0xFF808080);
         // Draw background
-        getRenderAdapter().drawRect(ctx, getBounds().getX(), getBounds().getY(), getBounds().getWidth(), getBounds().getHeight(), 0xFF808080);
+        getRenderAdapter().drawRect(ctx, getBounds().getX(), getBounds().getY(), getBounds().getWidth(), getBounds().getHeight(), 0xFF000000);
         // Draw text or placeholder
         String displayText = value.isEmpty() ? placeholder : value;
-        getRenderAdapter().drawText(ctx, displayText, getBounds().getX(1), getBounds().getVerticalCenter(getRenderAdapter().getFontHeight()), getTextColor());
+        getRenderAdapter().drawText(ctx, displayText, getBounds().getX(3), getBounds().getVerticalCenter(getRenderAdapter().getFontHeight()), getTextColor());
         // draw blinking cursor
         if(isFocused())
         {
             long time = System.currentTimeMillis();
             if((time / 500) % 2 == 0)
             {
-                int cursorX = getBounds().getX(1 + getRenderAdapter().getTextWidth(displayText.substring(0, cursorPosition)));
-                getRenderAdapter().drawRect(ctx, cursorX, getBounds().getY(1), 1, getBounds().getHeight(-2), 0xFFFFFFFF);
+                int cursorX = getBounds().getX(2 + getRenderAdapter().getTextWidth(displayText.substring(0, cursorPosition)));
+                getRenderAdapter().drawRect(ctx, cursorX, getBounds().getY(2), 1, getBounds().getHeight(-4), 0xFFFFFFFF);
             }
         }
     }
@@ -139,7 +139,7 @@ public class CoreTextInput extends CoreUiElement
     private int getTextColor()
     {
         if(value.isEmpty())
-            return 0xFFE0E0E0; // gray for empty input
+            return 0xFF606060; // gray for empty input
 
         if(inputType.getValidator() != null && !inputType.getValidator().test(value))
             return 0xFFFF0000; // red for invalid input
