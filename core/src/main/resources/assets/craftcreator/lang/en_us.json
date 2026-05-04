@@ -5,6 +5,9 @@
   "craftcreator.screen.minecraft_recipe_creator.crafting.title": "Crafting Table Recipe Creator",
   "craftcreator.screen.minecraft_recipe_creator.smelting.title": "Smelting Recipe Creator",
 
+  "block.craftcreator.crafting_table_recipe_creator": "Crafting Table Recipe Creator",
+  "block.craftcreator.furnace_recipe_creator": "Furnace Recipe Creator",
+
   "craftcreator.screen.tag_selector.title": "Tag Selector",
 
 
@@ -22,7 +25,6 @@
 	"key.craftcreator.open_tutorial": "Open Tutorial",
 
 
-    "block.craftcreator.crafting_table_recipe_creator": "Crafting Table Recipe Creator",
 
 	"block.craftcreator.minecraft_recipe_creator": "§lMinecraft Table Recipe Creator",
 	"block.craftcreator.botania_recipe_creator": "§lBotania Recipe Creator",
