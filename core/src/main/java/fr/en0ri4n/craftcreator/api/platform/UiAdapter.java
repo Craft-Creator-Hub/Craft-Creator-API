@@ -17,6 +17,8 @@ public interface UiAdapter<T> {
 
     void playSound(UiSound sound);
 
+    void closeScreen();
+
     enum UiSound
     {
         BUTTON_CLICK

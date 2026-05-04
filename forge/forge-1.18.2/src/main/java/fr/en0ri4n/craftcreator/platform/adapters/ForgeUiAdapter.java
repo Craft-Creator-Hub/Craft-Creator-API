@@ -51,4 +51,14 @@ public class ForgeUiAdapter implements UiAdapter<Widget>
         }
         mc.getSoundManager().play(instance);
     }
+
+    @Override
+    public void closeScreen()
+    {
+        mc.tell(() -> {
+            Screen current = mc.screen;
+            if(current instanceof ForgeScreen)
+                mc.setScreen(null);
+        });
+    }
 }
