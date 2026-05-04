@@ -35,7 +35,7 @@ public class FurnaceRCScreenDefinition extends RecipeCreatorContainerScreenDefin
     public void initElements(int screenWidth, int screenHeight)
     {
         super.initElements(screenWidth, screenHeight);
-        addElement(furnaceTypeDropdown = new CoreDropdown<>("furnace_type", getGuiSize().getRight(-22), getGuiSize().getY(), 22, 22, true, Arrays.stream(FurnaceRCBehavior.FurnaceType.values()).toList(), 0, "", this::setFurnaceType)
+        addElement(furnaceTypeDropdown = new CoreDropdown<>("furnace_type", getGuiSize().getRight(-22), getGuiSize().getY(), 22, 22, true, Arrays.stream(FurnaceRCBehavior.FurnaceType.values()).toList(), 0, "Furnace Type", this::setFurnaceType)
         {
             @Override
             public String getSelectedValueAsString()

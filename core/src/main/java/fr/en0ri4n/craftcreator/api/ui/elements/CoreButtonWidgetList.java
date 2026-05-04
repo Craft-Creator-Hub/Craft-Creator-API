@@ -197,10 +197,7 @@ public class CoreButtonWidgetList extends CoreUiElement
         if(!isVisible()) return;
         
         if(!isOpen())
-        {
-            getRenderAdapter().drawRect(ctx, getBounds().getX(), getBounds().getY(), getBounds().getWidth(), getBounds().getHeight(), 0x55FFFFFF);
             return;
-        }
 
         int contentTop = getContentTop();
         int contentLeft = getBounds().getX() + getOffset();

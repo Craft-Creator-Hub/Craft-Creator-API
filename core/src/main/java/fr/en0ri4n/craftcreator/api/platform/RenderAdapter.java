@@ -5,6 +5,8 @@ import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import fr.en0ri4n.craftcreator.utils.Pair;
 
+import java.util.List;
+
 
 /**
  * Loader-agnostic render adapter. All rendering calls receive a core RenderContext instance.
@@ -41,6 +43,8 @@ public interface RenderAdapter
     void drawItem(RenderContext ctx, CoreItemStack item, int x, int y, float scale);
 
     void drawTooltip(RenderContext ctx, String tooltip, int mouseX, int mouseY);
+    
+    void drawTooltips(RenderContext ctx, List<String> tooltips, int mouseX, int mouseY);
 
     int getTextWidth(String label);
 

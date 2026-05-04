@@ -49,6 +49,12 @@ public class ForgeWidget extends AbstractWidget implements Widget
     }
 
     @Override
+    public void renderToolTip(PoseStack pPoseStack, int pMouseX, int pMouseY)
+    {
+        this.coreUiElement.renderForeground(ForgeRenderContext.of(pPoseStack), pMouseX, pMouseY);
+    }
+
+    @Override
     public void updateNarration(NarrationElementOutput pNarrationElementOutput)
     {
         // No-op for now

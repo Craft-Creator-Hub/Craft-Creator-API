@@ -48,4 +48,11 @@ public class CoreButton extends CoreUiElement
         CoreScreenDefinition.renderTextureWithSize(ctx, CoreScreenDefinition.GUI_TEXTURE, getBounds().getX(), getBounds().getY(), getBounds().getWidth(), getBounds().getHeight(), isMouseOver(mouseX, mouseY), !enabled);
         getRenderAdapter().drawText(ctx, label, getBounds().getHorizontalCenter(getRenderAdapter().getTextWidth(label)), getBounds().getVerticalCenter(getRenderAdapter().getFontHeight()), enabled ? 0xFFFFFF : 0xAAAAAA);
     }
+
+    @Override
+    public void renderForeground(RenderContext ctx, int mouseX, int mouseY)
+    {
+        if(isMouseOver(mouseX, mouseY) && getTooltip() != null)
+            getRenderAdapter().drawTooltip(ctx, getTooltip(), mouseX, mouseY);
+    }
 }

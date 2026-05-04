@@ -63,6 +63,8 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
         int x = getGuiSize().getHorizontalCenter(getCurrentRenderAdapter().getTextWidth(title));
         int y = getGuiSize().getY() - 12;
         getCurrentRenderAdapter().drawText(ctx, title, x, y, 0xFFFFFF);
+        
+        getElements().forEach(element -> element.renderForeground(ctx, mouseX, mouseY));
     }
 
     public Core2DBounds getBackgroundTextureSize()

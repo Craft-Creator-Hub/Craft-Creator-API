@@ -100,5 +100,13 @@ public class CoreDropdown<T> extends CoreUiElement
         int textX = getBounds().getX((actualWidth - getRenderAdapter().getTextWidth(this.getSelectedValueAsString())) / 2);
         int textY = getBounds().getVerticalCenter(getRenderAdapter().getFontHeight());
         getRenderAdapter().drawText(ctx, getSelectedValueAsString(), textX, textY, color);
+        
+    }
+
+    @Override
+    public void renderForeground(RenderContext ctx, int mouseX, int mouseY)
+    {
+        if(isMouseOver(mouseX, mouseY))
+            getRenderAdapter().drawTooltip(ctx, getTooltip() + ": " + getSelectedValue().toString(), mouseX, mouseY);
     }
 }

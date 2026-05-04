@@ -58,17 +58,16 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         @Override
         public void renderForeground(RenderContext ctx, int index, int x, int y, int width, int itemHeight, int mouseX, int mouseY, boolean selected, boolean hovered)
         {
-            int relativeX = mouseX + 12;
-            int relativeY = mouseY + 12;
-            getRenderAdapter().drawRect(ctx, relativeX, relativeY, 100, 40, 0xCC004B96);
-            getRenderAdapter().drawText(ctx, "Type: " + getValue().getType(), relativeX += 3, relativeY += 3, 0xFFFFFFFF);
-            getRenderAdapter().drawText(ctx, "Input(s):", relativeX, relativeY += 16, 0xFFFFFFFF);
+            List<String> tooltips = new ArrayList<>();
+            tooltips.add("§aType: " + getValue().getType());
+            tooltips.add("§6Input(s):");
             for(int i = 0; i < getValue().getInputs().size(); i++)
-                getRenderAdapter().drawText(ctx, "- " + getValue().getInputs().get(i).getId(), relativeX + 12, relativeY += 12, 0xFFFFFFFF);
-            getRenderAdapter().drawText(ctx, "Output: " + getValue().getOutputs().get(0).getId(), relativeX, relativeY += 16, 0xFFFFFFFF);
-            getRenderAdapter().drawText(ctx, "Recipe Parameters:" + (getValue().getInfos().getParameters().isEmpty() ? " None" : ""), relativeX, relativeY += 16, 0xFFFFFFFF);
+                tooltips.add("  - " + getValue().getInputs().get(i).getId());
+            tooltips.add("§bOutput: " + getValue().getOutputs().get(0).getId());
+            tooltips.add("§7Recipe Parameters:§r" + (getValue().getInfos().getParameters().isEmpty() ? " None" : ""));
             for(int i = 0; i < getValue().getInfos().getParameters().size(); i++)
-                getRenderAdapter().drawText(ctx, "- " + getValue().getInfos().getParameters().get(i).getName() + ": " + getValue().getInfos().getParameters().get(i).getRawValue(), relativeX + 12, relativeY += 12, 0xFFFFFFFF);
+                tooltips.add("  - " + getValue().getInfos().getParameters().get(i).getName() + ": " + getValue().getInfos().getParameters().get(i).getRawValue());
+            getRenderAdapter().drawTooltips(ctx, tooltips, mouseX, mouseY);
         }
     }
 
