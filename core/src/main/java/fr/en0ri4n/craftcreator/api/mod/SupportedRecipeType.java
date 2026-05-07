@@ -1,5 +1,6 @@
 package fr.en0ri4n.craftcreator.api.mod;
 
+import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -26,4 +27,15 @@ public enum SupportedRecipeType
     GRINDSTONE("minecraft:grinding");
 
     private final String id;
+    
+    public static SupportedRecipeType byId(Identifier id)
+    {
+        for(SupportedRecipeType recipeType : values())
+        {
+            if(id.toString().equals(recipeType.getId()))
+                return recipeType;
+        }
+        
+        return null;
+    }
 }

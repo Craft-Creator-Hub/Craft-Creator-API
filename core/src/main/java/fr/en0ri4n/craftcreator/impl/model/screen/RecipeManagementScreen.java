@@ -2,30 +2,36 @@ package fr.en0ri4n.craftcreator.impl.model.screen;
 
 import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeExporter;
+import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeType;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.api.ui.elements.Core2DBounds;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreButton;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreDropdown;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreList;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreTextInput;
+import fr.en0ri4n.craftcreator.api.ui.screen.CoreContainerScreenDefinition;
 import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
 import fr.en0ri4n.craftcreator.api.ui.screen.ScreenData;
+import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreator;
+import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreators;
 import fr.en0ri4n.craftcreator.recipe.exporter.ModRecipeExporter;
 import fr.en0ri4n.craftcreator.recipe.exporter.RecipeExporterRegistry;
 import fr.en0ri4n.craftcreator.recipe.model.Recipe;
 import fr.en0ri4n.craftcreator.utils.Identifier;
+import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagementScreen.RecipeManagementScreenData>
 {
     private final Map<RecipeListType, CoreButton> recipeListTypeButtons = new HashMap<>();
     private CoreList<Recipe> recipeListElement;
+    
+    @Getter
+    private RecipeCreator<?> currentRecipeCreator;
+    @Getter
+    private CoreContainerScreenDefinition<?> currentRecipeCreatorScreenDef;
 
     public RecipeManagementScreen()
     {
@@ -35,7 +41,10 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
     @Override
     protected void initElements(int screenWidth, int screenHeight)
     {
+        getGuiSize().setWidth(screenWidth);
+        getGuiSize().setHeight(screenHeight);
         addElement(recipeListElement = new CoreList<>(10, 75, 180, screenHeight - 120, 20, transformRecipesToEntries(RecipeManagementScreenData.loadedRecipes)));
+        recipeListElement.setSelectionListener(oer -> oer.ifPresent(this::onRecipeSelected));
         
         recipeListTypeButtons.clear();
 
@@ -75,6 +84,14 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         return selectedEntry.map(CoreList.Entry::getValue).orElse(null);
     }
     
+    private void onRecipeSelected(CoreList.Entry<Recipe> recipeEntry)
+    {
+        Identifier recipeTypeId = recipeEntry.getValue().getType();
+        SupportedRecipeType recipeType = SupportedRecipeType.byId(recipeTypeId);
+        currentRecipeCreator = RecipeCreators.getRecipeCreator(recipeType);
+        currentRecipeCreatorScreenDef = currentRecipeCreator.getContainerModel().getScreenDefinition();
+    }
+    
     private CoreButton addRecipeListTypeButton(RecipeListType type, CoreButton button)
     {
         recipeListTypeButtons.put(type, button);
@@ -95,9 +112,11 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
     @Override
     public void render(RenderContext ctx, int mouseX, int mouseY)
     {
-        getCurrentRenderAdapter().drawRect(ctx, getGuiSize().getX(200), getGuiSize().getY(30), getGuiSize().getX(getGuiSize().getWidth(-210)), getGuiSize().getX(getGuiSize().getHeight(-75)), 0x80000000);
-
-        int relativeX = recipeListElement.getBounds().getRight() + 10;
+        int relativeX = recipeListElement.getBounds().getRight(10);
+        int relativeY = 30;
+        int relativeWidth = getGuiSize().getWidth(-recipeListElement.getBounds().getRight() - 20);
+        int relativeHeight = recipeListElement.getBounds().getBottom(-relativeY);
+        getCurrentRenderAdapter().drawRect(ctx, relativeX, relativeY, relativeWidth, relativeHeight, 0x80000000);
 
         if(getCurrentSelectedRecipe() != null)
         {
@@ -108,6 +127,24 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
                 getCurrentRenderAdapter().drawText(ctx, "- " + getCurrentSelectedRecipe().getInputs().get(i).getId(), relativeX + 10, getGuiSize().getY(115 + i * 20), 0xFFFFFF);
             getCurrentRenderAdapter().drawText(ctx, "Output: " + getCurrentSelectedRecipe().getOutputs().get(0).getId(), relativeX, getGuiSize().getY(135 + getCurrentSelectedRecipe().getInputs().size() * 20), 0xFFFFFF);
         }
+        
+        if(getCurrentSelectedRecipe() != null)
+        {
+            Core2DBounds guiSize = getCurrentRecipeCreatorScreenDef().getGuiSize();
+            
+            getCurrentRenderAdapter().drawTexture(ctx,
+                    getCurrentRecipeCreatorScreenDef().getBackgroundTexture(), 
+                    relativeX + (relativeWidth - guiSize.getWidth()) / 2 + 5,
+                    relativeY + (relativeHeight - guiSize.getHeight()) / 2,
+                    guiSize.getWidth(),
+                    guiSize.getHeight(),
+                    256,
+                    256,
+                    0,
+                    0,
+                    guiSize.getWidth(),
+                    guiSize.getHeight());
+        }
     }
 
     @Override
@@ -117,7 +154,7 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
 
         String title = translate(getTitle());
         int titleWidth = getCurrentRenderAdapter().getTextWidth(title);
-        getCurrentRenderAdapter().drawText(ctx, title, getGuiSize().getHorizontalCenter(titleWidth), getGuiSize().getY(10), 0xFFFFFF);
+        getCurrentRenderAdapter().drawText(ctx, title, getGuiSize().getHorizontalCenter(titleWidth), 10, 0xFFFFFF);
 
         super.renderForeground(ctx, mouseX, mouseY);
     }

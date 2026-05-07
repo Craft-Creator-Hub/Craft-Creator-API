@@ -45,6 +45,11 @@ public class RecipeCreators
                 CRAFTING_TABLE_RECIPE_CREATOR,
                 FURNACE_RECIPE_CREATOR));
     }
+    
+    public static RecipeCreator<?> getRecipeCreator(SupportedRecipeType recipeType)
+    {
+        return ALL_RECIPE_CREATORS.stream().filter(rc -> rc.getRecipeTypes().contains(recipeType)).findFirst().orElse(null);
+    }
 
     public static void registerAll()
     {
