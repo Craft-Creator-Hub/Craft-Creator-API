@@ -46,6 +46,10 @@ public interface RenderAdapter
     
     void drawTooltips(RenderContext ctx, List<String> tooltips, int mouseX, int mouseY);
 
+    void drawItemTooltip(RenderContext ctx, CoreItemStack item, int mouseX, int mouseY);
+
+    void drawItemTooltip(RenderContext ctx, CoreItemStack item, List<String> additionalTooltips, int mouseX, int mouseY);
+
     int getTextWidth(String label);
 
     int getFontHeight();

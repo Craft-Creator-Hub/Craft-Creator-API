@@ -6,7 +6,10 @@ import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Recipe model used by core for management.
@@ -50,4 +53,9 @@ public class Recipe
      * Additional parameters (time, energy, shapeless, etc.)
      */
     private final RecipeInfos infos;
+
+    public List<RecipeEntry> getEntries()
+    {
+        return Stream.concat(inputs.stream(), outputs.stream()).collect(Collectors.toList());
+    }
 }

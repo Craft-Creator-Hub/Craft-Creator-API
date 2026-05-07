@@ -1,9 +1,12 @@
 package fr.en0ri4n.craftcreator.impl.model.screen;
 
 import com.google.gson.JsonObject;
+import fr.en0ri4n.craftcreator.CraftCreatorAPI;
+import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
 import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeExporter;
 import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeType;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
+import fr.en0ri4n.craftcreator.api.ui.container.SlotDescriptor;
 import fr.en0ri4n.craftcreator.api.ui.elements.Core2DBounds;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreButton;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreDropdown;
@@ -20,7 +23,11 @@ import fr.en0ri4n.craftcreator.recipe.model.Recipe;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.Getter;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagementScreen.RecipeManagementScreenData>
@@ -116,26 +123,29 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         int relativeY = 30;
         int relativeWidth = getGuiSize().getWidth(-recipeListElement.getBounds().getRight() - 20);
         int relativeHeight = recipeListElement.getBounds().getBottom(-relativeY);
-        getCurrentRenderAdapter().drawRect(ctx, relativeX, relativeY, relativeWidth, relativeHeight, 0x80000000);
+//        getCurrentRenderAdapter().drawRect(ctx, relativeX, relativeY, relativeWidth, relativeHeight, 0x80000000);
 
-        if(getCurrentSelectedRecipe() != null)
-        {
-            getCurrentRenderAdapter().drawText(ctx, "ID: " + getCurrentSelectedRecipe().getName(), relativeX, getGuiSize().getY(55), 0xFFFFFF);
-            getCurrentRenderAdapter().drawText(ctx, "Type: " + getCurrentSelectedRecipe().getType(), relativeX, getGuiSize().getY(75), 0xFFFFFF);
-            getCurrentRenderAdapter().drawText(ctx, "Inputs:", relativeX, getGuiSize().getY(95), 0xFFFFFF);
-            for(int i = 0; i < getCurrentSelectedRecipe().getInputs().size(); i++)
-                getCurrentRenderAdapter().drawText(ctx, "- " + getCurrentSelectedRecipe().getInputs().get(i).getId(), relativeX + 10, getGuiSize().getY(115 + i * 20), 0xFFFFFF);
-            getCurrentRenderAdapter().drawText(ctx, "Output: " + getCurrentSelectedRecipe().getOutputs().get(0).getId(), relativeX, getGuiSize().getY(135 + getCurrentSelectedRecipe().getInputs().size() * 20), 0xFFFFFF);
-        }
+//        if(getCurrentSelectedRecipe() != null)
+//        {
+//            getCurrentRenderAdapter().drawText(ctx, "ID: " + getCurrentSelectedRecipe().getName(), relativeX, getGuiSize().getY(55), 0xFFFFFF);
+//            getCurrentRenderAdapter().drawText(ctx, "Type: " + getCurrentSelectedRecipe().getType(), relativeX, getGuiSize().getY(75), 0xFFFFFF);
+//            getCurrentRenderAdapter().drawText(ctx, "Inputs:", relativeX, getGuiSize().getY(95), 0xFFFFFF);
+//            for(int i = 0; i < getCurrentSelectedRecipe().getInputs().size(); i++)
+//                getCurrentRenderAdapter().drawText(ctx, "- " + getCurrentSelectedRecipe().getInputs().get(i).getId(), relativeX + 10, getGuiSize().getY(115 + i * 20), 0xFFFFFF);
+//            getCurrentRenderAdapter().drawText(ctx, "Output: " + getCurrentSelectedRecipe().getOutputs().get(0).getId(), relativeX, getGuiSize().getY(135 + getCurrentSelectedRecipe().getInputs().size() * 20), 0xFFFFFF);
+//        }
         
         if(getCurrentSelectedRecipe() != null)
         {
             Core2DBounds guiSize = getCurrentRecipeCreatorScreenDef().getGuiSize();
+
+            int guiX = relativeX + (relativeWidth - guiSize.getWidth()) / 2 + 5;
+            int guiY = relativeY + (relativeHeight - guiSize.getHeight()) / 2;
             
             getCurrentRenderAdapter().drawTexture(ctx,
-                    getCurrentRecipeCreatorScreenDef().getBackgroundTexture(), 
-                    relativeX + (relativeWidth - guiSize.getWidth()) / 2 + 5,
-                    relativeY + (relativeHeight - guiSize.getHeight()) / 2,
+                    getCurrentRecipeCreatorScreenDef().getBackgroundTexture(),
+                    guiX,
+                    guiY,
                     guiSize.getWidth(),
                     guiSize.getHeight(),
                     256,
@@ -144,6 +154,8 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
                     0,
                     guiSize.getWidth(),
                     guiSize.getHeight());
+
+            renderRecipeSlots(ctx, false, mouseX, mouseY);
         }
     }
 
@@ -152,11 +164,70 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
     {
         this.recipeListElement.renderForeground(ctx, mouseX, mouseY);
 
+        renderRecipeSlots(ctx, true, mouseX, mouseY);
+
+        super.renderForeground(ctx, mouseX, mouseY);
+    }
+
+    @Override
+    protected void renderTitle(RenderContext ctx)
+    {
         String title = translate(getTitle());
         int titleWidth = getCurrentRenderAdapter().getTextWidth(title);
         getCurrentRenderAdapter().drawText(ctx, title, getGuiSize().getHorizontalCenter(titleWidth), 10, 0xFFFFFF);
+    }
 
-        super.renderForeground(ctx, mouseX, mouseY);
+    private void renderRecipeSlots(RenderContext ctx, boolean isForeground, int mouseX, int mouseY)
+    {
+        if(getCurrentSelectedRecipe() == null) return;
+        
+        int relativeX = recipeListElement.getBounds().getRight(10);
+        int relativeY = 30;
+        int relativeWidth = getGuiSize().getWidth(-recipeListElement.getBounds().getRight() - 20);
+        int relativeHeight = recipeListElement.getBounds().getBottom(-relativeY);
+        Core2DBounds guiSize = getCurrentRecipeCreatorScreenDef().getGuiSize();
+
+        int guiX = relativeX + (relativeWidth - guiSize.getWidth()) / 2 + 5;
+        int guiY = relativeY + (relativeHeight - guiSize.getHeight()) / 2;
+
+        List<SlotDescriptor> slots = getCurrentRecipeCreator().getContainerModel().getLayout().getSlots();
+
+        for(fr.en0ri4n.craftcreator.recipe.utils.RecipeEntry entry : getCurrentSelectedRecipe().getEntries())
+        {
+            Identifier entryId = entry.getId();
+
+            if(entry.isTag())
+            {
+                List<Identifier> possibleItems = CraftCreatorAPI.get().getPlatform().getTagProvider().getItemsInTag(entryId).stream().map(CoreItemStack::getItemId).toList();
+                if(possibleItems.isEmpty())
+                    continue;
+                // Display item for 1 second before switching to the next one if there are multiple possible items for this tag
+                int index = (int) ((System.currentTimeMillis() / 1000) % possibleItems.size());
+                entryId = possibleItems.get(index);
+            }
+
+            SlotDescriptor slot = slots.stream().filter(sd -> sd.getIndex() == entry.getSlot()).findFirst().orElse(null);
+
+            if(slot == null)
+                continue;
+
+            int slotX = guiX + slot.getX();
+            int slotY = guiY + slot.getY();
+
+            CoreItemStack itemStack = new CoreItemStack(entryId, 1);
+
+            if(isForeground)
+            {
+                if(mouseX >= slotX && mouseX < slotX + 16 && mouseY >= slotY && mouseY < slotY + 16)
+                {
+                    getCurrentRenderAdapter().drawItemTooltip(ctx, itemStack, entry.isTag() ? List.of("§8#" + entry.getId().toString()) : List.of(), mouseX, mouseY);
+                }
+            }
+            else
+            {
+                getCurrentRenderAdapter().drawItem(ctx, itemStack, slotX, slotY, 1F);
+            }
+        }
     }
 
     @Override
@@ -219,3 +290,4 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         DELETED_RECIPES,
     }
 }
+

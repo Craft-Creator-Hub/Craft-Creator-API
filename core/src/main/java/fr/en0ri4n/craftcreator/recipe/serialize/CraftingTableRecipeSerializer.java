@@ -129,8 +129,9 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
             if(element.has("ingredients") && element.get("ingredients").isJsonArray())
             {
                 JsonArray ingredients = element.getAsJsonArray("ingredients");
-                for(JsonElement el : ingredients)
+                for(int i = 0; i < ingredients.size(); i++)
                 {
+                    JsonElement el = ingredients.get(i);
                     if(SupportedVersion.isGreaterOrEquals(SupportedVersion.V1_21_2))
                     {
                         String ingredientStr = el.getAsString();
@@ -138,6 +139,7 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
                         if(entry != null)
                         {
                             entry.setType(RecipeEntry.EntryType.INPUT);
+                            entry.setSlot(i);
                             inputs.add(entry);
                         }
                     }
@@ -149,6 +151,7 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
                         if(entry != null)
                         {
                             entry.setType(RecipeEntry.EntryType.INPUT);
+                            entry.setSlot(i);
                             inputs.add(entry);
                         }
                     }

@@ -45,8 +45,10 @@ public class FurnaceRecipeSerializer extends RecipeSerializer
         String name = in.has("name") ? in.get("name").getAsString() : "furnace_recipe";
         Identifier typeId = Identifier.from(in.get("type").getAsString());
         RecipeEntry inputEntry = parseIngredientObject(in.getAsJsonObject("ingredient"));
+        inputEntry.setSlot(0);
         RecipeEntry outputEntry = RecipeEntry.item(Identifier.from(in.get("result").getAsString()), 1);
         outputEntry.setType(RecipeEntry.EntryType.OUTPUT);
+        outputEntry.setSlot(1);
         float experience = in.get("experience").getAsFloat();
         int cookingTime = in.get("cookingtime").getAsInt();
         RecipeInfos infos = RecipeInfos.create();

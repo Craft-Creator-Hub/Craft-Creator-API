@@ -23,8 +23,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class 
-ForgeRenderAdapter implements RenderAdapter
+public class ForgeRenderAdapter implements RenderAdapter
 {
     private final Minecraft mc =  Minecraft.getInstance();
 
@@ -124,6 +123,26 @@ ForgeRenderAdapter implements RenderAdapter
         assert mc.screen != null;
         List<Component> tooltipComponents = tooltips.stream().map(TextComponent::new).map(textComponent -> (Component) textComponent).toList();
         mc.screen.renderTooltip(forgeRenderContext.poseStack(), tooltipComponents, Optional.empty(), mouseX, mouseY, null, ItemStack.EMPTY);
+    }
+
+    @Override
+    public void drawItemTooltip(RenderContext ctx, CoreItemStack item, int mouseX, int mouseY)
+    {
+        ForgeRenderContext forgeRenderContext = ForgeRenderContext.from(ctx);
+        assert mc.screen != null;
+        ItemStack platformStack = ForgeItemStackAdapter.get().toPlatform(item);
+        mc.screen.renderTooltip(forgeRenderContext.poseStack(), mc.screen.getTooltipFromItem(platformStack), Optional.empty(), mouseX, mouseY);
+    }
+
+    @Override
+    public void drawItemTooltip(RenderContext ctx, CoreItemStack item, List<String> additionalTooltips, int mouseX, int mouseY)
+    {
+        ForgeRenderContext forgeRenderContext = ForgeRenderContext.from(ctx);
+        assert mc.screen != null;
+        ItemStack platformStack = ForgeItemStackAdapter.get().toPlatform(item);
+        List<Component> tooltipComponents = new java.util.ArrayList<>(mc.screen.getTooltipFromItem(platformStack));
+        tooltipComponents.addAll(additionalTooltips.stream().map(TextComponent::new).map(textComponent -> (Component) textComponent).toList());
+        mc.screen.renderTooltip(forgeRenderContext.poseStack(), tooltipComponents, Optional.empty(), mouseX, mouseY, null, platformStack);
     }
 
     @Override

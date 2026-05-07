@@ -19,6 +19,10 @@ public class CoreItemStack {
     @Setter
     private int slotIndex = -1; // optional slot index in an inventory
 
+    public CoreItemStack(Identifier itemId) {
+        this(itemId, 1, null);
+    }
+
     public CoreItemStack(Identifier itemId, int count) {
         this(itemId, count, null);
     }
