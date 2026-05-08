@@ -1,9 +1,9 @@
 package fr.en0ri4n.craftcreator.recipe.serialize;
 
 import fr.en0ri4n.craftcreator.CraftCreatorAPI;
+import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeType;
 import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreator;
 import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreators;
-import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeType;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.NoArgsConstructor;
 

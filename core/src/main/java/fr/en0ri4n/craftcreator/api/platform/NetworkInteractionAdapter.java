@@ -1,6 +1,10 @@
 package fr.en0ri4n.craftcreator.api.platform;
 
-import fr.en0ri4n.craftcreator.api.net.*;
+import fr.en0ri4n.craftcreator.api.net.BlockEntityUpdateData;
+import fr.en0ri4n.craftcreator.api.net.FetchData;
+import fr.en0ri4n.craftcreator.api.net.MakeRecipeRequestData;
+import fr.en0ri4n.craftcreator.api.net.OpenContainerRequestData;
+import fr.en0ri4n.craftcreator.api.net.UiUpdateData;
 
 public interface NetworkInteractionAdapter<T>
 {

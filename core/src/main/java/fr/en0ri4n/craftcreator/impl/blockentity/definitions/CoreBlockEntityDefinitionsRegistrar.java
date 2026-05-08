@@ -1,10 +1,10 @@
 package fr.en0ri4n.craftcreator.impl.blockentity.definitions;
 
-import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreator;
-import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreators;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityDefinition;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityManager;
 import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.CoreBlockEntityBehaviorsRegistrar;
+import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreator;
+import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreators;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

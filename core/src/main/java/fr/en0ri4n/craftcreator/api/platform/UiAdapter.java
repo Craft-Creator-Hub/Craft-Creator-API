@@ -1,7 +1,7 @@
 package fr.en0ri4n.craftcreator.api.platform;
 
-import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreUiElement;
+import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
 
 /**
  * Platform-side helper for wiring core click actions to actual UI events.

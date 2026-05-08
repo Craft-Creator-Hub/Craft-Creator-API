@@ -1,8 +1,8 @@
 package fr.en0ri4n.craftcreator;
 
 import fr.en0ri4n.craftcreator.api.CCReferences;
-import fr.en0ri4n.craftcreator.impl.InitManager;
 import fr.en0ri4n.craftcreator.api.platform.Platform;
+import fr.en0ri4n.craftcreator.impl.InitManager;
 import fr.en0ri4n.craftcreator.impl.blockentity.definitions.CoreBlockEntityDefinitionsRegistrar;
 import fr.en0ri4n.craftcreator.impl.model.ContainerModels;
 import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreators;

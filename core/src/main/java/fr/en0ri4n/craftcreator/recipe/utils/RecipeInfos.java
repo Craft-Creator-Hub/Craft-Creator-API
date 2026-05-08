@@ -3,7 +3,12 @@ package fr.en0ri4n.craftcreator.recipe.utils;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.Getter;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Loader-agnostic container for extra recipe parameters (time, energy, flags, etc.).

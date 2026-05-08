@@ -1,7 +1,7 @@
 package fr.en0ri4n.craftcreator.api.item;
 
-import fr.en0ri4n.craftcreator.utils.Identifier;
 import com.google.gson.JsonObject;
+import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.Getter;
 import lombok.Setter;
 

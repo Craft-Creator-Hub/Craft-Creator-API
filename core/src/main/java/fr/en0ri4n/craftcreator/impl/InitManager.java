@@ -1,9 +1,6 @@
 package fr.en0ri4n.craftcreator.impl;
 
 import fr.en0ri4n.craftcreator.CraftCreatorAPI;
-import fr.en0ri4n.craftcreator.impl.model.screen.RecipeManagementScreen;
-import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreator;
-import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreators;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockDef;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockItemDef;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreItemDef;
@@ -11,6 +8,9 @@ import fr.en0ri4n.craftcreator.api.init.definitions.FacingType;
 import fr.en0ri4n.craftcreator.api.init.shapes.CoreFacing;
 import fr.en0ri4n.craftcreator.api.init.shapes.CoreShapes;
 import fr.en0ri4n.craftcreator.api.platform.RegistryAdapter;
+import fr.en0ri4n.craftcreator.impl.model.screen.RecipeManagementScreen;
+import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreator;
+import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreators;
 import fr.en0ri4n.craftcreator.utils.CoreKeybind;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.AccessLevel;
