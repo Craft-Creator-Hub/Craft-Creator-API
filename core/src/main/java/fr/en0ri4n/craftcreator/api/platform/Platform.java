@@ -4,7 +4,7 @@ import fr.en0ri4n.craftcreator.api.item.ItemStackAdapter;
 import fr.en0ri4n.craftcreator.api.item.tag.TagProvider;
 import fr.en0ri4n.craftcreator.api.mod.SupportedModLoader;
 import fr.en0ri4n.craftcreator.api.mod.SupportedVersion;
-import fr.en0ri4n.craftcreator.api.translations.TranslationProvider;
+import fr.en0ri4n.craftcreator.api.translations.TextComponentProvider;
 
 public interface Platform {
     SupportedModLoader getLoader();          // "Forge", "Fabric", "NeoForge", etc.
@@ -37,5 +37,5 @@ public interface Platform {
 
     TagProvider getTagProvider();
 
-    TranslationProvider getTranslationProvider();
+    TextComponentProvider<?> getTextComponentProvider();
 }

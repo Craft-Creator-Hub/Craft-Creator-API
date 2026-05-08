@@ -10,7 +10,6 @@ import fr.en0ri4n.craftcreator.api.net.MakeRecipeRequestData;
 import fr.en0ri4n.craftcreator.api.net.OpenContainerRequestData;
 import fr.en0ri4n.craftcreator.api.net.UiUpdateData;
 import fr.en0ri4n.craftcreator.api.platform.NetworkInteractionAdapter;
-import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.RecipeCreatorBlockEntityBehavior;
 import fr.en0ri4n.craftcreator.platform.Forge1182Platform;
 import fr.en0ri4n.craftcreator.platform.blockentity.ForgeGenericBlockEntity;
 import fr.en0ri4n.craftcreator.platform.net.BlockEntityUpdatePacket;
@@ -23,13 +22,8 @@ import fr.en0ri4n.craftcreator.platform.ui.screen.ForgeRecipeCreatorScreen;
 import fr.en0ri4n.craftcreator.recipe.RecipeManager;
 import fr.en0ri4n.craftcreator.recipe.utils.RecipeRequestFeedback;
 import fr.en0ri4n.craftcreator.utils.Identifier;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
@@ -169,21 +163,6 @@ public class ForgeNetworkInteractionAdapter implements NetworkInteractionAdapter
 
         RecipeRequestFeedback requestFeedback = RecipeManager.get().handleMakeRecipeRequest(blockEntity.getCoreEntity(), data.getContainerId());
 
-        RecipeCreatorBlockEntityBehavior behavior = (RecipeCreatorBlockEntityBehavior) blockEntity.getCoreEntity().getBehavior();
-
-        // TODO: Improve message formatting and content, add abstraction to lighten code and avoid direct dependency on Minecraft classes
-        MutableComponent component = new TextComponent("{ < = - [Craft-Creator] - = > } }").append("\n").withStyle(ChatFormatting.GRAY);
-        component.append(new TextComponent("Exporter: ").withStyle(ChatFormatting.WHITE).append(new TextComponent(behavior.getSerializationType().toString()).withStyle(ChatFormatting.AQUA)).append("\n"));
-        component.append(new TextComponent("Name: ").withStyle(ChatFormatting.WHITE).append(new TextComponent(requestFeedback.getRecipeName() != null ? requestFeedback.getRecipeName() : "N/A").withStyle(ChatFormatting.LIGHT_PURPLE)).append("\n"));
-        component.append(new TextComponent("[Open Recipe] ").withStyle(style -> style
-                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, requestFeedback.getRecipePath() != null ? requestFeedback.getRecipePath() : ""))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(requestFeedback.getRecipePath() != null ? requestFeedback.getRecipePath() : "No file path available").withStyle(ChatFormatting.GRAY))))
-            .withStyle(ChatFormatting.GREEN));
-        component.append(new TextComponent("[Copy JSON] ").withStyle(style -> style
-                .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, requestFeedback.getRecipeJson() != null ? requestFeedback.getRecipeJson() : ""))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(requestFeedback.getRecipeJson() != null ? requestFeedback.getRecipeJson() : "No JSON data available").withStyle(ChatFormatting.GRAY))))
-            .withStyle(ChatFormatting.YELLOW));
-
-        player.sendMessage(component, player.getUUID());
+        player.sendMessage(Forge1182Platform.get().getTextComponentProvider().createFeedbackComponent(requestFeedback), player.getUUID());
     }
 }

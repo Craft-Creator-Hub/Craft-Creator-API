@@ -75,7 +75,11 @@ public class CraftCreatorAPI {
         CraftCreatorAPI.LOGGER.info("CraftCreatorAPI[%s][%s-%s] initialized successfully.".formatted(ApiReferences.VERSION, platform.getLoader().getModLoaderName(), platform.getMinecraftVersion()));
     }
 
-    public static String translate(String key, Object... args) {
-        return get().getPlatform().getTranslationProvider().translate(CCReferences.MOD_ID + "." + key, args);
+    public static Object translate(String key, Object... args) {
+        return get().getPlatform().getTextComponentProvider().translate(CCReferences.MOD_ID + "." + key, args);
+    }
+
+    public static String translateToString(String key, Object... args) {
+        return get().getPlatform().getTextComponentProvider().translateToString(CCReferences.MOD_ID + "." + key, args);
     }
 }

@@ -29,7 +29,7 @@ public class TagSelectionScreen extends CoreScreenDefinition<TagSelectionScreen.
     public TagSelectionScreen(TaggableSlotsContainerScreenDefinition<?> parent, Pair<Integer, CoreItemStack> clickedStack)
     {
         super(Identifier.fromMod("tag_selection_screen"),
-              translate("screen.tag_selector.title"),
+              translateToString("screen.tag_selector.title"),
               new TagSelectionScreenData(),
               Core2DBounds.ofSize(176 * 2, 166));
         this.parent = parent;

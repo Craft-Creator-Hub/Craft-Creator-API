@@ -172,7 +172,7 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
     @Override
     protected void renderTitle(RenderContext ctx)
     {
-        String title = translate(getTitle());
+        String title = translateToString(getTitle());
         int titleWidth = getRenderAdapter().getTextWidth(title);
         getRenderAdapter().drawText(ctx, title, getGuiSize().getHorizontalCenter(titleWidth), 10, 0xFFFFFF);
     }

@@ -6,7 +6,7 @@ import fr.en0ri4n.craftcreator.api.mod.SupportedModLoader;
 import fr.en0ri4n.craftcreator.api.mod.SupportedMod;
 import fr.en0ri4n.craftcreator.api.mod.SupportedVersion;
 import fr.en0ri4n.craftcreator.api.platform.*;
-import fr.en0ri4n.craftcreator.api.translations.TranslationProvider;
+import fr.en0ri4n.craftcreator.api.translations.TextComponentProvider;
 import fr.en0ri4n.craftcreator.platform.adapters.*;
 import fr.en0ri4n.craftcreator.platform.item.ForgeItemStackAdapter;
 import fr.en0ri4n.craftcreator.platform.item.ForgeTagProvider;
@@ -15,6 +15,7 @@ import fr.en0ri4n.craftcreator.utils.Identifier;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -208,8 +209,8 @@ public class Forge1182Platform implements Platform {
     }
 
     @Override
-    public TranslationProvider getTranslationProvider()
+    public TextComponentProvider<Component> getTextComponentProvider()
     {
-        return ForgeTranslationProvider.get();
+        return ForgeTextComponentProvider.get();
     }
 }

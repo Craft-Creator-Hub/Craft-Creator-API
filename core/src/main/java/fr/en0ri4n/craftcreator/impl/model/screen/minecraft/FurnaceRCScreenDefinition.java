@@ -48,9 +48,9 @@ public class FurnaceRCScreenDefinition extends RecipeCreatorContainerScreenDefin
     @Override
     protected void addSettings()
     {
-        addRecipeSetting(translate("screen.minecraft_recipe_creator.smelting.field.cooking_time"),
+        addRecipeSetting(translateToString("screen.minecraft_recipe_creator.smelting.field.cooking_time"),
                          cookingTimeInput = new CoreTextInput("cooking_time_input", CoreTextInput.TextInputType.INTEGER, getGuiSize().getX(10), getGuiSize().getY(35), 30, 10, "", String.valueOf(200), "Ticks", "Time it takes to smelt one item in ticks"));
-        addRecipeSetting(translate("screen.minecraft_recipe_creator.smelting.field.experience"),
+        addRecipeSetting(translateToString("screen.minecraft_recipe_creator.smelting.field.experience"),
                          experienceInput = new CoreTextInput("experience_input", CoreTextInput.TextInputType.FLOAT, getGuiSize().getX(10), getGuiSize().getY(60), 30, 10, "", String.valueOf(0.5F), "XP", "Experience awarded per item smelted"));
     }
 

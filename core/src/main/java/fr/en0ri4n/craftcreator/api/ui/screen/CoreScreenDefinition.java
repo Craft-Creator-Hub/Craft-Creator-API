@@ -65,7 +65,7 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
 
     protected void renderTitle(RenderContext ctx)
     {
-        String title = translate(getTitle());
+        String title = translateToString(getTitle());
         int x = getGuiSize().getHorizontalCenter(getRenderAdapter().getTextWidth(title));
         int y = getGuiSize().getY() - 12;
         getRenderAdapter().drawText(ctx, title, x, y, 0xFFFFFF);
@@ -131,9 +131,9 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
         adapter.drawTexture(ctx, texture, left + width - 5, top + height - 5, 5, 5, textureWidth, textureHeight, 11, baseY + 11, 5, 5);
     }
 
-    protected static String translate(String key, Object... args)
+    protected static String translateToString(String key, Object... args)
     {
-        return CraftCreatorAPI.translate(key, args);
+        return CraftCreatorAPI.translateToString(key, args);
     }
 
     protected static RenderAdapter getRenderAdapter()

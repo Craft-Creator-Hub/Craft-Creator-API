@@ -3,6 +3,7 @@ package fr.en0ri4n.craftcreator.recipe.exporter;
 import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.ApiReferences;
 import fr.en0ri4n.craftcreator.CraftCreatorAPI;
+import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeExporter;
 import fr.en0ri4n.craftcreator.recipe.model.Recipe;
 import fr.en0ri4n.craftcreator.recipe.serialize.RecipeSerializerRegistry;
 import fr.en0ri4n.craftcreator.recipe.utils.RecipeRequestFeedback;
@@ -90,7 +91,7 @@ public class DatapackRecipeExporter extends ModRecipeExporter
         {
             Files.writeString(recipeFilePath, GsonProvider.prettyGson().toJson(recipeJson));
             CraftCreatorAPI.LOGGER.info("Added custom recipe to datapack: " + recipeName);
-            return RecipeRequestFeedback.of(Feedback.DATAPACK_ADDED, true, recipeJson.get("name").getAsString(), GsonProvider.prettyGson().toJson(recipeJson), recipeFilePath.toString());
+            return RecipeRequestFeedback.of(Feedback.DATAPACK_ADDED, true, SupportedRecipeExporter.MINECRAFT_DATAPACK, recipeJson.get("name").getAsString(), GsonProvider.prettyGson().toJson(recipeJson), recipeFilePath.toString());
         }
         catch(IOException e)
         {
