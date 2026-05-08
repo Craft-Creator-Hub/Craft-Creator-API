@@ -90,7 +90,7 @@ public class DatapackRecipeExporter extends ModRecipeExporter
         {
             Files.writeString(recipeFilePath, GsonProvider.prettyGson().toJson(recipeJson));
             CraftCreatorAPI.LOGGER.info("Added custom recipe to datapack: " + recipeName);
-            return RecipeRequestFeedback.of(Feedback.DATAPACK_ADDED, true);
+            return RecipeRequestFeedback.of(Feedback.DATAPACK_ADDED, true, recipeJson.get("name").getAsString(), GsonProvider.prettyGson().toJson(recipeJson), recipeFilePath.toString());
         }
         catch(IOException e)
         {
