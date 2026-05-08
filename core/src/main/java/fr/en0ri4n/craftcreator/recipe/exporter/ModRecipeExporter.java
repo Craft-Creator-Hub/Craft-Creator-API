@@ -32,6 +32,11 @@ public abstract class ModRecipeExporter
         this.isLoaded = false;
     }
 
+    public boolean doesRecipeExist(String recipeId)
+    {
+        return getRecipes().stream().anyMatch(r -> r.getId().getPath().equals(recipeId));
+    }
+
     protected abstract void loadInternal();
 
     public abstract RecipeRequestFeedback addRecipe(JsonObject recipeJson);

@@ -1,5 +1,6 @@
 package fr.en0ri4n.craftcreator.platform;
 
+import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.api.translations.TextComponentProvider;
 import fr.en0ri4n.craftcreator.recipe.utils.RecipeRequestFeedback;
 import net.minecraft.ChatFormatting;
@@ -22,7 +23,7 @@ public class ForgeTextComponentProvider implements TextComponentProvider<Compone
     @Override
     public String translateToString(String key, Object... args)
     {
-        return new TranslatableComponent(key, args).getString();
+        return translate(key, args).getString();
     }
 
     @Override
@@ -40,6 +41,12 @@ public class ForgeTextComponentProvider implements TextComponentProvider<Compone
     @Override
     public Component createFeedbackComponent(RecipeRequestFeedback feedback)
     {
+        if(!feedback.isSuccess())
+        {
+            // For simplicity, we use the feedback's message key directly.
+            return literal(CraftCreatorAPI.translateToString(feedback.getFeedback().getMessageKey()));
+        }
+
         // TODO: Translation keys for the labels and hover texts
         MutableComponent component = new TextComponent("{ < = - [Craft-Creator] - = > } }").append("\n").withStyle(ChatFormatting.GRAY);
 

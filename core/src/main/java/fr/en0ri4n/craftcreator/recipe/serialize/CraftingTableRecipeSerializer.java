@@ -18,7 +18,6 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @NoArgsConstructor
 public class CraftingTableRecipeSerializer extends RecipeSerializer
@@ -266,9 +265,7 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
     public JsonObject shaped(RecipeEntry result, CraftingGrid grid)
     {
         JsonObject root = new JsonObject();
-        root.addProperty("id", UUID.randomUUID().toString());
-        root.addProperty("name", result.getId().getPath() + "_shaped");
-
+        
         root.addProperty("type", CraftingTableRCBehavior.CraftingType.SHAPED.getRecipeTypeId().toString());
 
         PatternAndKey pk = buildPatternAndKey(grid);
@@ -281,6 +278,10 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
         jsonResult.addProperty("count", result.getCount());
         root.add("result", jsonResult);
 
+        String hash = generateHash(root);
+        root.addProperty("id", hash);
+        root.addProperty("name", result.getId().getPath() + "_shaped_" + hash.substring(0, 5));
+
         return root;
     }
 
@@ -290,8 +291,6 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
     public JsonObject shapeless(RecipeEntry output, RecipeEntry.MultiInput inputs)
     {
         JsonObject root = new JsonObject();
-        root.addProperty("id", UUID.randomUUID().toString());
-        root.addProperty("name", output.getId().getPath() + "_shapeless");
         root.addProperty("type", CraftingTableRCBehavior.CraftingType.SHAPELESS.getRecipeTypeId().toString());
 
         JsonArray ingredients = new JsonArray();
@@ -305,6 +304,10 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
         result.addProperty("item", output.getId().toString());
         result.addProperty("count", output.getCount());
         root.add("result", result);
+
+        String hash = generateHash(root);
+        root.addProperty("id", hash);
+        root.addProperty("name", output.getId().getPath() + "_shapeless_" + hash.substring(0, 5));
 
         return root;
     }

@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.security.MessageDigest;
+import java.nio.charset.StandardCharsets;
 
 public abstract class RecipeSerializer
 {
@@ -53,6 +55,26 @@ public abstract class RecipeSerializer
         obj.addProperty("id", UUID.randomUUID().toString());
         obj.addProperty("name", name);
         return obj;
+    }
+
+    public static String generateHash(JsonObject json)
+    {
+        try
+        {
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            byte[] hashBytes = digest.digest(json.toString().getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        }
+        catch(Exception e)
+        {
+            return UUID.randomUUID().toString().replace("-", "");
+        }
     }
 
     /**

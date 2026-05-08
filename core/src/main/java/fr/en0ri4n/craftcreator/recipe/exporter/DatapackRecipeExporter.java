@@ -84,6 +84,12 @@ public class DatapackRecipeExporter extends ModRecipeExporter
             return RecipeRequestFeedback.of(Feedback.INVALID_JSON_RECIPE, false);
         }
 
+        if(doesRecipeExist(recipeJson.get("id").getAsString()))
+        {
+            CraftCreatorAPI.LOGGER.error("A recipe with the same id already exists in the datapack: " + recipeJson.get("id").getAsString());
+            return RecipeRequestFeedback.of(Feedback.ALREADY_EXISTS, false);
+        }
+
         String recipeName = recipeJson.has("name") ? recipeJson.get("name").getAsString() : recipeJson.get("id").getAsString();
         Path recipeFilePath = recipesPath.resolve(recipeName + ".json");
 
@@ -91,7 +97,12 @@ public class DatapackRecipeExporter extends ModRecipeExporter
         {
             Files.writeString(recipeFilePath, GsonProvider.prettyGson().toJson(recipeJson));
             CraftCreatorAPI.LOGGER.info("Added custom recipe to datapack: " + recipeName);
-            return RecipeRequestFeedback.of(Feedback.DATAPACK_ADDED, true, SupportedRecipeExporter.MINECRAFT_DATAPACK, recipeJson.get("name").getAsString(), GsonProvider.prettyGson().toJson(recipeJson), recipeFilePath.toString());
+
+            JsonObject cleanedRecipeJson = recipeJson.deepCopy();
+            cleanedRecipeJson.remove("id");
+            cleanedRecipeJson.remove("name"); // Remove id & name from feedback as it's not needed for the user and can be confusing
+
+            return RecipeRequestFeedback.of(Feedback.DATAPACK_ADDED, true, SupportedRecipeExporter.MINECRAFT_DATAPACK, recipeJson.get("name").getAsString(), GsonProvider.prettyGson().toJson(cleanedRecipeJson), recipeFilePath.toString());
         }
         catch(IOException e)
         {
