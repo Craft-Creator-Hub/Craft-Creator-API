@@ -32,7 +32,7 @@ public abstract class TaggableSlotsContainerScreenDefinition<T extends TaggableS
     @Override
     public boolean onClick(double mouseX, double mouseY, int button)
     {
-        Pair<Integer, CoreItemStack> underMouse = getCurrentRenderAdapter().getItemStackUnderMouse(mouseX, mouseY);
+        Pair<Integer, CoreItemStack> underMouse = getRenderAdapter().getItemStackUnderMouse(mouseX, mouseY);
 
         if(!getCurrentUiAdapter().isCtrlKeyDown())
         {
@@ -72,7 +72,7 @@ public abstract class TaggableSlotsContainerScreenDefinition<T extends TaggableS
         int x = getGuiSize().getX(slot.getX());
         int y = getGuiSize().getY(slot.getY());
         Identifier tag = getScreenData().getBehavior().getTaggedSlots().get(slot.getIndex());
-        getCurrentRenderAdapter().drawRect(ctx, x, y, 16, 16, getColorForTag(tag.toString()));
+        getRenderAdapter().drawRect(ctx, x, y, 16, 16, getColorForTag(tag.toString()));
     }
 
     /**

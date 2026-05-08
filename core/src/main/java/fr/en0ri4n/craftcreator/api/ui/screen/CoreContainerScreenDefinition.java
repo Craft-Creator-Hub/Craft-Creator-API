@@ -38,10 +38,10 @@ public abstract class CoreContainerScreenDefinition<T extends BlockEntityBehavio
         super.renderBackground(ctx);
         Core2DBounds size = getBackgroundTextureSize();
 
-        getCurrentRenderAdapter().drawTexture(ctx, getBackgroundTexture(),
-                getGuiSize().getX(), getGuiSize().getY(), size.getWidth(), size.getHeight(),
-                256, 256,
-                0, 0, getGuiSize().getWidth(), getGuiSize().getHeight());
+        getRenderAdapter().drawTexture(ctx, getBackgroundTexture(),
+                                       getGuiSize().getX(), getGuiSize().getY(), size.getWidth(), size.getHeight(),
+                                       256, 256,
+                                       0, 0, getGuiSize().getWidth(), getGuiSize().getHeight());
     }
 
     public abstract Identifier getBackgroundTexture();

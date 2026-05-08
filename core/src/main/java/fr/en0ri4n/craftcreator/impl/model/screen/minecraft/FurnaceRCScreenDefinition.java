@@ -87,10 +87,10 @@ public class FurnaceRCScreenDefinition extends RecipeCreatorContainerScreenDefin
     public void renderForeground(RenderContext ctx, int mouseX, int mouseY)
     {
         super.renderForeground(ctx, mouseX, mouseY);
-        getCurrentRenderAdapter().drawItem(ctx,
-                                           new CoreItemStack(getBehavior().getFurnaceType().getItemId(), 1),
-                                           furnaceTypeDropdown.getBounds().getX(3),
-                                           furnaceTypeDropdown.getBounds().getY(3),
-                                           1F);
+        getRenderAdapter().drawItem(ctx,
+                                    new CoreItemStack(getBehavior().getFurnaceType().getItemId(), 1),
+                                    furnaceTypeDropdown.getBounds().getX(3),
+                                    furnaceTypeDropdown.getBounds().getY(3),
+                                    1F);
     }
 }

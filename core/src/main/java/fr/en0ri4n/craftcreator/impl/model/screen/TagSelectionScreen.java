@@ -42,7 +42,7 @@ public class TagSelectionScreen extends CoreScreenDefinition<TagSelectionScreen.
     public void renderBackground(RenderContext ctx)
     {
         parent.render(ctx, 0, 0);
-        getCurrentRenderAdapter().drawRect(ctx, 0, 0, getCurrentRenderAdapter().getScreenWidth(), getCurrentRenderAdapter().getScreenHeight(), 0xD0101010);
+        getRenderAdapter().drawRect(ctx, 0, 0, getRenderAdapter().getScreenWidth(), getRenderAdapter().getScreenHeight(), 0xD0101010);
         renderTextureWithSize(ctx, GUI_TEXTURE, getGuiSize().getX(), getGuiSize().getY(), getGuiSize().getWidth(), getGuiSize().getHeight(), false, false);
     }
 
@@ -51,7 +51,7 @@ public class TagSelectionScreen extends CoreScreenDefinition<TagSelectionScreen.
     {
         float scale = 1.6F;
         int itemSize = Math.round(16 * scale);
-        getCurrentRenderAdapter().drawItem(ctx, clickedStack, getGuiSize().getHorizontalCenter(itemSize), getGuiSize().getBottom(-itemSize - 6), scale);
+        getRenderAdapter().drawItem(ctx, clickedStack, getGuiSize().getHorizontalCenter(itemSize), getGuiSize().getBottom(-itemSize - 6), scale);
     }
 
     @Override

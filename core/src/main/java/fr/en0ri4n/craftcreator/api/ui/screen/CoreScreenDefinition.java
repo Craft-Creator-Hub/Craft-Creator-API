@@ -37,7 +37,7 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
 
     public Core2DBounds getGuiSize()
     {
-        return Core2DBounds.centerScreen(getSize(), getCurrentRenderAdapter().getScreenWidth(), getCurrentRenderAdapter().getScreenHeight());
+        return Core2DBounds.centerScreen(getSize(), getRenderAdapter().getScreenWidth(), getRenderAdapter().getScreenHeight());
     }
 
     public CoreScreenDefinition(Identifier id, String title, T data)
@@ -52,7 +52,7 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
 
     public void renderBackground(RenderContext ctx)
     {
-        getCurrentRenderAdapter().drawRect(ctx, 0, 0, getCurrentRenderAdapter().getScreenWidth(), getCurrentRenderAdapter().getScreenHeight(), 0xD0101010);
+        getRenderAdapter().drawRect(ctx, 0, 0, getRenderAdapter().getScreenWidth(), getRenderAdapter().getScreenHeight(), 0xD0101010);
     }
 
     public void render(RenderContext ctx, int mouseX, int mouseY) { /* Default implementation does nothing */ }
@@ -66,9 +66,9 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
     protected void renderTitle(RenderContext ctx)
     {
         String title = translate(getTitle());
-        int x = getGuiSize().getHorizontalCenter(getCurrentRenderAdapter().getTextWidth(title));
+        int x = getGuiSize().getHorizontalCenter(getRenderAdapter().getTextWidth(title));
         int y = getGuiSize().getY() - 12;
-        getCurrentRenderAdapter().drawText(ctx, title, x, y, 0xFFFFFF);
+        getRenderAdapter().drawText(ctx, title, x, y, 0xFFFFFF);
     }
 
     public Core2DBounds getBackgroundTextureSize()
@@ -136,7 +136,7 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
         return CraftCreatorAPI.translate(key, args);
     }
 
-    protected static RenderAdapter getCurrentRenderAdapter()
+    protected static RenderAdapter getRenderAdapter()
     {
         return CraftCreatorAPI.get().getPlatform().getRenderAdapter();
     }

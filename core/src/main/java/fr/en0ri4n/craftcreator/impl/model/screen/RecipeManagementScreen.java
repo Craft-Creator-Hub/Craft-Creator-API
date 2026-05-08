@@ -42,7 +42,7 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
 
     public RecipeManagementScreen()
     {
-        super(Identifier.fromMod("recipe_management_screen"), "screen.recipe_management_screen.title", new RecipeManagementScreenData(), Core2DBounds.of(0, 0, getCurrentRenderAdapter().getScreenWidth(), getCurrentRenderAdapter().getScreenHeight()));
+        super(Identifier.fromMod("recipe_management_screen"), "screen.recipe_management_screen.title", new RecipeManagementScreenData(), Core2DBounds.of(0, 0, getRenderAdapter().getScreenWidth(), getRenderAdapter().getScreenHeight()));
     }
 
     @Override
@@ -142,18 +142,18 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
             int guiX = relativeX + (relativeWidth - guiSize.getWidth()) / 2 + 5;
             int guiY = relativeY + (relativeHeight - guiSize.getHeight()) / 2;
             
-            getCurrentRenderAdapter().drawTexture(ctx,
-                    getCurrentRecipeCreatorScreenDef().getBackgroundTexture(),
-                    guiX,
-                    guiY,
-                    guiSize.getWidth(),
-                    guiSize.getHeight(),
-                    256,
-                    256,
-                    0,
-                    0,
-                    guiSize.getWidth(),
-                    guiSize.getHeight());
+            getRenderAdapter().drawTexture(ctx,
+                                           getCurrentRecipeCreatorScreenDef().getBackgroundTexture(),
+                                           guiX,
+                                           guiY,
+                                           guiSize.getWidth(),
+                                           guiSize.getHeight(),
+                                           256,
+                                           256,
+                                           0,
+                                           0,
+                                           guiSize.getWidth(),
+                                           guiSize.getHeight());
 
             renderRecipeSlots(ctx, false, mouseX, mouseY);
         }
@@ -173,8 +173,8 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
     protected void renderTitle(RenderContext ctx)
     {
         String title = translate(getTitle());
-        int titleWidth = getCurrentRenderAdapter().getTextWidth(title);
-        getCurrentRenderAdapter().drawText(ctx, title, getGuiSize().getHorizontalCenter(titleWidth), 10, 0xFFFFFF);
+        int titleWidth = getRenderAdapter().getTextWidth(title);
+        getRenderAdapter().drawText(ctx, title, getGuiSize().getHorizontalCenter(titleWidth), 10, 0xFFFFFF);
     }
 
     private void renderRecipeSlots(RenderContext ctx, boolean isForeground, int mouseX, int mouseY)
@@ -220,12 +220,12 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
             {
                 if(mouseX >= slotX && mouseX < slotX + 16 && mouseY >= slotY && mouseY < slotY + 16)
                 {
-                    getCurrentRenderAdapter().drawItemTooltip(ctx, itemStack, entry.isTag() ? List.of("§8#" + entry.getId().toString()) : List.of(), mouseX, mouseY);
+                    getRenderAdapter().drawItemTooltip(ctx, itemStack, entry.isTag() ? List.of("§8#" + entry.getId().toString()) : List.of(), mouseX, mouseY);
                 }
             }
             else
             {
-                getCurrentRenderAdapter().drawItem(ctx, itemStack, slotX, slotY, 1F);
+                getRenderAdapter().drawItem(ctx, itemStack, slotX, slotY, 1F);
             }
         }
     }
