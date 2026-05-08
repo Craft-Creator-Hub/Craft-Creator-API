@@ -18,7 +18,6 @@ public class CoreButtonWidgetList extends CoreUiElement
     private final int itemSpacing = 4;
     
     @Getter
-    @Setter
     private boolean isOpen = false;
     private final Core2DBounds buttonBounds;
 
