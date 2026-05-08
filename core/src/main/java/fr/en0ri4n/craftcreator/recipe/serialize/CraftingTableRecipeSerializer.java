@@ -166,6 +166,7 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
                 if(out != null)
                 {
                     out.setType(RecipeEntry.EntryType.OUTPUT);
+                    out.setSlot(9);
                     outputs.add(out);
                 }
             }
@@ -247,6 +248,7 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
                 if(out != null)
                 {
                     out.setType(RecipeEntry.EntryType.OUTPUT);
+                    out.setSlot(9);
                     outputs.add(out);
                 }
             }
