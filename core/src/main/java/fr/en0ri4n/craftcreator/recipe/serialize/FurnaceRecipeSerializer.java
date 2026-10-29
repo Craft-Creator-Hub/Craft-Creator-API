@@ -1,6 +1,7 @@
 package fr.en0ri4n.craftcreator.recipe.serialize;
 
 import com.google.gson.JsonObject;
+import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntity;
 import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
 import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.FurnaceRCBehavior;
@@ -16,6 +17,7 @@ public class FurnaceRecipeSerializer extends RecipeSerializer
 {
     private static final FurnaceRecipeSerializer INSTANCE = new FurnaceRecipeSerializer();
     public static FurnaceRecipeSerializer get() { return INSTANCE; }
+
     @Override
     protected void processInventory(List<RecipeEntry> entries, List<CoreItemStack> inventory, Map<Integer, Identifier> taggedSlots)
     {
@@ -41,20 +43,34 @@ public class FurnaceRecipeSerializer extends RecipeSerializer
     @Override
     public Recipe deserializeToRecipe(JsonObject in)
     {
-        Identifier recipeId = in.has("id") ? Identifier.fromMod(in.get("id").getAsString()) : Identifier.fromMod("craftcreator:unknown_furnace_recipe");
-        String name = in.has("name") ? in.get("name").getAsString() : "furnace_recipe";
-        Identifier typeId = Identifier.from(in.get("type").getAsString());
-        RecipeEntry inputEntry = parseIngredientObject(in.getAsJsonObject("ingredient"));
-        inputEntry.setSlot(0);
-        RecipeEntry outputEntry = RecipeEntry.item(Identifier.from(in.get("result").getAsString()), 1);
-        outputEntry.setType(RecipeEntry.EntryType.OUTPUT);
-        outputEntry.setSlot(1);
-        float experience = in.get("experience").getAsFloat();
-        int cookingTime = in.get("cookingtime").getAsInt();
-        RecipeInfos infos = RecipeInfos.create();
-        infos.addParameter(new RecipeInfos.RecipeParameterNumber("experience", experience, true));
-        infos.addParameter(new RecipeInfos.RecipeParameterNumber("cookingtime", cookingTime, true));
-        return new Recipe(recipeId, name, typeId, List.of(inputEntry), List.of(outputEntry), infos);
+        try
+        {
+            Identifier recipeId = Identifier.fromMod(in.has("id") ? in.get("id").getAsString() : "unknown_furnace_recipe");
+            String name = in.has("name") ? in.get("name").getAsString() : "furnace_recipe";
+            Identifier typeId = Identifier.from(in.get("type").getAsString());
+
+            RecipeEntry inputEntry = parseIngredient(in.get("ingredient"));
+            if(inputEntry == null) return Recipe.EMPTY;
+            inputEntry.setSlot(0);
+
+            RecipeEntry outputEntry = in.get("result").isJsonObject()
+                    ? parseResultObject(in.getAsJsonObject("result"))
+                    : RecipeEntry.item(Identifier.from(in.get("result").getAsString()), 1);
+            if(outputEntry == null) return Recipe.EMPTY;
+            outputEntry.setType(RecipeEntry.EntryType.OUTPUT);
+            outputEntry.setSlot(1);
+
+            RecipeInfos infos = RecipeInfos.create();
+            infos.addParameter(new RecipeInfos.RecipeParameterNumber("experience", in.get("experience").getAsFloat(), true));
+            infos.addParameter(new RecipeInfos.RecipeParameterNumber("cookingtime", in.get("cookingtime").getAsInt(), true));
+
+            return new Recipe(recipeId, name, typeId, List.of(inputEntry), List.of(outputEntry), infos);
+        }
+        catch(Exception e)
+        {
+            CraftCreatorAPI.LOGGER.error("Failed to deserialize furnace recipe: " + in, e);
+            return Recipe.EMPTY;
+        }
     }
 
     @Override
@@ -63,24 +79,17 @@ public class FurnaceRecipeSerializer extends RecipeSerializer
         FurnaceRCBehavior behavior = (FurnaceRCBehavior) value.getBehavior();
         List<RecipeEntry> entries = processBlockEntity(value);
 
-        RecipeEntry inputEntry = entries.stream()
-                .filter(entry -> entry.getType() == RecipeEntry.EntryType.INPUT)
-                .findFirst()
-                .orElse(RecipeEntry.EMPTY);
+        RecipeEntry inputEntry = findFirst(entries, RecipeEntry.EntryType.INPUT);
+        RecipeEntry outputEntry = findFirst(entries, RecipeEntry.EntryType.OUTPUT);
+        Identifier typeId = behavior.getFurnaceType().getRecipeTypeId();
 
-        RecipeEntry outputEntry = entries.stream()
-                .filter(entry -> entry.getType() == RecipeEntry.EntryType.OUTPUT)
-                .findFirst()
-                .orElse(RecipeEntry.EMPTY);
-
-        JsonObject out = createBaseRecipeObject(behavior.getFurnaceType().getRecipeTypeId(), outputEntry.getId().getPath() + "_from_" + behavior.getFurnaceType().getRecipeTypeId().getPath());
-
-        out.add("ingredient", singletonItemJson(inputEntry));
-
+        JsonObject out = new JsonObject();
+        out.addProperty("type", typeId.toString());
+        out.add("ingredient", ingredientJson(inputEntry));
         out.addProperty("result", outputEntry.getId().toString());
         out.addProperty("experience", behavior.getExperience());
         out.addProperty("cookingtime", behavior.getCookingTime());
 
-        return out;
+        return withIdAndName(out, outputEntry.getId().getPath() + "_from_" + typeId.getPath());
     }
 }

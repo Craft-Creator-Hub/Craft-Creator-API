@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntity;
 import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
-import fr.en0ri4n.craftcreator.api.mod.SupportedVersion;
 import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.CraftingTableRCBehavior;
 import fr.en0ri4n.craftcreator.recipe.model.CraftingGrid;
 import fr.en0ri4n.craftcreator.recipe.model.Recipe;
@@ -18,6 +17,7 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 @NoArgsConstructor
 public class CraftingTableRecipeSerializer extends RecipeSerializer
@@ -25,33 +25,33 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
     public static final CraftingTableRecipeSerializer INSTANCE = new CraftingTableRecipeSerializer();
     public static RecipeSerializer get() { return INSTANCE; }
 
+    private static final int GRID_SIZE = 3;
+    private static final int OUTPUT_SLOT = GRID_SIZE * GRID_SIZE;
+
     @Override
     protected void processInventory(List<RecipeEntry> entries, List<CoreItemStack> inventory, Map<Integer, Identifier> taggedSlots)
     {
-        for(int i = 0; i < 9; i++)
+        for(int i = 0; i < OUTPUT_SLOT; i++)
         {
-            if(taggedSlots.containsKey(i))
-            {
-                Identifier tagId = taggedSlots.get(i);
-                RecipeEntry entry = RecipeEntry.itemTag(tagId, inventory.get(i).getCount());
-                entry.setSlot(i);
-                entries.add(entry);
-            }
-            else
-            {
-                CoreItemStack stack = inventory.get(i);
-                if(!stack.isEmpty())
-                {
-                    RecipeEntry entry = RecipeEntry.item(stack.getItemId(), stack.getCount());
-                    entry.setSlot(i);
-                    entries.add(entry);
-                }
-            }
+            CoreItemStack stack = inventory.get(i);
+            RecipeEntry entry;
+
+            if(taggedSlots.containsKey(i)) entry = RecipeEntry.itemTag(taggedSlots.get(i), stack.getCount());
+            else if(!stack.isEmpty()) entry = RecipeEntry.item(stack.getItemId(), stack.getCount());
+            else continue;
+
+            entry.setSlot(i);
+            entries.add(entry);
         }
 
-        RecipeEntry resultEntry = RecipeEntry.item(inventory.get(9).getItemId(), inventory.get(9).getCount());
-        resultEntry.setType(RecipeEntry.EntryType.OUTPUT);
-        entries.add(resultEntry);
+        CoreItemStack resultStack = inventory.get(OUTPUT_SLOT);
+        if(!resultStack.isEmpty())
+        {
+            RecipeEntry resultEntry = RecipeEntry.item(resultStack.getItemId(), resultStack.getCount());
+            resultEntry.setType(RecipeEntry.EntryType.OUTPUT);
+            resultEntry.setSlot(OUTPUT_SLOT);
+            entries.add(resultEntry);
+        }
     }
 
     @Override
@@ -60,205 +60,101 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
         CraftingTableRCBehavior behavior = (CraftingTableRCBehavior) coreBlockEntity.getBehavior();
 
         List<RecipeEntry> entries = processBlockEntity(coreBlockEntity);
+        List<RecipeEntry> inputs = entries.stream().filter(entry -> entry.getType() == RecipeEntry.EntryType.INPUT).toList();
+        RecipeEntry outputEntry = findFirst(entries, RecipeEntry.EntryType.OUTPUT);
 
-        RecipeEntry outputEntry = entries.stream()
-                .filter(entry -> entry.getType() == RecipeEntry.EntryType.OUTPUT)
-                .findFirst()
-                .orElse(RecipeEntry.EMPTY);
-
-        if(behavior.getCraftingType() == CraftingTableRCBehavior.CraftingType.SHAPED)
+        return switch(behavior.getCraftingType())
         {
-            CraftingGrid grid = new CraftingGrid(3, 3);
-            for(RecipeEntry entry : entries)
+            case SHAPED ->
             {
-                if(entry.getType() == RecipeEntry.EntryType.INPUT)
-                {
-                    int slotIndex = entry.getSlot();
-                    int row = slotIndex / 3;
-                    int col = slotIndex % 3;
-                    grid.set(row, col, entry);
-                }
+                CraftingGrid grid = new CraftingGrid(GRID_SIZE, GRID_SIZE);
+                inputs.forEach(entry -> grid.set(entry.getSlot() % GRID_SIZE, entry.getSlot() / GRID_SIZE, entry));
+                yield shaped(outputEntry, grid);
             }
-            return shaped(outputEntry, grid);
-        }
-        else if(behavior.getCraftingType() == CraftingTableRCBehavior.CraftingType.SHAPELESS)
-        {
-            RecipeEntry.MultiInput inputs = new RecipeEntry.MultiInput();
-            entries.stream().filter(entry -> entry.getType() == RecipeEntry.EntryType.INPUT).forEach(inputs::add);
-            return shapeless(outputEntry, inputs);
-        }
-        return null;
+            case SHAPELESS -> shapeless(outputEntry, inputs);
+        };
     }
 
     @Override
     public Recipe deserializeToRecipe(JsonObject element)
     {
-        if(element == null) return Recipe.EMPTY;
+        if(element == null || !element.has("type")) return Recipe.EMPTY;
 
-        if(element.has("type"))
-        {
-            String type = element.get("type").getAsString();
-            if(type.equals(CraftingTableRCBehavior.CraftingType.SHAPED.getRecipeTypeId().toString()))
-            {
-                return deserializeShapedRecipe(element);
-            }
-            else if(type.equals(CraftingTableRCBehavior.CraftingType.SHAPELESS.getRecipeTypeId().toString()))
-            {
-                return deserializeShapelessRecipe(element);
-            }
-        }
+        String type = element.get("type").getAsString();
+        if(type.equals(CraftingTableRCBehavior.CraftingType.SHAPED.getRecipeTypeId().toString()))
+            return deserialize(element, "shaped_recipe", this::parseShapedInputs);
+        if(type.equals(CraftingTableRCBehavior.CraftingType.SHAPELESS.getRecipeTypeId().toString()))
+            return deserialize(element, "shapeless_recipe", this::parseShapelessInputs);
+
         return Recipe.EMPTY;
     }
 
-    private Recipe deserializeShapelessRecipe(JsonObject element)
+    private Recipe deserialize(JsonObject element, String defaultName, Function<JsonObject, List<RecipeEntry>> inputsParser)
     {
-        if(element == null) return Recipe.EMPTY;
-
         try
         {
             Identifier id = Identifier.fromMod(element.has("id") ? element.get("id").getAsString() : "unknown");
-
-            String name = element.has("name") ? element.get("name").getAsString() : "shapeless_recipe";
-
-            // parse type
+            String name = element.has("name") ? element.get("name").getAsString() : defaultName;
             Identifier type = Identifier.from(element.get("type").getAsString());
 
-            // parse ingredients array
-            List<RecipeEntry> inputs = new ArrayList<>();
-            if(element.has("ingredients") && element.get("ingredients").isJsonArray())
-            {
-                JsonArray ingredients = element.getAsJsonArray("ingredients");
-                for(int i = 0; i < ingredients.size(); i++)
-                {
-                    JsonElement el = ingredients.get(i);
-                    if(SupportedVersion.isGreaterOrEquals(SupportedVersion.V1_21_2))
-                    {
-                        String ingredientStr = el.getAsString();
-                        RecipeEntry entry = parseIngredientNewVersion(ingredientStr);
-                        if(entry != null)
-                        {
-                            entry.setType(RecipeEntry.EntryType.INPUT);
-                            entry.setSlot(i);
-                            inputs.add(entry);
-                        }
-                    }
-                    else
-                    {
-                        if(!el.isJsonObject()) continue;
-                        JsonObject obj = el.getAsJsonObject();
-                        RecipeEntry entry = parseIngredientObject(obj);
-                        if(entry != null)
-                        {
-                            entry.setType(RecipeEntry.EntryType.INPUT);
-                            entry.setSlot(i);
-                            inputs.add(entry);
-                        }
-                    }
-                }
-            }
-
-            // parse result
             List<RecipeEntry> outputs = new ArrayList<>();
-            if(element.has("result") && element.get("result").isJsonObject())
+            RecipeEntry out = element.has("result") && element.get("result").isJsonObject() ? parseResultObject(element.getAsJsonObject("result")) : null;
+            if(out != null)
             {
-                JsonObject res = element.getAsJsonObject("result");
-                RecipeEntry out = parseResultObject(res);
-                if(out != null)
-                {
-                    out.setType(RecipeEntry.EntryType.OUTPUT);
-                    out.setSlot(9);
-                    outputs.add(out);
-                }
+                out.setType(RecipeEntry.EntryType.OUTPUT);
+                out.setSlot(OUTPUT_SLOT);
+                outputs.add(out);
             }
 
-            return new Recipe(id, name, type, inputs, outputs, RecipeInfos.create());
+            return new Recipe(id, name, type, inputsParser.apply(element), outputs, RecipeInfos.create());
         }
-        catch(Exception ex)
+        catch(Exception e)
         {
-            CraftCreatorAPI.LOGGER.error("Failed to deserialize shapeless recipe: " + ex.getMessage());
+            CraftCreatorAPI.LOGGER.error("Failed to deserialize crafting recipe: " + element, e);
             return Recipe.EMPTY;
         }
     }
 
-    private Recipe deserializeShapedRecipe(JsonObject element)
+    private List<RecipeEntry> parseShapelessInputs(JsonObject element)
     {
-        if(element == null) return Recipe.EMPTY;
+        List<RecipeEntry> inputs = new ArrayList<>();
+        if(!element.has("ingredients") || !element.get("ingredients").isJsonArray()) return inputs;
 
-        try
+        JsonArray ingredients = element.getAsJsonArray("ingredients");
+        for(int i = 0; i < ingredients.size(); i++)
+            addInput(inputs, parseIngredient(ingredients.get(i)), i);
+
+        return inputs;
+    }
+
+    private List<RecipeEntry> parseShapedInputs(JsonObject element)
+    {
+        List<RecipeEntry> inputs = new ArrayList<>();
+        if(!element.has("pattern")) return inputs;
+
+        JsonArray pattern = element.getAsJsonArray("pattern");
+        JsonObject key = element.has("key") ? element.getAsJsonObject("key") : new JsonObject();
+
+        for(int row = 0; row < Math.min(pattern.size(), GRID_SIZE); row++)
         {
-            Identifier id = Identifier.fromMod(element.has("id") ? element.get("id").getAsString() : "unknown");
-
-            String name = element.has("name") ? element.get("name").getAsString() : "shaped_recipe";
-
-            Identifier type = Identifier.from(element.get("type").getAsString());
-
-            // pattern is an array of strings
-            JsonArray patternArray = element.has("pattern") ? element.getAsJsonArray("pattern") : null;
-            JsonObject key = element.has("key") ? element.getAsJsonObject("key") : new JsonObject();
-
-            List<RecipeEntry> inputs = new ArrayList<>();
-
-            if(patternArray != null)
+            String rowStr = pattern.get(row).getAsString();
+            for(int col = 0; col < Math.min(rowStr.length(), GRID_SIZE); col++)
             {
-                int rows = patternArray.size();
-                int cols = 0;
-                // determine cols from longest pattern row
-                for(JsonElement e : patternArray)
-                {
-                    if(e.isJsonPrimitive())
-                    {
-                        String row = e.getAsString();
-                        cols = Math.max(cols, row.length());
-                    }
-                }
-                // iterate pattern rows and cols, map chars using key
-                for(int r = 0; r < rows; r++)
-                {
-                    String rowStr = patternArray.get(r).getAsString();
-                    for(int c = 0; c < cols; c++)
-                    {
-                        char ch = (c < rowStr.length() ? rowStr.charAt(c) : ' ');
-                        if(ch == ' ' || ch == '\0') continue;
-                        String keyChar = String.valueOf(ch);
-                        if(!key.has(keyChar)) continue;
-                        JsonElement mapping = key.get(keyChar);
-                        if(!mapping.isJsonObject()) continue;
-                        JsonObject mapObj = mapping.getAsJsonObject();
-                        RecipeEntry entry = parseIngredientObject(mapObj);
-                        if(entry != null)
-                        {
-                            entry.setType(RecipeEntry.EntryType.INPUT);
-                            // set slot based on a 3x3 grid mapping: attempt to place into the 3x3 grid top-left
-                            int slot = r * 3 + c; // if pattern smaller/larger than 3 this may overflow; clamp to 0..8
-                            if(slot < 0) slot = 0;
-                            if(slot > 8) slot = 8;
-                            entry.setSlot(slot);
-                            inputs.add(entry);
-                        }
-                    }
-                }
+                String symbol = String.valueOf(rowStr.charAt(col));
+                JsonElement mapping = key.get(symbol);
+                if(mapping != null) addInput(inputs, parseIngredient(mapping), row * GRID_SIZE + col);
             }
-
-            // parse result
-            List<RecipeEntry> outputs = new ArrayList<>();
-            if(element.has("result") && element.get("result").isJsonObject())
-            {
-                JsonObject res = element.getAsJsonObject("result");
-                RecipeEntry out = parseResultObject(res);
-                if(out != null)
-                {
-                    out.setType(RecipeEntry.EntryType.OUTPUT);
-                    out.setSlot(9);
-                    outputs.add(out);
-                }
-            }
-
-            return new Recipe(id, name, type, inputs, outputs, RecipeInfos.create());
         }
-        catch(Exception ex)
-        {
-            return Recipe.EMPTY;
-        }
+
+        return inputs;
+    }
+
+    private static void addInput(List<RecipeEntry> inputs, RecipeEntry entry, int slot)
+    {
+        if(entry == null) return;
+        entry.setType(RecipeEntry.EntryType.INPUT);
+        entry.setSlot(slot);
+        inputs.add(entry);
     }
 
     /**
@@ -267,50 +163,29 @@ public class CraftingTableRecipeSerializer extends RecipeSerializer
     public JsonObject shaped(RecipeEntry result, CraftingGrid grid)
     {
         JsonObject root = new JsonObject();
-        
         root.addProperty("type", CraftingTableRCBehavior.CraftingType.SHAPED.getRecipeTypeId().toString());
 
         PatternAndKey pk = buildPatternAndKey(grid);
-        root.add("pattern", pk.pattern);
-        root.add("key", pk.key);
+        root.add("pattern", pk.pattern());
+        root.add("key", pk.key());
+        root.add("result", resultJson(result));
 
-        // result
-        JsonObject jsonResult = new JsonObject();
-        jsonResult.addProperty("item", result.getId().toString());
-        jsonResult.addProperty("count", result.getCount());
-        root.add("result", jsonResult);
-
-        String hash = generateHash(root);
-        root.addProperty("id", hash);
-        root.addProperty("name", result.getId().getPath() + "_shaped_" + hash.substring(0, 5));
-
-        return root;
+        return withIdAndName(root, result.getId().getPath() + "_shaped");
     }
 
     /**
      * Build a shapeless crafting recipe JSON (minecraft:crafting_shapeless).
      */
-    public JsonObject shapeless(RecipeEntry output, RecipeEntry.MultiInput inputs)
+    public JsonObject shapeless(RecipeEntry output, List<RecipeEntry> inputs)
     {
         JsonObject root = new JsonObject();
         root.addProperty("type", CraftingTableRCBehavior.CraftingType.SHAPELESS.getRecipeTypeId().toString());
 
         JsonArray ingredients = new JsonArray();
-        for(RecipeEntry entry : inputs.getEntries())
-        {
-            ingredients.add(singletonItemJson(entry));
-        }
+        inputs.forEach(entry -> ingredients.add(ingredientJson(entry)));
         root.add("ingredients", ingredients);
+        root.add("result", resultJson(output));
 
-        JsonObject result = new JsonObject();
-        result.addProperty("item", output.getId().toString());
-        result.addProperty("count", output.getCount());
-        root.add("result", result);
-
-        String hash = generateHash(root);
-        root.addProperty("id", hash);
-        root.addProperty("name", output.getId().getPath() + "_shapeless_" + hash.substring(0, 5));
-
-        return root;
+        return withIdAndName(root, output.getId().getPath() + "_shapeless");
     }
 }

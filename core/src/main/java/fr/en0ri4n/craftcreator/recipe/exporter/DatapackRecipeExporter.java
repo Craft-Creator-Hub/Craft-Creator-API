@@ -5,6 +5,7 @@ import fr.en0ri4n.craftcreator.ApiReferences;
 import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeExporter;
 import fr.en0ri4n.craftcreator.recipe.model.Recipe;
+import fr.en0ri4n.craftcreator.recipe.serialize.RecipeSerializer;
 import fr.en0ri4n.craftcreator.recipe.serialize.RecipeSerializerRegistry;
 import fr.en0ri4n.craftcreator.recipe.utils.RecipeRequestFeedback;
 import fr.en0ri4n.craftcreator.serialize.GsonProvider;
@@ -49,7 +50,7 @@ public class DatapackRecipeExporter extends ModRecipeExporter
         if(!packMcmeta.exists())
         {
             // Get file from resources assets/craftcreator/pack.mcmeta
-            try(InputStream inputStream = CraftCreatorAPI.class.getClassLoader().getResourceAsStream("/assets/craftcreator/presets/pack.mcmeta"))
+            try(InputStream inputStream = CraftCreatorAPI.class.getResourceAsStream("/assets/craftcreator/presets/pack.mcmeta"))
             {
                 if(inputStream == null) throw new IOException("pack.mcmeta resource not found");
 
@@ -102,7 +103,7 @@ public class DatapackRecipeExporter extends ModRecipeExporter
             cleanedRecipeJson.remove("id");
             cleanedRecipeJson.remove("name"); // Remove id & name from feedback as it's not needed for the user and can be confusing
 
-            return RecipeRequestFeedback.of(Feedback.DATAPACK_ADDED, true, SupportedRecipeExporter.MINECRAFT_DATAPACK, recipeJson.get("name").getAsString(), GsonProvider.prettyGson().toJson(cleanedRecipeJson), recipeFilePath.toString());
+            return RecipeRequestFeedback.of(Feedback.DATAPACK_ADDED, true, SupportedRecipeExporter.MINECRAFT_DATAPACK, recipeName, GsonProvider.prettyGson().toJson(cleanedRecipeJson), recipeFilePath.toString());
         }
         catch(IOException e)
         {
@@ -117,18 +118,42 @@ public class DatapackRecipeExporter extends ModRecipeExporter
         if(arePathsInvalid())
             return RecipeRequestFeedback.of(Feedback.DATAPACK_PATH_INVALID, false);
 
-        Path recipeFilePath = recipesPath.resolve(id.toString() + ".json");
+        // Files are named after the recipe name, so look for the file holding this id
+        File[] recipeFiles = recipesPath.toFile().listFiles((dir, name) -> name.endsWith(".json"));
+        if(recipeFiles == null) return RecipeRequestFeedback.of(Feedback.DATAPACK_FILE_ERROR, false);
 
+        for(File recipeFile : recipeFiles)
+        {
+            JsonObject recipeJson = readRecipeJson(recipeFile);
+            if(recipeJson == null || !recipeJson.has("id") || !recipeJson.get("id").getAsString().equals(id.getPath())) continue;
+
+            try
+            {
+                Files.delete(recipeFile.toPath());
+                CraftCreatorAPI.LOGGER.info("Removed custom recipe from datapack: " + id);
+                return RecipeRequestFeedback.of(Feedback.DATAPACK_REMOVED, true);
+            }
+            catch(IOException e)
+            {
+                CraftCreatorAPI.LOGGER.error("Failed to remove custom recipe from datapack: " + id, e);
+                return RecipeRequestFeedback.of(Feedback.DATAPACK_FILE_ERROR, false);
+            }
+        }
+
+        CraftCreatorAPI.LOGGER.warn("No custom recipe found in datapack with id: " + id);
+        return RecipeRequestFeedback.of(Feedback.DATAPACK_FILE_ERROR, false);
+    }
+
+    private static JsonObject readRecipeJson(File recipeFile)
+    {
         try
         {
-            Files.deleteIfExists(recipeFilePath);
-            CraftCreatorAPI.LOGGER.info("Removed custom recipe from datapack: " + id);
-            return RecipeRequestFeedback.of(Feedback.DATAPACK_REMOVED, true);
+            return GsonProvider.compactGson().fromJson(Files.readString(recipeFile.toPath()), JsonObject.class);
         }
-        catch(IOException e)
+        catch(Exception e)
         {
-            CraftCreatorAPI.LOGGER.error("Failed to remove custom recipe from datapack: " + id, e);
-            return RecipeRequestFeedback.of(Feedback.INVALID_JSON_RECIPE, false);
+            CraftCreatorAPI.LOGGER.error("Failed to read recipe file: " + recipeFile.getName(), e);
+            return null;
         }
     }
 
@@ -149,19 +174,18 @@ public class DatapackRecipeExporter extends ModRecipeExporter
 
         for(File recipeFile : recipeFiles)
         {
-            try
-            {
-                String content = Files.readString(recipeFile.toPath());
-                JsonObject recipeJson = GsonProvider.compactGson().fromJson(content, JsonObject.class);
+            JsonObject recipeJson = readRecipeJson(recipeFile);
+            if(recipeJson == null || !recipeJson.has("type")) continue;
 
-                String typeStr = recipeJson.get("type").getAsString();
-                Recipe recipe = RecipeSerializerRegistry.get().getByRecipeTypeId(Identifier.from(typeStr)).deserializeToRecipe(recipeJson);
-                loadedRecipes.add(recipe);
-            }
-            catch(Exception e)
+            RecipeSerializer serializer = RecipeSerializerRegistry.get().getByRecipeTypeId(Identifier.from(recipeJson.get("type").getAsString()));
+            if(serializer == null)
             {
-                CraftCreatorAPI.LOGGER.error("Failed to read recipe file: " + recipeFile.getName(), e);
+                CraftCreatorAPI.LOGGER.warn("No serializer for recipe type of file: " + recipeFile.getName());
+                continue;
             }
+
+            Recipe recipe = serializer.deserializeToRecipe(recipeJson);
+            if(recipe != Recipe.EMPTY) loadedRecipes.add(recipe);
         }
 
         return loadedRecipes;
@@ -177,7 +201,7 @@ public class DatapackRecipeExporter extends ModRecipeExporter
 
         if(recipesPath == null)
         {
-            CraftCreatorAPI.LOGGER.error("Datapack path is not initialized. Cannot add custom recipe.");
+            CraftCreatorAPI.LOGGER.error("Datapack recipes path is not initialized. Cannot add custom recipe.");
             return true;
         }
 
