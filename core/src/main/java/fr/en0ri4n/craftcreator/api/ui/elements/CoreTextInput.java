@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -13,8 +14,9 @@ import java.util.function.Predicate;
 @Getter
 public class CoreTextInput extends CoreUiElement
 {
-    @Setter
     private String value;
+    @Setter
+    private Consumer<String> onChange = value -> {};
 
     private final TextInputType inputType;
     private final String placeholder;
@@ -39,6 +41,13 @@ public class CoreTextInput extends CoreUiElement
         this(id, type, x, y, width, height, label, value, placeholder, Short.MAX_VALUE, tooltip);
     }
 
+    public void setValue(String value)
+    {
+        this.value = value == null ? "" : value;
+        this.cursorPosition = Math.min(cursorPosition, this.value.length());
+        onChange.accept(this.value);
+    }
+
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers)
     {
@@ -48,9 +57,14 @@ public class CoreTextInput extends CoreUiElement
             {
                 if(cursorPosition > 0 && !value.isEmpty())
                 {
-                    value = value.substring(0, cursorPosition - 1) + value.substring(cursorPosition);
                     cursorPosition--;
+                    setValue(value.substring(0, cursorPosition) + value.substring(cursorPosition + 1));
                 }
+            }
+            else if(keyCode == 261) // delete
+            {
+                if(cursorPosition < value.length())
+                    setValue(value.substring(0, cursorPosition) + value.substring(cursorPosition + 1));
             }
             else if(keyCode == 262) // right arrow
             {
@@ -81,8 +95,8 @@ public class CoreTextInput extends CoreUiElement
             String newValue = value.substring(0, cursorPosition) + codePoint + value.substring(cursorPosition);
             if(newValue.length() <= maxLength)
             {
-                value = newValue;
                 cursorPosition++;
+                setValue(newValue);
             }
             return true;
         }
@@ -126,7 +140,7 @@ public class CoreTextInput extends CoreUiElement
             long time = System.currentTimeMillis();
             if((time / 500) % 2 == 0)
             {
-                int cursorX = getBounds().getX(2 + getRenderAdapter().getTextWidth(displayText.substring(0, cursorPosition)));
+                int cursorX = getBounds().getX(2 + getRenderAdapter().getTextWidth(value.substring(0, cursorPosition)));
                 getRenderAdapter().drawRect(ctx, cursorX, getBounds().getY(2), 1, getBounds().getHeight(-4), 0xFFFFFFFF);
             }
         }

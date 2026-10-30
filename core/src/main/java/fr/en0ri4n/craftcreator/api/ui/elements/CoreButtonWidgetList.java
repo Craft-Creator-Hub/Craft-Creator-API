@@ -9,242 +9,120 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Collapsible panel holding a scrollable column of labelled widgets (used for recipe settings).<br>
+ * A toggle button sits on the panel's right edge when open and on its left edge when closed.
+ */
 public class CoreButtonWidgetList extends CoreUiElement
 {
+    private static final int PADDING = 5;
+    private static final int ITEM_SPACING = 4;
+    private static final int LABEL_GAP = 6;
+
     private final List<WidgetEntry> entries = new ArrayList<>();
     private final Identifier buttonTexture;
-    private int scrollOffset = 0;
-    private final int itemSpacing = 4;
-    
+    private final CoreScrollbar scrollbar = new CoreScrollbar();
+    private final Core2DBounds buttonBounds;
+
     @Getter
     private boolean isOpen = false;
-    private final Core2DBounds buttonBounds;
 
     public CoreButtonWidgetList(String id, int x, int y, int width, int height, Core2DBounds buttonBounds, Identifier buttonTexture, String tooltip)
     {
         super(CoreUiElementType.WIDGET_LIST, id, x, y, width, height, tooltip);
         this.buttonTexture = buttonTexture;
-        buttonBounds.setX(x + width - 20);
-        buttonBounds.setY(y);
         this.buttonBounds = buttonBounds;
+        setOpen(false);
     }
 
     public void addWidget(String label, CoreUiElement widget)
     {
         entries.add(new WidgetEntry(label, widget));
-        clampScroll();
+        layout();
     }
 
     public void clear()
     {
         entries.clear();
-        scrollOffset = 0;
-    }
-
-    private int getOffset()
-    {
-        return 5;
-    }
-
-    private int getScrollBarWidth()
-    {
-        return 6;
-    }
-
-    private int getContentTop()
-    {
-        return getBounds().getY() + getOffset();
-    }
-
-    private int getContentHeight()
-    {
-        return Math.max(0, getBounds().getHeight() - getOffset() * 2);
-    }
-
-    private int getTotalContentHeight()
-    {
-        int totalHeight = 0;
-        int listWidth = getBounds().getWidth() - getOffset() * 2 - getScrollBarWidth() - itemSpacing;
-
-        for(WidgetEntry entry : entries)
-        {
-            totalHeight += entry.calculateHeight(listWidth) + itemSpacing;
-        }
-
-        return Math.max(0, totalHeight - itemSpacing);
-    }
-
-    private void clampScroll()
-    {
-        int max = Math.max(0, getTotalContentHeight() - getContentHeight());
-        if(scrollOffset < 0) scrollOffset = 0;
-        if(scrollOffset > max) scrollOffset = max;
-    }
-
-    public void scrollByPixels(int deltaPixels)
-    {
-        scrollOffset += deltaPixels;
-        clampScroll();
-    }
-
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta)
-    {
-        if(!isVisible() || !isOpen()) return false;
-
-        int steps = 0;
-        if(delta > 0) steps = -20;
-        else if(delta < 0) steps = 20;
-
-        if(steps != 0)
-        {
-            scrollByPixels(steps);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
-    {
-        if(!isVisible() || !isOpen()) return false;
-
-        for(WidgetEntry entry : entries)
-        {
-            if(entry.widget.keyPressed(keyCode, scanCode, modifiers))
-                return true;
-        }
-        return super.keyPressed(keyCode, scanCode, modifiers);
-    }
-
-    @Override
-    public boolean charTyped(char codePoint, int modifiers)
-    {
-        if(!isVisible() || !isOpen()) return false;
-
-        for(WidgetEntry entry : entries)
-        {
-            if(entry.widget.charTyped(codePoint, modifiers))
-                return true;
-        }
-        return super.charTyped(codePoint, modifiers);
+        scrollbar.setScrollOffset(0);
+        layout();
     }
 
     public void setOpen(boolean open)
     {
         isOpen = open;
-        buttonBounds.setX(getBounds().getX() + (!isOpen ? getBounds().getWidth() : 0) - buttonBounds.getWidth());
+        buttonBounds.setX(getBounds().getX() + (isOpen ? 0 : getBounds().getWidth()) - buttonBounds.getWidth());
+        buttonBounds.setY(getBounds().getY());
     }
 
-    @Override
-    public void render(RenderContext ctx, int mouseX, int mouseY, float partialTick)
+    /* ---------------- layout ---------------- */
+
+    private int getContentX()
     {
-        if(ctx == null || !isVisible()) return;
-
-        // Render the button background
-        CoreScreenDefinition.renderTextureWithSize(ctx, CoreScreenDefinition.GUI_TEXTURE, buttonBounds.getX(), buttonBounds.getY(), buttonBounds.getWidth(), buttonBounds.getHeight(), false, false);
-        getRenderAdapter().drawTexture(ctx,
-                buttonTexture, 
-                buttonBounds.getX() + 4, 
-                buttonBounds.getY() + 4,
-                12,
-                12, 
-                24,
-                24,
-                0,
-                0,
-                24,
-                24);
-        
-        if(!isOpen()) return;
-
-        int x = getBounds().getX();
-        int y = getBounds().getY();
-        int width = getBounds().getWidth();
-        int height = getBounds().getHeight();
-
-        CoreScreenDefinition.renderTextureWithSize(ctx, CoreScreenDefinition.GUI_TEXTURE, x, y, width, height, false, false);
-
-        if(entries.isEmpty() || getContentHeight() <= 0) return;
-
-        int contentLeft = x + getOffset();
-        int contentTop = getContentTop();
-        int contentWidth = width - getOffset() * 2 - getScrollBarWidth() - itemSpacing;
-
-        int currentY = contentTop - scrollOffset;
-
-        // Scissor support would be ideal here depending on RenderAdapter capabilities
-        for(WidgetEntry entry : entries)
-        {
-            int entryHeight = entry.calculateHeight(contentWidth);
-            
-            // Only render if visible (or partially visible)
-            if(currentY + entryHeight > contentTop && currentY < contentTop + getContentHeight())
-            {
-                entry.render(ctx, contentLeft, currentY, contentWidth, mouseX, mouseY, partialTick);
-            }
-            
-            currentY += entryHeight + itemSpacing;
-        }
-
-        drawScrollBar(ctx);
+        return getBounds().getX(PADDING);
     }
 
-    @Override
-    public void renderForeground(RenderContext ctx, int mouseX, int mouseY)
+    private int getContentY()
     {
-        if(!isVisible()) return;
-        
-        if(!isOpen())
-            return;
+        return getBounds().getY(PADDING);
+    }
 
-        int contentTop = getContentTop();
-        int contentLeft = getBounds().getX() + getOffset();
-        int contentWidth = getBounds().getWidth() - getOffset() * 2 - getScrollBarWidth() - itemSpacing;
-        int currentY = contentTop - scrollOffset;
+    private int getContentWidth()
+    {
+        return Math.max(0, getBounds().getWidth() - PADDING * 2 - CoreScrollbar.WIDTH - ITEM_SPACING);
+    }
 
+    private int getContentHeight()
+    {
+        return Math.max(0, getBounds().getHeight() - PADDING * 2);
+    }
+
+    /**
+     * Place every widget at its current scrolled position, so clicks hit the right place even before the next render.
+     */
+    private void layout()
+    {
+        int contentWidth = getContentWidth();
+        int totalHeight = 0;
+        for(WidgetEntry entry : entries)
+            totalHeight += entry.getHeight(contentWidth) + ITEM_SPACING;
+
+        scrollbar.update(getBounds().getRight(-PADDING - CoreScrollbar.WIDTH), getContentY(), getContentHeight(), Math.max(0, totalHeight - ITEM_SPACING));
+
+        int currentY = getContentY() - scrollbar.getScrollOffset();
         for(WidgetEntry entry : entries)
         {
-            int entryHeight = entry.calculateHeight(contentWidth);
-            
-            if(currentY + entryHeight > contentTop && currentY < contentTop + getContentHeight())
-            {
-                entry.widget.renderForeground(ctx, mouseX, mouseY);
-            }
-            
-            currentY += entryHeight + itemSpacing;
+            entry.place(getContentX(), currentY, contentWidth);
+            currentY += entry.getHeight(contentWidth) + ITEM_SPACING;
         }
     }
 
-    private void drawScrollBar(RenderContext ctx)
+    private boolean isOverContent(int mouseX, int mouseY)
     {
-        int contentHeight = getTotalContentHeight();
-        int ch = getContentHeight();
-        if(contentHeight <= ch) return;
-
-        int x = getBounds().getX();
-        int width = getBounds().getWidth();
-
-        int barX = x + width - getScrollBarWidth() - getOffset();
-        int barY = getContentTop();
-        int barW = getScrollBarWidth();
-        int barH = ch;
-
-        getRenderAdapter().drawRect(ctx, barX, barY, barW, barH, 0x66191919);
-
-        float ratio = (float) ch / (float) contentHeight;
-        int thumbH = Math.max(8, (int) (barH * ratio));
-        int maxThumbY = barH - thumbH;
-        int thumbY = maxThumbY == 0 ? 0 : (int) ((float) scrollOffset / Math.max(1, contentHeight - ch) * maxThumbY);
-
-        getRenderAdapter().drawRect(ctx, barX, barY + thumbY, barW, thumbH, 0xAA2B8AE6);
+        return mouseX >= getContentX() && mouseX < getContentX() + getContentWidth()
+                && mouseY >= getContentY() && mouseY < getContentY() + getContentHeight();
     }
+
+    private boolean isEntryVisible(WidgetEntry entry)
+    {
+        Core2DBounds b = entry.widget.getBounds();
+        return b.getBottom() > getContentY() && b.getY() < getContentY() + getContentHeight();
+    }
+
+    @Override
+    public boolean isMouseOverElement(int mouseX, int mouseY)
+    {
+        if(!isVisible()) return false;
+        return buttonBounds.contains(mouseX, mouseY) || (isOpen && getBounds().contains(mouseX, mouseY));
+    }
+
+    /* ---------------- input ---------------- */
 
     @Override
     public boolean mouseClicked(int mouseX, int mouseY, int button)
     {
         if(!isVisible()) return false;
-        
+
         if(button == 0 && buttonBounds.contains(mouseX, mouseY))
         {
             setOpen(!isOpen);
@@ -252,58 +130,117 @@ public class CoreButtonWidgetList extends CoreUiElement
             return true;
         }
 
-        int x = getBounds().getX();
-        int width = getBounds().getWidth();
-        int contentLeft = x + getOffset();
-        int contentTop = getContentTop();
-        int contentBottom = contentTop + getContentHeight();
-        int contentWidth = width - getOffset() * 2 - getScrollBarWidth() - itemSpacing;
+        if(!isOpen) return false;
 
-        // Click on content area
-        int contentRight = x + width - getOffset() - getScrollBarWidth();
-        if(mouseX >= contentLeft && mouseX < contentRight && mouseY >= contentTop && mouseY < contentBottom)
+        layout();
+
+        // Let every widget see the click so text inputs can lose focus, but only visible ones can take it
+        boolean handled = false;
+        for(WidgetEntry entry : entries)
         {
-            int currentY = contentTop - scrollOffset;
-            for(WidgetEntry entry : entries)
-            {
-                int entryHeight = entry.calculateHeight(contentWidth);
-                if(currentY + entryHeight > contentTop && currentY < contentBottom)
-                {
-                    if (entry.widget.mouseClicked(mouseX, mouseY, button))
-                    {
-                        return true;
-                    }
-                }
-                currentY += entryHeight + itemSpacing;
-            }
-            return true;
+            boolean canReceive = isOverContent(mouseX, mouseY) && isEntryVisible(entry);
+            if(entry.widget.mouseClicked(canReceive ? mouseX : Integer.MIN_VALUE, canReceive ? mouseY : Integer.MIN_VALUE, button))
+                handled = true;
         }
+        if(handled) return true;
 
-        // Click on scrollbar area
-        int barLeft = x + width - getScrollBarWidth() - getOffset();
-        int barRight = x + width - getOffset();
-        if(mouseX >= barLeft && mouseX < barRight && mouseY >= contentTop && mouseY < contentBottom)
-        {
-            int contentHeight = getTotalContentHeight();
-            if(contentHeight <= getContentHeight()) return false;
+        if(scrollbar.mouseClicked(mouseX, mouseY)) return true;
 
-            int barY = contentTop;
-            int barH = getContentHeight();
+        // Swallow clicks on the panel background so they don't reach what's behind it
+        return getBounds().contains(mouseX, mouseY);
+    }
 
-            float ratio = (float) getContentHeight() / (float) contentHeight;
-            int thumbH = Math.max(8, (int) (barH * ratio));
-            int maxThumbY = barH - thumbH;
+    @Override
+    public boolean mouseDragged(int mouseX, int mouseY, int button)
+    {
+        if(!scrollbar.mouseDragged(mouseY)) return false;
+        layout();
+        return true;
+    }
 
-            int clickY = mouseY - barY - thumbH / 2;
-            if(clickY < 0) clickY = 0;
-            if(clickY > maxThumbY) clickY = maxThumbY;
+    @Override
+    public boolean mouseReleased(int mouseX, int mouseY, int button)
+    {
+        return scrollbar.mouseReleased();
+    }
 
-            scrollOffset = maxThumbY == 0 ? 0 : (int) ((float) clickY / (float) maxThumbY * (contentHeight - getContentHeight()));
-            clampScroll();
-            return true;
-        }
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta)
+    {
+        if(!isVisible() || !isOpen || !getBounds().contains((int) mouseX, (int) mouseY) || delta == 0) return false;
 
+        for(WidgetEntry entry : entries)
+            if(entry.widget.isMouseOverElement((int) mouseX, (int) mouseY) && entry.widget.mouseScrolled(mouseX, mouseY, delta))
+                return true;
+
+        scrollbar.scrollBy(delta > 0 ? -20 : 20);
+        layout();
+        return true;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    {
+        if(!isVisible() || !isOpen) return false;
+
+        for(WidgetEntry entry : entries)
+            if(entry.widget.keyPressed(keyCode, scanCode, modifiers))
+                return true;
         return false;
+    }
+
+    @Override
+    public boolean charTyped(char codePoint, int modifiers)
+    {
+        if(!isVisible() || !isOpen) return false;
+
+        for(WidgetEntry entry : entries)
+            if(entry.widget.charTyped(codePoint, modifiers))
+                return true;
+        return false;
+    }
+
+    /* ---------------- rendering ---------------- */
+
+    @Override
+    public void render(RenderContext ctx, int mouseX, int mouseY, float partialTick)
+    {
+        if(ctx == null || !isVisible()) return;
+
+        CoreScreenDefinition.renderTextureWithBounds(ctx, CoreScreenDefinition.GUI_TEXTURE, buttonBounds, buttonBounds.contains(mouseX, mouseY), false);
+        getRenderAdapter().drawTexture(ctx, buttonTexture, buttonBounds.getX(4), buttonBounds.getY(4), buttonBounds.getWidth(-8), buttonBounds.getHeight(-8), 24, 24, 0, 0, 24, 24);
+
+        if(!isOpen) return;
+
+        CoreScreenDefinition.renderTextureWithBounds(ctx, CoreScreenDefinition.GUI_TEXTURE, getBounds(), false, false);
+
+        layout();
+        getRenderAdapter().enableScissor(ctx, getContentX(), getContentY(), getContentWidth(), getContentHeight());
+        for(WidgetEntry entry : entries)
+            if(isEntryVisible(entry))
+                entry.render(ctx, getContentWidth(), mouseX, mouseY, partialTick);
+        getRenderAdapter().disableScissor(ctx);
+
+        scrollbar.render(ctx, getRenderAdapter(), mouseX, mouseY);
+    }
+
+    @Override
+    public void renderForeground(RenderContext ctx, int mouseX, int mouseY)
+    {
+        if(!isVisible()) return;
+
+        if(!isOpen)
+        {
+            if(buttonBounds.contains(mouseX, mouseY) && getTooltip() != null && !getTooltip().isEmpty())
+                getRenderAdapter().drawTooltip(ctx, getTooltip(), mouseX, mouseY);
+            return;
+        }
+
+        if(!isOverContent(mouseX, mouseY)) return;
+
+        for(WidgetEntry entry : entries)
+            if(isEntryVisible(entry))
+                entry.widget.renderForeground(ctx, mouseX, mouseY);
     }
 
     private static class WidgetEntry
@@ -311,52 +248,55 @@ public class CoreButtonWidgetList extends CoreUiElement
         private final String label;
         private final CoreUiElement widget;
 
-        public WidgetEntry(String label, CoreUiElement widget)
+        private WidgetEntry(String label, CoreUiElement widget)
         {
-            this.label = label;
+            this.label = label == null ? "" : label;
             this.widget = widget;
         }
 
-        public int calculateHeight(int availableWidth)
+        private int getLabelWidth()
         {
-            int labelWidth = label != null && !label.isEmpty() ? getRenderAdapter().getTextWidth(label) : 0;
-            boolean labelAbove = label != null && !label.isEmpty() && (labelWidth + 10 + widget.getBounds().getWidth() > availableWidth);
+            return label.isEmpty() ? 0 : getRenderAdapter().getTextWidth(label);
+        }
 
-            if(labelAbove)
+        /**
+         * The label goes above the widget when both don't fit on one line.
+         */
+        private boolean isLabelAbove(int availableWidth)
+        {
+            return !label.isEmpty() && getLabelWidth() + LABEL_GAP + widget.getBounds().getWidth() > availableWidth;
+        }
+
+        private int getHeight(int availableWidth)
+        {
+            if(isLabelAbove(availableWidth))
+                return getRenderAdapter().getFontHeight() + 3 + widget.getBounds().getHeight();
+            return Math.max(getRenderAdapter().getFontHeight(), widget.getBounds().getHeight());
+        }
+
+        private void place(int x, int y, int availableWidth)
+        {
+            if(isLabelAbove(availableWidth))
             {
-                return 12 + widget.getBounds().getHeight(); // Label height (e.g. 10) + margin + widget
+                widget.getBounds().setX(x);
+                widget.getBounds().setY(y + getRenderAdapter().getFontHeight() + 3);
             }
             else
             {
-                return Math.max(10, widget.getBounds().getHeight()); // Max of label height and widget height
+                widget.getBounds().setX(x + (label.isEmpty() ? 0 : getLabelWidth() + LABEL_GAP));
+                widget.getBounds().setY(y);
             }
         }
 
-        public void render(RenderContext ctx, int x, int y, int availableWidth, int mouseX, int mouseY, float partialTick)
+        private void render(RenderContext ctx, int availableWidth, int mouseX, int mouseY, float partialTick)
         {
-            int labelWidth = label != null && !label.isEmpty() ? getRenderAdapter().getTextWidth(label) : 0;
-            boolean labelAbove = label != null && !label.isEmpty() && (labelWidth + 10 + widget.getBounds().getWidth() > availableWidth);
-
-            if(labelAbove)
+            if(!label.isEmpty())
             {
-                getRenderAdapter().drawText(ctx, label, x, y, 0xFFFFFFFF);
-                
-                // Update widget position
-                widget.getBounds().setX(x);
-                widget.getBounds().setY(y + 12);
-            }
-            else
-            {
-                int widgetX = x;
-                if (label != null && !label.isEmpty())
-                {
-                    getRenderAdapter().drawText(ctx, label, x, y + (widget.getBounds().getHeight() - 8) / 2, 0xFFFFFFFF);
-                    widgetX += labelWidth + 10;
-                }
-                
-                // Update widget position
-                widget.getBounds().setX(widgetX);
-                widget.getBounds().setY(y);
+                int labelY = isLabelAbove(availableWidth)
+                        ? widget.getBounds().getY() - getRenderAdapter().getFontHeight() - 3
+                        : widget.getBounds().getVerticalCenter(getRenderAdapter().getFontHeight());
+                int labelX = isLabelAbove(availableWidth) ? widget.getBounds().getX() : widget.getBounds().getX() - getLabelWidth() - LABEL_GAP;
+                getRenderAdapter().drawText(ctx, label, labelX, labelY, 0xFFFFFFFF);
             }
 
             widget.render(ctx, mouseX, mouseY, partialTick);

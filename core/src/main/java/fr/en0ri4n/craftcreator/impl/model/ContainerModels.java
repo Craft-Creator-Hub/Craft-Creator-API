@@ -6,6 +6,7 @@ import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.CraftingTableRCBehavio
 import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.FurnaceRCBehavior;
 import fr.en0ri4n.craftcreator.impl.model.container.minecraft.CraftingTableRCContainerModel;
 import fr.en0ri4n.craftcreator.impl.model.container.minecraft.FurnaceRCContainerModel;
+import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreator;
 import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreators;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.AccessLevel;
@@ -39,7 +40,7 @@ public class ContainerModels
 
     public void registerAll()
     {
-        containerModels.put(RecipeCreators.CRAFTING_TABLE_RECIPE_CREATOR_ID.toString(), new CraftingTableRCContainerModel());
-        containerModels.put(RecipeCreators.FURNACE_RECIPE_CREATOR_ID.toString(), new FurnaceRCContainerModel());
+        for(RecipeCreator<?> creator : RecipeCreators.ALL_RECIPE_CREATORS)
+            containerModels.put(creator.getId().toString(), creator.getContainerModel());
     }
 }

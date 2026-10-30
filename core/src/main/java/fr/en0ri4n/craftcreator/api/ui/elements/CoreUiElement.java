@@ -73,4 +73,16 @@ public abstract class CoreUiElement {
     public boolean charTyped(char codePoint, int modifiers) { return false; }
 
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) { return false; }
+
+    public boolean mouseDragged(int mouseX, int mouseY, int button) { return false; }
+
+    public boolean mouseReleased(int mouseX, int mouseY, int button) { return false; }
+
+    /**
+     * Used by platforms to route events (e.g. mouse wheel) to the element under the mouse.
+     */
+    public boolean isMouseOverElement(int mouseX, int mouseY)
+    {
+        return isMouseOver(mouseX, mouseY);
+    }
 }

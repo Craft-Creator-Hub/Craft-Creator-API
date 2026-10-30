@@ -1,0 +1,19 @@
+{
+    "variants": {
+        "facing=north": {
+            "model": "craftcreator:block/botania_terra_plate"
+        },
+        "facing=east": {
+            "model": "craftcreator:block/botania_terra_plate",
+            "y": 90
+        },
+        "facing=south": {
+            "model": "craftcreator:block/botania_terra_plate",
+            "y": 180
+        },
+        "facing=west": {
+            "model": "craftcreator:block/botania_terra_plate",
+            "y": 270
+        }
+    }
+}

@@ -41,7 +41,7 @@ public abstract class RecipeCreatorContainerScreenDefinition<T extends RecipeCre
         //addElement(new RecipeSettingsButton("recipe_settings_button", getRecipeSettingsButtonBounds(), this::openRecipeSettingsScreen, "Recipe Settings"));
         addElement(new ExportButton("export_button", getExportButtonBounds(), this::exportRecipe, "Export Recipe"));
 
-        addElement(settingsList = new CoreButtonWidgetList("example_button_list", getGuiSize().getX(-100), getGuiSize().getY(), 100, 100, Core2DBounds.ofSize(20, 20), Identifier.fromMod("textures/gui/widgets/settings.png"), "HELLO"));
+        addElement(settingsList = new CoreButtonWidgetList("recipe_settings", getGuiSize().getX(-120), getGuiSize().getY(), 120, 100, Core2DBounds.ofSize(20, 20), Identifier.fromMod("textures/gui/widgets/settings.png"), "Recipe Settings"));
         settingsList.setVisible(hasRecipeSettings());
         addSettings();
     }

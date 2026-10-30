@@ -49,6 +49,15 @@ public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecip
     }
 
     @Override
+    public boolean mouseDragged(double pMouseX, double pMouseY, int pButton, double pDragX, double pDragY)
+    {
+        // AbstractContainerScreen only handles slot dragging, forward to the focused widget first (e.g. a list scrollbar)
+        if(this.isDragging() && this.getFocused() != null && this.getFocused().mouseDragged(pMouseX, pMouseY, pButton, pDragX, pDragY))
+            return true;
+        return super.mouseDragged(pMouseX, pMouseY, pButton, pDragX, pDragY);
+    }
+
+    @Override
     public void onClose()
     {
         model.getScreenDefinition().onClose();

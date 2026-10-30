@@ -44,7 +44,8 @@ public class FurnaceRCBehavior extends RecipeCreatorBlockEntityBehavior
     public enum FurnaceType {
         FURNACE(Identifier.from("minecraft:smelting"), Identifier.from("minecraft:furnace")),
         BLAST_FURNACE(Identifier.from("minecraft:blasting"), Identifier.from("minecraft:blast_furnace")),
-        SMOKER(Identifier.from("minecraft:smoking"), Identifier.from("minecraft:smoker"));
+        SMOKER(Identifier.from("minecraft:smoking"), Identifier.from("minecraft:smoker")),
+        CAMPFIRE(Identifier.from("minecraft:campfire_cooking"), Identifier.from("minecraft:campfire"));
 
         private final Identifier recipeTypeId;
         private final Identifier itemId;

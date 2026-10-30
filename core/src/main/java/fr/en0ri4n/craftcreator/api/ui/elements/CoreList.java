@@ -6,303 +6,318 @@ import fr.en0ri4n.craftcreator.api.platform.RenderAdapter;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
+/**
+ * Scrollable, selectable list of entries with an optional filter.<br>
+ * Everything is computed from {@link #getBounds()}, so the list can be moved or resized at any time.
+ */
 public class CoreList<T> extends CoreUiElement
 {
     public static final int DEFAULT_ITEM_HEIGHT = 20;
+    private static final int PADDING = 4;
+    private static final int KEY_UP = 265;
+    private static final int KEY_DOWN = 264;
 
-    @Getter
     private final List<Entry<T>> entries = new ArrayList<>();
-    private int x, y, width, height;
-    @Getter
-    private int itemHeight = DEFAULT_ITEM_HEIGHT;
+    /** Entries matching the current filter, in display order. */
+    private final List<Entry<T>> visibleEntries = new ArrayList<>();
+    private final CoreScrollbar scrollbar = new CoreScrollbar();
 
     @Getter
-    private int scrollOffset = 0;
+    private int itemHeight;
+    private Predicate<Entry<T>> filter = entry -> true;
+    private Entry<T> selected;
+    private Entry<T> hovered;
+    @Setter
+    private String emptyText = "";
 
-    @Getter
-    private int selectedIndex = -1;
-    private int hoveredIndex = -1;
-
-    private Consumer<Optional<Entry<T>>> selectionListener = e ->
-    {};
+    private Consumer<Optional<Entry<T>>> selectionListener = e -> {};
 
     public CoreList(int x, int y, int width, int height, int itemHeight, List<Entry<T>> initialEntries)
     {
         super(CoreUiElementType.LIST, x, y, width, height, "");
+        this.itemHeight = Math.max(4, itemHeight);
         setEntries(initialEntries);
-        setBounds(x, y, width, height);
-        this.itemHeight = itemHeight;
     }
 
+    /**
+     * Create a list tall enough to display exactly {@code displayedEntriesCount} entries.
+     */
     public static <T> CoreList<T> countedList(int x, int y, int width, int displayedEntriesCount, int itemHeight, List<Entry<T>> initialEntries)
     {
-        CoreList<T> coreList = new CoreList<>(x, y, width, 1, itemHeight, initialEntries);
-        coreList.setBounds(x, y, width, displayedEntriesCount * itemHeight + coreList.getOffset() * 2);
-        return coreList;
+        return new CoreList<>(x, y, width, displayedEntriesCount * itemHeight + PADDING * 2, itemHeight, initialEntries);
     }
 
-    public void setBounds(int x, int y, int width, int height)
+    /* ---------------- entries & filter ---------------- */
+
+    public List<Entry<T>> getEntries()
     {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
+        return Collections.unmodifiableList(entries);
+    }
+
+    public List<Entry<T>> getVisibleEntries()
+    {
+        return Collections.unmodifiableList(visibleEntries);
     }
 
     public void setEntries(List<Entry<T>> newEntries)
     {
-        this.entries.clear();
-        if(newEntries != null) this.entries.addAll(newEntries);
-        clampScroll();
-        if(selectedIndex >= entries.size()) setSelectedIndex(-1);
+        entries.clear();
+        if(newEntries != null) entries.addAll(newEntries);
+        refresh();
     }
 
-    public void setItemHeight(int itemHeight)
+    public void addEntry(Entry<T> entry)
     {
-        this.itemHeight = Math.max(4, itemHeight);
-    }
-
-    public void addEntry(Entry<T> e)
-    {
-        entries.add(Objects.requireNonNull(e));
-        clampScroll();
+        entries.add(Objects.requireNonNull(entry));
+        refresh();
     }
 
     public void clear()
     {
         entries.clear();
-        selectedIndex = -1;
-        hoveredIndex = -1;
-        scrollOffset = 0;
+        scrollbar.setScrollOffset(0);
+        refresh();
     }
+
+    /**
+     * Only show entries matching the given predicate. Pass null to show everything.
+     * The selection is kept if the selected entry is still visible.
+     */
+    public void setFilter(Predicate<Entry<T>> filter)
+    {
+        this.filter = filter == null ? entry -> true : filter;
+        scrollbar.setScrollOffset(0);
+        refresh();
+    }
+
+    /**
+     * Convenience filter matching the label, case-insensitive.
+     */
+    public void filterByLabel(String search)
+    {
+        String lowerSearch = search == null ? "" : search.trim().toLowerCase();
+        setFilter(lowerSearch.isEmpty() ? null : entry -> entry.getLabel().toLowerCase().contains(lowerSearch));
+    }
+
+    private void refresh()
+    {
+        visibleEntries.clear();
+        entries.stream().filter(filter).forEach(visibleEntries::add);
+        hovered = null;
+
+        if(selected != null && !visibleEntries.contains(selected)) select(null);
+        updateScrollbar();
+    }
+
+    public void setItemHeight(int itemHeight)
+    {
+        this.itemHeight = Math.max(4, itemHeight);
+        updateScrollbar();
+    }
+
+    /* ---------------- selection ---------------- */
 
     public Optional<Entry<T>> getSelected()
     {
-        if(selectedIndex < 0 || selectedIndex >= entries.size()) return Optional.empty();
-        return Optional.of(entries.get(selectedIndex));
+        return Optional.ofNullable(selected);
+    }
+
+    /**
+     * @return the index of the selected entry among the visible entries, or -1
+     */
+    public int getSelectedIndex()
+    {
+        return selected == null ? -1 : visibleEntries.indexOf(selected);
     }
 
     public void setSelectionListener(Consumer<Optional<Entry<T>>> listener)
     {
-        this.selectionListener = listener == null ? e ->
-        {} : listener;
+        this.selectionListener = listener == null ? e -> {} : listener;
     }
 
-    public void setSelectedIndex(int idx)
+    public void setSelectedIndex(int index)
     {
-        if(idx < 0 || idx >= entries.size())
+        select(index < 0 || index >= visibleEntries.size() ? null : visibleEntries.get(index));
+    }
+
+    public void setSelectedValue(T value)
+    {
+        select(visibleEntries.stream().filter(entry -> Objects.equals(entry.getValue(), value)).findFirst().orElse(null));
+    }
+
+    private void select(Entry<T> entry)
+    {
+        if(entry == selected) return;
+
+        selected = entry;
+        if(entry != null)
         {
-            this.selectedIndex = -1;
-        }
-        else
-        {
-            this.selectedIndex = idx;
-            ensureIndexVisible(idx);
+            int top = visibleEntries.indexOf(entry) * itemHeight;
+            scrollbar.ensureVisible(top, top + itemHeight);
         }
         selectionListener.accept(getSelected());
     }
 
-    public void scrollByItems(int deltaItems)
+    /* ---------------- layout ---------------- */
+
+    private int getContentX()
     {
-        scrollOffset += deltaItems * itemHeight;
-        clampScroll();
+        return getBounds().getX(PADDING);
     }
 
-    private int getOffset()
+    private int getContentY()
     {
-        return 4;
+        return getBounds().getY(PADDING);
     }
 
-    private int getScrollBarWidth()
+    private int getContentWidth()
     {
-        return 6;
-    }
-
-    private int getContentTop()
-    {
-        return y + getOffset();
+        return Math.max(0, getBounds().getWidth() - PADDING * 2 - (scrollbar.isNeeded() ? CoreScrollbar.WIDTH + 2 : 0));
     }
 
     private int getContentHeight()
     {
-        return Math.max(0, height - getOffset() * 2);
+        return Math.max(0, getBounds().getHeight() - PADDING * 2);
     }
 
-    private void clampScroll()
+    private void updateScrollbar()
     {
-        int max = Math.max(0, entries.size() * itemHeight - getContentHeight());
-        if(scrollOffset < 0) scrollOffset = 0;
-        if(scrollOffset > max) scrollOffset = max;
+        scrollbar.update(getBounds().getRight(-PADDING - CoreScrollbar.WIDTH), getContentY(), getContentHeight(), visibleEntries.size() * itemHeight);
     }
 
-    private void ensureIndexVisible(int idx)
+    private boolean isOverContent(int mouseX, int mouseY)
     {
-        if(idx < 0 || idx >= entries.size()) return;
-        int topOfIdx = idx * itemHeight;
-        int bottomOfIdx = topOfIdx + itemHeight;
-        int ch = getContentHeight();
-        if(topOfIdx < scrollOffset)
+        return mouseX >= getContentX() && mouseX < getContentX() + getContentWidth()
+                && mouseY >= getContentY() && mouseY < getContentY() + getContentHeight();
+    }
+
+    private Entry<T> getEntryAt(int mouseX, int mouseY)
+    {
+        if(!isOverContent(mouseX, mouseY)) return null;
+        int index = (mouseY - getContentY() + scrollbar.getScrollOffset()) / itemHeight;
+        return index >= 0 && index < visibleEntries.size() ? visibleEntries.get(index) : null;
+    }
+
+    /* ---------------- input ---------------- */
+
+    @Override
+    public boolean mouseClicked(int mouseX, int mouseY, int button)
+    {
+        if(!isMouseOver(mouseX, mouseY)) return false;
+
+        updateScrollbar();
+        if(scrollbar.mouseClicked(mouseX, mouseY)) return true;
+
+        Entry<T> entry = getEntryAt(mouseX, mouseY);
+        if(entry != null)
         {
-            scrollOffset = topOfIdx;
+            select(entry);
+            if(entry.getOnClick() != null) entry.getOnClick().accept(entry);
         }
-        else if(bottomOfIdx > scrollOffset + ch)
-        {
-            scrollOffset = bottomOfIdx - ch;
-        }
-        clampScroll();
+        return true;
+    }
+
+    @Override
+    public boolean mouseDragged(int mouseX, int mouseY, int button)
+    {
+        return scrollbar.mouseDragged(mouseY);
+    }
+
+    @Override
+    public boolean mouseReleased(int mouseX, int mouseY, int button)
+    {
+        return scrollbar.mouseReleased();
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta)
     {
-        int steps = 0;
-        if(delta > 0) steps = -1;
-        else if(delta < 0) steps = 1;
-        if(steps != 0) scrollByItems(steps);
+        if(!isMouseOver((int) mouseX, (int) mouseY) || delta == 0) return false;
+        scrollbar.scrollBy(delta > 0 ? -itemHeight : itemHeight);
         return true;
     }
 
+    /**
+     * Up/down arrows move the selection. Only reached when the list has focus (after a click on it).
+     */
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers)
     {
-        if(keyCode == 265) // up
+        if(!isVisible() || visibleEntries.isEmpty()) return false;
+
+        int index = getSelectedIndex();
+        if(keyCode == KEY_UP)
         {
-            scrollByItems(-1);
+            setSelectedIndex(index <= 0 ? 0 : index - 1);
             return true;
         }
-        else if(keyCode == 264) // down
+        if(keyCode == KEY_DOWN)
         {
-            scrollByItems(1);
+            setSelectedIndex(Math.min(visibleEntries.size() - 1, index + 1));
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return false;
     }
 
+    /* ---------------- rendering ---------------- */
+
     @Override
-    public void render(RenderContext ctx, int mouseX, int mouseY, float pPartialTick)
+    public void render(RenderContext ctx, int mouseX, int mouseY, float partialTick)
     {
-        if(ctx == null) return;
+        if(ctx == null || !isVisible()) return;
 
-        getRenderAdapter().drawRect(ctx, getBounds().getX(), getBounds().getY(), getBounds().getWidth(), getBounds().getHeight(), 0xFF1F2933);
-        getRenderAdapter().drawRect(ctx, x + getOffset(), y + getOffset(), width - getOffset() * 2, height - getOffset() * 2, 0xFF0F1416);
+        updateScrollbar();
+        RenderAdapter adapter = getRenderAdapter();
+        Core2DBounds b = getBounds();
 
-        if(entries.isEmpty() || getContentHeight() <= 0) return;
+        adapter.drawRect(ctx, b.getX(), b.getY(), b.getWidth(), b.getHeight(), 0xFF1F2933);
+        adapter.drawRect(ctx, getContentX(), getContentY(), b.getWidth() - PADDING * 2, getContentHeight(), 0xFF0F1416);
 
-        int firstIndex = scrollOffset / itemHeight;
-        int lastIndex = Math.min(entries.size() - 1, (scrollOffset + getContentHeight() - 1) / itemHeight);
+        hovered = scrollbar.isDragging() ? null : getEntryAt(mouseX, mouseY);
 
-        hoveredIndex = -1;
-        int contentLeft = x + getOffset();
-        int contentRight = x + width - getOffset() - getScrollBarWidth();
-        int contentTop = getContentTop();
-        int contentBottom = contentTop + getContentHeight();
-
-        if(mouseX >= contentLeft && mouseX < contentRight && mouseY >= contentTop && mouseY < contentBottom)
+        if(visibleEntries.isEmpty())
         {
-            int relY = mouseY - contentTop + scrollOffset;
-            int idx = relY / itemHeight;
-            if(idx >= 0 && idx < entries.size()) hoveredIndex = idx;
+            if(!emptyText.isEmpty())
+                adapter.drawText(ctx, emptyText, b.getHorizontalCenter(adapter.getTextWidth(emptyText)), b.getVerticalCenter(adapter.getFontHeight()), 0xFF808080);
+            return;
         }
 
+        int scroll = scrollbar.getScrollOffset();
+        int firstIndex = scroll / itemHeight;
+        int lastIndex = Math.min(visibleEntries.size() - 1, (scroll + getContentHeight()) / itemHeight);
+
+        adapter.enableScissor(ctx, getContentX(), getContentY(), getContentWidth(), getContentHeight());
         for(int i = firstIndex; i <= lastIndex; i++)
         {
-            Entry<T> e = entries.get(i);
-            int entryTop = contentTop + (i * itemHeight - scrollOffset);
-            boolean hovered = (i == hoveredIndex);
-            boolean selected = (i == selectedIndex);
-            e.render(ctx, i, contentLeft, entryTop, width - getScrollBarWidth() - getOffset() * 2, itemHeight, mouseX, mouseY, selected, hovered);
+            Entry<T> entry = visibleEntries.get(i);
+            int entryTop = getContentY() + i * itemHeight - scroll;
+            entry.render(ctx, i, getContentX(), entryTop, getContentWidth(), itemHeight, mouseX, mouseY, entry == selected, entry == hovered);
         }
+        adapter.disableScissor(ctx);
 
-        drawScrollBar(ctx);
+        scrollbar.render(ctx, adapter, mouseX, mouseY);
     }
 
     @Override
     public void renderForeground(RenderContext ctx, int mouseX, int mouseY)
     {
-        if(hoveredIndex >= 0 && hoveredIndex < entries.size())
-        {
-            Entry<T> hoveredEntry = entries.get(hoveredIndex);
-            hoveredEntry.renderForeground(ctx, hoveredIndex, x + getOffset(), getContentTop() + (hoveredIndex * itemHeight - scrollOffset), width - getScrollBarWidth() - getOffset() * 2, itemHeight, mouseX, mouseY, false, true);
-        }
-    }
+        if(hovered == null || !isVisible()) return;
 
-    private void drawScrollBar(RenderContext ctx)
-    {
-        int contentHeight = entries.size() * itemHeight;
-        int ch = getContentHeight();
-        if(contentHeight <= ch) return;
+        int index = visibleEntries.indexOf(hovered);
+        if(index < 0) return;
 
-        int barX = x + width - getScrollBarWidth() - getOffset();
-        int barY = getContentTop();
-        int barW = getScrollBarWidth();
-        int barH = ch;
-
-        getRenderAdapter().drawRect(ctx, barX, barY, barW, barH, 0x66191919);
-
-        float ratio = (float) ch / (float) contentHeight;
-        int thumbH = Math.max(8, (int) (barH * ratio));
-        int maxThumbY = barH - thumbH;
-        int thumbY = maxThumbY == 0 ? 0 : (int) ((float) scrollOffset / Math.max(1, contentHeight - ch) * maxThumbY);
-
-        getRenderAdapter().drawRect(ctx, barX, barY + thumbY, barW, thumbH, 0xAA2B8AE6);
-    }
-
-    public boolean mouseClicked(int mouseX, int mouseY, int button)
-    {
-        int contentLeft = x + getOffset();
-        int contentRight = x + width - getOffset() - getScrollBarWidth();
-        int contentTop = getContentTop();
-        int contentBottom = contentTop + getContentHeight();
-
-        // Click on content area (select)
-        if(mouseX >= contentLeft && mouseX < contentRight && mouseY >= contentTop && mouseY < contentBottom)
-        {
-            int relY = mouseY - contentTop + scrollOffset;
-            int idx = relY / itemHeight;
-            if(idx < 0 || idx >= entries.size()) return false;
-
-            setSelectedIndex(idx);
-            Entry<T> e = entries.get(idx);
-            if(e.onClick != null)
-            {
-                e.onClick.accept(e);
-                return true;
-            }
-            return true;
-        }
-
-        // Click on scrollbar area
-        int barLeft = x + width - getScrollBarWidth() - getOffset();
-        int barRight = x + width - getOffset();
-        if(mouseX >= barLeft && mouseX < barRight && mouseY >= contentTop && mouseY < contentBottom)
-        {
-            int contentHeight = entries.size() * itemHeight;
-            if(contentHeight <= getContentHeight()) return false;
-
-            int barY = contentTop;
-            int barH = getContentHeight();
-
-            float ratio = (float) getContentHeight() / (float) contentHeight;
-            int thumbH = Math.max(8, (int) (barH * ratio));
-            int maxThumbY = barH - thumbH;
-
-            int clickY = mouseY - barY - thumbH / 2;
-            if(clickY < 0) clickY = 0;
-            if(clickY > maxThumbY) clickY = maxThumbY;
-
-            scrollOffset = maxThumbY == 0 ? 0 : (int) ((float) clickY / (float) maxThumbY * (contentHeight - getContentHeight()));
-            clampScroll();
-            return true;
-        }
-
-        return false;
+        int entryTop = getContentY() + index * itemHeight - scrollbar.getScrollOffset();
+        hovered.renderForeground(ctx, index, getContentX(), entryTop, getContentWidth(), itemHeight, mouseX, mouseY, hovered == selected, true);
     }
 
     @Getter
@@ -328,41 +343,48 @@ public class CoreList<T> extends CoreUiElement
 
         public void render(RenderContext ctx, int index, int x, int entryTop, int width, int itemHeight, int mouseX, int mouseY, boolean selected, boolean hovered)
         {
-            if(selected)
-            {
-                getRenderAdapter().drawRect(ctx, x, entryTop + 2, width, itemHeight - 4, 0xAA2B8AE6);
-            }
-            else if(hovered)
-            {
-                getRenderAdapter().drawRect(ctx, x + 6, entryTop + 2, width - 6, itemHeight - 4, 0x552B8AE6);
-            }
-            else if((index & 1) == 0)
-            {
-                getRenderAdapter().drawRect(ctx, x + 6, entryTop + 2, width - 6, itemHeight - 4, 0xFF0D1112);
-            }
+            int background = selected ? 0xAA2B8AE6 : hovered ? 0x552B8AE6 : (index & 1) == 0 ? 0xFF0D1112 : 0;
+            if(background != 0) getRenderAdapter().drawRect(ctx, x, entryTop + 1, width, itemHeight - 2, background);
 
-            float iconX = x + 10f;
-            float iconY = entryTop + (itemHeight - 16) / 2f;
+            int textX = x + 4;
             if(iconId != null)
             {
-                getRenderAdapter().drawItem(ctx, new CoreItemStack(iconId, 1), (int) iconX, (int) iconY, 1F);
+                getRenderAdapter().drawItem(ctx, new CoreItemStack(iconId, 1), textX, entryTop + (itemHeight - 16) / 2, 1F);
+                textX += 20;
             }
 
-            float textX = x + 10f + (iconId != null ? 20f : 0f);
-            float textY = entryTop + (itemHeight - 8) / 2f;
-            int color = selected ? 0xFFFFFFFF : (hovered ? 0xFFEFEFEF : 0xFFDDE6EE);
-            getRenderAdapter().drawText(ctx, label, (int) textX, (int) textY, color);
+            int color = selected ? 0xFFFFFFFF : hovered ? 0xFFEFEFEF : 0xFFDDE6EE;
+            String text = trimToWidth(label, x + width - textX - 2);
+            getRenderAdapter().drawText(ctx, text, textX, entryTop + (itemHeight - getRenderAdapter().getFontHeight()) / 2 + 1, color);
+        }
+
+        /**
+         * Lines shown when hovering the entry. Labels that don't fit are shown in full by default.
+         */
+        public List<String> getTooltip(int width)
+        {
+            int labelSpace = width - 8 - (iconId != null ? 20 : 0);
+            return getRenderAdapter().getTextWidth(label) > labelSpace ? List.of(label) : List.of();
         }
 
         public void renderForeground(RenderContext ctx, int index, int x, int y, int width, int itemHeight, int mouseX, int mouseY, boolean selected, boolean hovered)
         {
-            if(!hovered) return;
-
-            getRenderAdapter().drawRect(ctx, mouseX + 12, mouseY + 12, 100, 40, 0xCC000000);
-            getRenderAdapter().drawText(ctx, "Entry: " + label, mouseX + 16, mouseY + 16, 0xFFFFFFFF);
+            List<String> tooltip = getTooltip(width);
+            if(hovered && !tooltip.isEmpty()) getRenderAdapter().drawTooltips(ctx, tooltip, mouseX, mouseY);
         }
 
-        protected RenderAdapter getRenderAdapter()
+        protected static String trimToWidth(String text, int maxWidth)
+        {
+            RenderAdapter adapter = getRenderAdapter();
+            if(adapter.getTextWidth(text) <= maxWidth) return text;
+
+            String ellipsis = "...";
+            int end = text.length();
+            while(end > 0 && adapter.getTextWidth(text.substring(0, end) + ellipsis) > maxWidth) end--;
+            return text.substring(0, end) + ellipsis;
+        }
+
+        protected static RenderAdapter getRenderAdapter()
         {
             return CraftCreatorAPI.get().getPlatform().getRenderAdapter();
         }

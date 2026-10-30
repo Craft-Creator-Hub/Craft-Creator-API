@@ -40,11 +40,19 @@ public abstract class CoreContainerScreenDefinition<T extends BlockEntityBehavio
 
         getRenderAdapter().drawTexture(ctx, getBackgroundTexture(),
                                        getGuiSize().getX(), getGuiSize().getY(), size.getWidth(), size.getHeight(),
-                                       256, 256,
-                                       0, 0, getGuiSize().getWidth(), getGuiSize().getHeight());
+                                       getTextureFileSize(), getTextureFileSize(),
+                                       0, 0, size.getWidth(), size.getHeight());
     }
 
     public abstract Identifier getBackgroundTexture();
+
+    /**
+     * @return width and height of the background texture file
+     */
+    public int getTextureFileSize()
+    {
+        return 256;
+    }
 
     /**
      * Fills the behavior with the current values of the screen's elements. This is called before sending the data to the server, to make sure the behavior is up to date with the screen's state.

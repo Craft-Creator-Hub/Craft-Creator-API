@@ -160,6 +160,21 @@ public class ForgeRenderAdapter implements RenderAdapter
         forgeRenderContext.poseStack().popPose();
     }
 
+    @Override
+    public void enableScissor(RenderContext ctx, int x, int y, int width, int height)
+    {
+        // RenderSystem works in window pixels with the origin at the bottom left
+        double scale = mc.getWindow().getGuiScale();
+        int windowHeight = mc.getWindow().getHeight();
+        RenderSystem.enableScissor((int) (x * scale), (int) (windowHeight - (y + height) * scale), Math.max(0, (int) (width * scale)), Math.max(0, (int) (height * scale)));
+    }
+
+    @Override
+    public void disableScissor(RenderContext ctx)
+    {
+        RenderSystem.disableScissor();
+    }
+
     private void bindTexture(Identifier backgroundTexture)
     {
         RenderSystem.setShaderTexture(0, Objects.requireNonNull(ResourceLocation.tryParse(backgroundTexture.toString())));

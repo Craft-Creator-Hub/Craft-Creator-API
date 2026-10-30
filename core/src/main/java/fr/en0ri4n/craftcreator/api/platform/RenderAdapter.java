@@ -35,7 +35,7 @@ public interface RenderAdapter
     void drawText(RenderContext ctx, String text, boolean shadow, int x, int y, int color);
 
     default void drawText(RenderContext ctx, String text, int x, int y, int color) {
-        drawText(ctx, text, true, x, y, 0xFFFFFFFF);
+        drawText(ctx, text, true, x, y, color);
     }
 
     void drawRect(RenderContext ctx, int x, int y, int width, int height, int argb);
@@ -57,4 +57,11 @@ public interface RenderAdapter
     void startScale(RenderContext ctx, float scaleX, float scaleY);
 
     void endScale(RenderContext ctx);
+
+    /**
+     * Restrict rendering to the given rectangle (in scaled GUI coordinates) until {@link #disableScissor(RenderContext)} is called.
+     */
+    void enableScissor(RenderContext ctx, int x, int y, int width, int height);
+
+    void disableScissor(RenderContext ctx);
 }

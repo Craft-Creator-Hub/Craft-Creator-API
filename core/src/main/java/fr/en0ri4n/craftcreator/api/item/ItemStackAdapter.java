@@ -1,5 +1,7 @@
 package fr.en0ri4n.craftcreator.api.item;
 
+import fr.en0ri4n.craftcreator.utils.Identifier;
+
 /**
  * Adapter that converts between core CoreItemStack and a platform ItemStack object.
  *
@@ -22,4 +24,12 @@ public interface ItemStackAdapter<T> {
      * Platform code supplies a platform ItemStack instance (e.g. net.minecraft.world.item.ItemStack).
      */
     CoreItemStack fromPlatform(T platformStack);
+
+    /**
+     * @return the id of the fluid held by this item (e.g. a bucket), or null if it holds none
+     */
+    default Identifier getContainedFluid(CoreItemStack coreStack)
+    {
+        return null;
+    }
 }

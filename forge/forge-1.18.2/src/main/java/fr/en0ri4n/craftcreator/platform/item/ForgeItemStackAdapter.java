@@ -22,6 +22,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.registries.ForgeRegistries;
 
 /**
@@ -59,6 +60,16 @@ public class ForgeItemStackAdapter implements ItemStackAdapter<ItemStack> {
         }
 
         return stack;
+    }
+
+    @Override
+    public Identifier getContainedFluid(CoreItemStack coreStack)
+    {
+        return FluidUtil.getFluidContained(toPlatform(coreStack))
+                .filter(fluid -> !fluid.isEmpty())
+                .map(fluid -> fluid.getFluid().getRegistryName())
+                .map(rl -> Identifier.from(rl.getNamespace(), rl.getPath()))
+                .orElse(null);
     }
 
     @Override

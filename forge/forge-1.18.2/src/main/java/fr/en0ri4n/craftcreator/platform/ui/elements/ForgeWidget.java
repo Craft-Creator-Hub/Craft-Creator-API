@@ -43,8 +43,33 @@ public class ForgeWidget extends AbstractWidget implements Widget
     }
 
     @Override
+    public boolean mouseDragged(double pMouseX, double pMouseY, int pButton, double pDragX, double pDragY)
+    {
+        return coreUiElement.mouseDragged((int) pMouseX, (int) pMouseY, pButton);
+    }
+
+    @Override
+    public boolean mouseReleased(double pMouseX, double pMouseY, int pButton)
+    {
+        return coreUiElement.mouseReleased((int) pMouseX, (int) pMouseY, pButton);
+    }
+
+    /**
+     * Core elements can move or resize after creation, so always ask them instead of using the widget's own fields.
+     */
+    @Override
+    public boolean isMouseOver(double pMouseX, double pMouseY)
+    {
+        return coreUiElement.isMouseOverElement((int) pMouseX, (int) pMouseY);
+    }
+
+    @Override
     public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick)
     {
+        this.x = coreUiElement.getBounds().getX();
+        this.y = coreUiElement.getBounds().getY();
+        this.width = coreUiElement.getBounds().getWidth();
+        this.height = coreUiElement.getBounds().getHeight();
         this.coreUiElement.render(ForgeRenderContext.of(pPoseStack), pMouseX, pMouseY, pPartialTick);
     }
 

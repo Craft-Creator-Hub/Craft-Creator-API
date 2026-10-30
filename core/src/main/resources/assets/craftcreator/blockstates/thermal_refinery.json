@@ -1,0 +1,19 @@
+{
+    "variants": {
+        "facing=north": {
+            "model": "craftcreator:block/thermal_refinery"
+        },
+        "facing=east": {
+            "model": "craftcreator:block/thermal_refinery",
+            "y": 90
+        },
+        "facing=south": {
+            "model": "craftcreator:block/thermal_refinery",
+            "y": 180
+        },
+        "facing=west": {
+            "model": "craftcreator:block/thermal_refinery",
+            "y": 270
+        }
+    }
+}

@@ -48,6 +48,7 @@ public class RecipeSerializerRegistry
         {
             CraftCreatorAPI.LOGGER.info("Registering recipe serializer for recipe creator: " + creator.getId());
             get().register(creator.getId(), creator.getRecipeTypes(), creator.getSerializer());
+            creator.getRecipeTypeIds().forEach(typeId -> get().idToSerializerMap.putIfAbsent(typeId.toString(), creator.getSerializer()));
         }
     }
 }

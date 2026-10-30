@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
 import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeExporter;
-import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeType;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.api.ui.container.SlotDescriptor;
 import fr.en0ri4n.craftcreator.api.ui.elements.Core2DBounds;
@@ -51,13 +50,17 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         getGuiSize().setWidth(screenWidth);
         getGuiSize().setHeight(screenHeight);
         addElement(recipeListElement = new CoreList<>(10, 75, 180, screenHeight - 120, 20, transformRecipesToEntries(RecipeManagementScreenData.loadedRecipes)));
-        recipeListElement.setSelectionListener(oer -> oer.ifPresent(this::onRecipeSelected));
+        recipeListElement.setEmptyText("No recipes");
+        recipeListElement.setSelectionListener(selected -> onRecipeSelected(selected.orElse(null)));
         
         recipeListTypeButtons.clear();
 
         addElement(new CoreDropdown<>("recipe_exporter_dropdown", getGuiSize().getRight(-130), getGuiSize().getBottom(-30), 120, 18, true, List.of(SupportedRecipeExporter.values()), 0, "Exporter", (selected) -> {
             if(selected != null)
+            {
                 RecipeManagementScreenData.loadRecipes(selected);
+                setCurrentRecipeListType(RecipeListType.RECIPES);
+            }
         }));
 
         int relativeY = 30;
@@ -75,7 +78,9 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         
         setCurrentRecipeListType(RecipeListType.RECIPES);
         
-        addElement(new CoreTextInput("search", CoreTextInput.TextInputType.STRING, 10, screenHeight - 30, 180, height, "Search for recipes", "", "Recipe...", 64, "Type to search"));
+        CoreTextInput searchInput = new CoreTextInput("search", CoreTextInput.TextInputType.STRING, 10, screenHeight - 30, 180, height, "Search for recipes", "", "Recipe...", 64, "Type to search");
+        searchInput.setOnChange(this::search);
+        addElement(searchInput);
 
         addElement(new CoreButton("close", getGuiSize().getHorizontalCenter(80), screenHeight - 30, 80, height, "Close", this::closeScreen, null));
     }
@@ -93,10 +98,23 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
     
     private void onRecipeSelected(CoreList.Entry<Recipe> recipeEntry)
     {
-        Identifier recipeTypeId = recipeEntry.getValue().getType();
-        SupportedRecipeType recipeType = SupportedRecipeType.byId(recipeTypeId);
-        currentRecipeCreator = RecipeCreators.getRecipeCreator(recipeType);
-        currentRecipeCreatorScreenDef = currentRecipeCreator.getContainerModel().getScreenDefinition();
+        currentRecipeCreator = recipeEntry == null ? null : RecipeCreators.getRecipeCreator(recipeEntry.getValue().getType());
+        currentRecipeCreatorScreenDef = currentRecipeCreator == null ? null : currentRecipeCreator.getContainerModel().getScreenDefinition();
+    }
+
+    /**
+     * Keep recipes whose name, type or entries contain the search text.
+     */
+    private void search(String text)
+    {
+        String search = text.trim().toLowerCase();
+        recipeListElement.setFilter(search.isEmpty() ? null : entry ->
+        {
+            Recipe recipe = entry.getValue();
+            return recipe.getName().toLowerCase().contains(search)
+                    || recipe.getType().toString().contains(search)
+                    || recipe.getEntries().stream().anyMatch(e -> e.getId().toString().contains(search));
+        });
     }
     
     private CoreButton addRecipeListTypeButton(RecipeListType type, CoreButton button)
@@ -135,7 +153,7 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
 //            getCurrentRenderAdapter().drawText(ctx, "Output: " + getCurrentSelectedRecipe().getOutputs().get(0).getId(), relativeX, getGuiSize().getY(135 + getCurrentSelectedRecipe().getInputs().size() * 20), 0xFFFFFF);
 //        }
         
-        if(getCurrentSelectedRecipe() != null)
+        if(getCurrentSelectedRecipe() != null && getCurrentRecipeCreatorScreenDef() != null)
         {
             Core2DBounds guiSize = getCurrentRecipeCreatorScreenDef().getGuiSize();
 
@@ -148,8 +166,8 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
                                            guiY,
                                            guiSize.getWidth(),
                                            guiSize.getHeight(),
-                                           256,
-                                           256,
+                                           getCurrentRecipeCreatorScreenDef().getTextureFileSize(),
+                                           getCurrentRecipeCreatorScreenDef().getTextureFileSize(),
                                            0,
                                            0,
                                            guiSize.getWidth(),
@@ -179,7 +197,7 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
 
     private void renderRecipeSlots(RenderContext ctx, boolean isForeground, int mouseX, int mouseY)
     {
-        if(getCurrentSelectedRecipe() == null) return;
+        if(getCurrentSelectedRecipe() == null || getCurrentRecipeCreator() == null) return;
         
         int relativeX = recipeListElement.getBounds().getRight(10);
         int relativeY = 30;
@@ -238,7 +256,17 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
 
     protected List<CoreList.Entry<Recipe>> transformRecipesToEntries(List<Recipe> recipes)
     {
-        return recipes.stream().<CoreList.Entry<Recipe>>map(recipe -> new RecipeEntry(recipe.getName(), recipe, recipe.getOutputs().get(0).getId(), (e) -> {})).toList();
+        return recipes.stream().<CoreList.Entry<Recipe>>map(recipe -> new RecipeEntry(recipe.getName(), recipe, getIcon(recipe), (e) -> {})).toList();
+    }
+
+    /**
+     * The first output, or the first input for recipes without item output (e.g. Botania brews).
+     */
+    private static Identifier getIcon(Recipe recipe)
+    {
+        if(!recipe.getOutputs().isEmpty()) return recipe.getOutputs().get(0).getId();
+        if(!recipe.getInputs().isEmpty()) return recipe.getInputs().get(0).getId();
+        return null;
     }
 
     public static class RecipeEntry extends CoreList.Entry<Recipe>
@@ -256,7 +284,8 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
             tooltips.add("§6Input(s):");
             for(int i = 0; i < getValue().getInputs().size(); i++)
                 tooltips.add("  - " + getValue().getInputs().get(i).getId());
-            tooltips.add("§bOutput: " + getValue().getOutputs().get(0).getId());
+            for(int i = 0; i < getValue().getOutputs().size(); i++)
+                tooltips.add("§bOutput: " + getValue().getOutputs().get(i).getId());
             tooltips.add("§7Recipe Parameters:§r" + (getValue().getInfos().getParameters().isEmpty() ? " None" : ""));
             for(int i = 0; i < getValue().getInfos().getParameters().size(); i++)
                 tooltips.add("  - " + getValue().getInfos().getParameters().get(i).getName() + ": " + getValue().getInfos().getParameters().get(i).getRawValue());

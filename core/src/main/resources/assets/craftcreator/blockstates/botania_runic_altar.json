@@ -1,0 +1,19 @@
+{
+    "variants": {
+        "facing=north": {
+            "model": "craftcreator:block/botania_runic_altar"
+        },
+        "facing=east": {
+            "model": "craftcreator:block/botania_runic_altar",
+            "y": 90
+        },
+        "facing=south": {
+            "model": "craftcreator:block/botania_runic_altar",
+            "y": 180
+        },
+        "facing=west": {
+            "model": "craftcreator:block/botania_runic_altar",
+            "y": 270
+        }
+    }
+}

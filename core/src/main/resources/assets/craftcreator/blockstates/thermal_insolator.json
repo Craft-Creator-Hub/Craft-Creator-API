@@ -1,0 +1,19 @@
+{
+    "variants": {
+        "facing=north": {
+            "model": "craftcreator:block/thermal_insolator"
+        },
+        "facing=east": {
+            "model": "craftcreator:block/thermal_insolator",
+            "y": 90
+        },
+        "facing=south": {
+            "model": "craftcreator:block/thermal_insolator",
+            "y": 180
+        },
+        "facing=west": {
+            "model": "craftcreator:block/thermal_insolator",
+            "y": 270
+        }
+    }
+}
