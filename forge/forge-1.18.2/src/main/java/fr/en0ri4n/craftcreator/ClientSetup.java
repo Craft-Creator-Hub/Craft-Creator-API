@@ -1,6 +1,5 @@
 package fr.en0ri4n.craftcreator;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import fr.en0ri4n.craftcreator.api.ui.screen.TaggableSlotsContainerScreenDefinition;
 import fr.en0ri4n.craftcreator.impl.InitManager;
 import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.TaggableSlotsBlockEntityBehavior;
@@ -28,15 +27,18 @@ import java.util.Optional;
 @Mod.EventBusSubscriber(modid = References.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientSetup
 {
+    private static KeyMapping openManagementScreenKey;
+
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event)
     {
         MenuScreens.register(ForgeRegistryAdapter.RECIPE_CREATOR_MENU.get(), ForgeRecipeCreatorScreen::new);
 
-        ClientRegistry.registerKeyBinding(new KeyMapping(
+        openManagementScreenKey = new KeyMapping(
                 InitManager.OPEN_MANAGEMENT_SCREEN_KEYBIND.getName(),
                 InitManager.OPEN_MANAGEMENT_SCREEN_KEYBIND.getKeyCode(),
-                InitManager.OPEN_MANAGEMENT_SCREEN_KEYBIND.getCategory()));
+                InitManager.OPEN_MANAGEMENT_SCREEN_KEYBIND.getCategory());
+        ClientRegistry.registerKeyBinding(openManagementScreenKey);
     }
 
     @Mod.EventBusSubscriber(modid = References.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
@@ -45,10 +47,12 @@ public class ClientSetup
         @SubscribeEvent
         public static void onKeyPressed(TickEvent.ClientTickEvent event)
         {
-            if(InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), InitManager.OPEN_MANAGEMENT_SCREEN_KEYBIND.getKeyCode()))
-            {
+            // Key presses are only counted while no screen is open, so typing in a field never triggers it.
+            // consumeClick also honors the key chosen in the controls menu.
+            if(event.phase != TickEvent.Phase.END || openManagementScreenKey == null || Minecraft.getInstance().screen != null) return;
+
+            if(openManagementScreenKey.consumeClick())
                 InitManager.OPEN_MANAGEMENT_SCREEN_KEYBIND.getOnPress().run();
-            }
         }
     }
 

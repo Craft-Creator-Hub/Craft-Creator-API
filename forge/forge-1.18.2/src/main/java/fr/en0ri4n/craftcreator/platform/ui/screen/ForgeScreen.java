@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
 import fr.en0ri4n.craftcreator.api.ui.screen.WidgetRenderer;
 import fr.en0ri4n.craftcreator.platform.render.ForgeRenderContext;
+import fr.en0ri4n.craftcreator.platform.ui.elements.ForgeWidget;
 import lombok.Getter;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -30,10 +31,26 @@ public class ForgeScreen extends Screen implements WidgetRenderer
         screenDefinition.init(this, this.width, this.height);
     }
 
+    /**
+     * Screens talk to the server (e.g. recipe management), which must keep running in singleplayer.
+     */
+    @Override
+    public boolean isPauseScreen()
+    {
+        return false;
+    }
+
     @Override
     public void addWidgetToScreen(Object widget)
     {
         this.addRenderableWidget((GuiEventListener & Widget & NarratableEntry) widget);
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    {
+        ForgeWidget.dispatchFocusLoss(children(), mouseX, mouseY);
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override

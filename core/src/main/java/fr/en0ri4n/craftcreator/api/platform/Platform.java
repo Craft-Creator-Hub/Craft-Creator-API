@@ -37,5 +37,7 @@ public interface Platform {
 
     TagProvider getTagProvider();
 
+    GameDataProvider getGameDataProvider();
+
     TextComponentProvider<?> getTextComponentProvider();
 }

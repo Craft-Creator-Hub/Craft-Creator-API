@@ -4,9 +4,6 @@ import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.ApiReferences;
 import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeExporter;
-import fr.en0ri4n.craftcreator.recipe.model.Recipe;
-import fr.en0ri4n.craftcreator.recipe.serialize.RecipeSerializer;
-import fr.en0ri4n.craftcreator.recipe.serialize.RecipeSerializerRegistry;
 import fr.en0ri4n.craftcreator.recipe.utils.RecipeRequestFeedback;
 import fr.en0ri4n.craftcreator.serialize.GsonProvider;
 import fr.en0ri4n.craftcreator.utils.Feedback;
@@ -158,37 +155,20 @@ public class DatapackRecipeExporter extends ModRecipeExporter
     }
 
     @Override
-    public List<Recipe> getRecipes()
+    public List<JsonObject> getAddedRecipesJson()
     {
-        File recipesDir = recipesPath.toFile();
-        if(!recipesDir.exists() || !recipesDir.isDirectory())
-        {
-            CraftCreatorAPI.LOGGER.warn("Recipes directory does not exist: " + recipesPath.toString());
-            return List.of();
-        }
+        if(recipesPath == null) return List.of();
 
-        File[] recipeFiles = recipesDir.listFiles((dir, name) -> name.endsWith(".json"));
+        File[] recipeFiles = recipesPath.toFile().listFiles((dir, name) -> name.endsWith(".json"));
         if(recipeFiles == null) return List.of();
 
-        List<Recipe> loadedRecipes = new ArrayList<>();
-
+        List<JsonObject> recipes = new ArrayList<>();
         for(File recipeFile : recipeFiles)
         {
             JsonObject recipeJson = readRecipeJson(recipeFile);
-            if(recipeJson == null || !recipeJson.has("type")) continue;
-
-            RecipeSerializer serializer = RecipeSerializerRegistry.get().getByRecipeTypeId(Identifier.from(recipeJson.get("type").getAsString()));
-            if(serializer == null)
-            {
-                CraftCreatorAPI.LOGGER.warn("No serializer for recipe type of file: " + recipeFile.getName());
-                continue;
-            }
-
-            Recipe recipe = serializer.deserializeToRecipe(recipeJson);
-            if(recipe != Recipe.EMPTY) loadedRecipes.add(recipe);
+            if(recipeJson != null) recipes.add(recipeJson);
         }
-
-        return loadedRecipes;
+        return recipes;
     }
 
     private boolean arePathsInvalid()

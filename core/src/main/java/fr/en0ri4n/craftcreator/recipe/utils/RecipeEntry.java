@@ -47,6 +47,9 @@ public class RecipeEntry {
     /* Optional NBT data as a JsonObject. Not implemented yet */
     private JsonObject nbt;
 
+    /** Other items accepted in place of this one (e.g. an ingredient listing several items), shown in turn when displayed. */
+    private List<Identifier> alternatives = List.of();
+
     /* -------------------------------------------------------------------------
      * Convenience queries
      * ---------------------------------------------------------------------- */

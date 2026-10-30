@@ -220,5 +220,27 @@
   "craftcreator.screen.slot_recipe.field.chance_0": "Chance 1:",
   "craftcreator.screen.slot_recipe.field.chance_1": "Chance 2:",
   "craftcreator.screen.slot_recipe.field.chance_2": "Chance 3:",
-  "craftcreator.screen.slot_recipe.field.chance_3": "Chance 4:"
+  "craftcreator.screen.slot_recipe.field.chance_3": "Chance 4:",
+
+  "craftcreator.serializer.message.recipe.do_not_exists": "§cThis recipe doesn't exist",
+  "craftcreator.serializer.message.recipe.invalid_json": "§cInvalid recipe",
+  "craftcreator.serializer.message.recipe.invalid_block_data": "§cThe recipe is incomplete: add at least one input and an output",
+  "craftcreator.serializer.message.recipe.datapack_file_invalid": "§cThe datapack folder isn't ready, try again once in a world",
+  "craftcreator.serializer.message.recipe.datapack_file_error": "§cCouldn't write or delete the recipe file",
+  "craftcreator.serializer.message.recipe.kubejs_added": "§aRecipe added to the KubeJS script",
+  "craftcreator.serializer.message.recipe.kubejs_updated": "§aKubeJS script updated",
+  "craftcreator.serializer.message.recipe.kubejs_file_error": "§cCouldn't write the KubeJS script",
+  "craftcreator.serializer.message.recipe.not_supported": "§cThis exporter can't remove recipes",
+  "craftcreator.serializer.message.recipe.no_permission": "§cYou need to be an operator to edit recipes",
+  "craftcreator.serializer.message.recipe.already_exists": "§cThis recipe already exists",
+  "craftcreator.screen.tutorial.title": "Craft Creator Tutorial",
+  "craftcreator.screen.tutorial.page_0.title": "Recipe Creators",
+  "craftcreator.screen.tutorial.page_0.text": "Each recipe type has its own Recipe Creator block (crafting table, furnace, mana infusion, pulverizer...).\nPut the ingredients in the input slots and the result in the output slot, then press the export button on the right of the GUI.",
+  "craftcreator.screen.tutorial.page_1.title": "Tags and Settings",
+  "craftcreator.screen.tutorial.page_1.text": "Ctrl + click an input slot to use one of the item's tags instead of the item. Click it again to remove the tag.\nValues like cooking time, mana or energy are set in the settings panel, opened with the gear button on the left of the GUI.",
+  "craftcreator.screen.tutorial.page_2.title": "Datapack or KubeJS",
+  "craftcreator.screen.tutorial.page_2.text": "The button at the top left of the GUI chooses where the recipe goes: MC for a datapack in your world, KJS for a KubeJS script.\nRun /reload to load new recipes.",
+  "craftcreator.screen.tutorial.page_3.title": "Managing Recipes",
+  "craftcreator.screen.tutorial.page_3.text": "Open the recipe management screen with its key (K by default).\nAll: every recipe of the game, remove one with KubeJS.\nAdded: your recipes, delete the ones you don't want.\nRemoved: KubeJS removals, restore them.\nRemove recipes...: remove every recipe matching a filter (id, type, mod, input, output).",
+  "craftcreator.serializer.message.recipe.already_removed": "§eThis recipe is already removed"
 }

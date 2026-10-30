@@ -33,6 +33,12 @@ public class NetworkHandler {
         // Register client -> server packet (MakeRecipeRequestPacket)
         INSTANCE.registerMessage(id++, MakeRecipeRequestPacket.class,
                 MakeRecipeRequestPacket::encode, MakeRecipeRequestPacket::decode, MakeRecipeRequestPacket::handleServer);
+        // Register client -> server packet (RecipeManagementRequestPacket)
+        INSTANCE.registerMessage(id++, RecipeManagementRequestPacket.class,
+                RecipeManagementRequestPacket::encode, RecipeManagementRequestPacket::decode, RecipeManagementRequestPacket::handleServer);
+        // Register server -> client packet (RecipeManagementStatePacket)
+        INSTANCE.registerMessage(id++, RecipeManagementStatePacket.class,
+                RecipeManagementStatePacket::encode, RecipeManagementStatePacket::decode, RecipeManagementStatePacket::handleClient);
     }
 
     private NetworkHandler() {}

@@ -19,6 +19,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -160,19 +162,39 @@ public class ForgeRenderAdapter implements RenderAdapter
         forgeRenderContext.poseStack().popPose();
     }
 
+    /**
+     * Nested clipping areas (e.g. a text input inside a scrolled panel): each one is intersected with its parent.
+     */
+    private final Deque<int[]> scissorStack = new ArrayDeque<>();
+
     @Override
     public void enableScissor(RenderContext ctx, int x, int y, int width, int height)
     {
-        // RenderSystem works in window pixels with the origin at the bottom left
-        double scale = mc.getWindow().getGuiScale();
-        int windowHeight = mc.getWindow().getHeight();
-        RenderSystem.enableScissor((int) (x * scale), (int) (windowHeight - (y + height) * scale), Math.max(0, (int) (width * scale)), Math.max(0, (int) (height * scale)));
+        int[] rect = {x, y, x + width, y + height};
+        int[] parent = scissorStack.peek();
+        if(parent != null)
+            rect = new int[] {Math.max(rect[0], parent[0]), Math.max(rect[1], parent[1]), Math.min(rect[2], parent[2]), Math.min(rect[3], parent[3])};
+
+        scissorStack.push(rect);
+        applyScissor(rect);
     }
 
     @Override
     public void disableScissor(RenderContext ctx)
     {
-        RenderSystem.disableScissor();
+        scissorStack.poll();
+        int[] parent = scissorStack.peek();
+        if(parent != null) applyScissor(parent);
+        else RenderSystem.disableScissor();
+    }
+
+    private void applyScissor(int[] rect)
+    {
+        // RenderSystem works in window pixels with the origin at the bottom left
+        double scale = mc.getWindow().getGuiScale();
+        int windowHeight = mc.getWindow().getHeight();
+        RenderSystem.enableScissor((int) (rect[0] * scale), (int) (windowHeight - rect[3] * scale),
+                                   Math.max(0, (int) ((rect[2] - rect[0]) * scale)), Math.max(0, (int) ((rect[3] - rect[1]) * scale)));
     }
 
     private void bindTexture(Identifier backgroundTexture)

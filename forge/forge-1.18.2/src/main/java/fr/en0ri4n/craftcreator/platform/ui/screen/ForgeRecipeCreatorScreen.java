@@ -5,6 +5,7 @@ import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
 import fr.en0ri4n.craftcreator.api.ui.screen.WidgetRenderer;
 import fr.en0ri4n.craftcreator.platform.render.ForgeRenderContext;
 import fr.en0ri4n.craftcreator.platform.ui.container.ForgeRecipeCreatorMenu;
+import fr.en0ri4n.craftcreator.platform.ui.elements.ForgeWidget;
 import lombok.Getter;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -44,8 +45,20 @@ public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecip
     @Override
     public boolean mouseClicked(double pMouseX, double pMouseY, int pButton)
     {
+        ForgeWidget.dispatchFocusLoss(children(), pMouseX, pMouseY);
         boolean impl = this.model.getScreenDefinition().onClick((pMouseX - this.leftPos), (pMouseY - this.topPos), pButton);
         return impl || super.mouseClicked(pMouseX, pMouseY, pButton);
+    }
+
+    /**
+     * A focused text input gets keys first, so typing "e" or a number doesn't close the screen or move items.
+     */
+    @Override
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers)
+    {
+        if(pKeyCode != 256 && this.getFocused() != null && this.getFocused().keyPressed(pKeyCode, pScanCode, pModifiers))
+            return true;
+        return super.keyPressed(pKeyCode, pScanCode, pModifiers);
     }
 
     @Override

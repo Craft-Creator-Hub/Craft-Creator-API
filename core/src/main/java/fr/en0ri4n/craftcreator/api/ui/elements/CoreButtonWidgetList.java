@@ -179,6 +179,12 @@ public class CoreButtonWidgetList extends CoreUiElement
     }
 
     @Override
+    public void loseFocus()
+    {
+        entries.forEach(entry -> entry.widget.loseFocus());
+    }
+
+    @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers)
     {
         if(!isVisible() || !isOpen) return false;

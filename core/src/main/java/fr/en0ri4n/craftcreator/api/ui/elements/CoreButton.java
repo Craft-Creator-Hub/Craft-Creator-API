@@ -12,7 +12,8 @@ import lombok.Setter;
 @Getter
 public class CoreButton extends CoreUiElement
 {
-    private final String label;
+    @Setter
+    private String label;
 
     /**
      * Logical action id, the platform will map this to actual click handlers.
@@ -21,6 +22,10 @@ public class CoreButton extends CoreUiElement
 
     @Setter
     private boolean enabled = true;
+
+    /** A selected button (e.g. the current tab) is drawn highlighted and can't be clicked. */
+    @Setter
+    private boolean selected = false;
 
     public CoreButton(String id, int x, int y, int width, int height, String label, Runnable onPress, String tooltip)
     {
@@ -32,7 +37,7 @@ public class CoreButton extends CoreUiElement
     @Override
     public boolean mouseClicked(int mouseX, int mouseY, int button)
     {
-        if(!isMouseOver(mouseX, mouseY) || !enabled) return false;
+        if(!isMouseOver(mouseX, mouseY) || !enabled || selected) return false;
 
         getUiAdapter().playSound(UiAdapter.UiSound.BUTTON_CLICK);
 
@@ -45,8 +50,13 @@ public class CoreButton extends CoreUiElement
     @Override
     public void render(RenderContext ctx, int mouseX, int mouseY, float partialTick)
     {
-        CoreScreenDefinition.renderTextureWithSize(ctx, CoreScreenDefinition.GUI_TEXTURE, getBounds().getX(), getBounds().getY(), getBounds().getWidth(), getBounds().getHeight(), isMouseOver(mouseX, mouseY), !enabled);
-        getRenderAdapter().drawText(ctx, label, getBounds().getHorizontalCenter(getRenderAdapter().getTextWidth(label)), getBounds().getVerticalCenter(getRenderAdapter().getFontHeight()), enabled ? 0xFFFFFF : 0xAAAAAA);
+        if(!isVisible()) return;
+
+        boolean hovered = enabled && !selected && isMouseOver(mouseX, mouseY);
+        CoreScreenDefinition.renderTextureWithBounds(ctx, CoreScreenDefinition.GUI_TEXTURE, getBounds(), hovered || selected, !enabled);
+
+        int color = selected ? CoreTheme.ACCENT : !enabled ? CoreTheme.TEXT_DISABLED : hovered ? CoreTheme.TEXT_BRIGHT : CoreTheme.TEXT;
+        getRenderAdapter().drawText(ctx, label, getBounds().getHorizontalCenter(getRenderAdapter().getTextWidth(label)), getBounds().getVerticalCenter(getRenderAdapter().getFontHeight()) + 1, color);
     }
 
     @Override

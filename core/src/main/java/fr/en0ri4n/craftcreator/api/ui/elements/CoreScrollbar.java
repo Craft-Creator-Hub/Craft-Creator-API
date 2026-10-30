@@ -13,9 +13,9 @@ public class CoreScrollbar
 {
     public static final int WIDTH = 6;
     private static final int MIN_THUMB_HEIGHT = 8;
-    private static final int TRACK_COLOR = 0x66191919;
-    private static final int THUMB_COLOR = 0xAA2B8AE6;
-    private static final int THUMB_HOVER_COLOR = 0xFF4FA3F0;
+    private static final int TRACK_COLOR = CoreTheme.INSET_SHADOW;
+    private static final int THUMB_COLOR = CoreTheme.THUMB;
+    private static final int THUMB_HOVER_COLOR = CoreTheme.THUMB_HOVER;
 
     private final Core2DBounds track = Core2DBounds.of(0, 0, WIDTH, 0);
     private int contentHeight;
@@ -96,6 +96,7 @@ public class CoreScrollbar
         adapter.drawRect(ctx, track.getX(), track.getY(), track.getWidth(), track.getHeight(), TRACK_COLOR);
         boolean highlighted = dragging || isOver(mouseX, mouseY);
         adapter.drawRect(ctx, track.getX(), getThumbY(), track.getWidth(), getThumbHeight(), highlighted ? THUMB_HOVER_COLOR : THUMB_COLOR);
+        adapter.drawRect(ctx, track.getX(), getThumbY(), 1, getThumbHeight(), CoreTheme.THUMB_HOVER);
     }
 
     /**

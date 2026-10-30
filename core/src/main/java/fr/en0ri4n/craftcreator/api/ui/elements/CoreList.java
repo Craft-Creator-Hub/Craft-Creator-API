@@ -23,7 +23,7 @@ import java.util.function.Predicate;
 public class CoreList<T> extends CoreUiElement
 {
     public static final int DEFAULT_ITEM_HEIGHT = 20;
-    private static final int PADDING = 4;
+    private static final int PADDING = 3;
     private static final int KEY_UP = 265;
     private static final int KEY_DOWN = 264;
 
@@ -280,15 +280,14 @@ public class CoreList<T> extends CoreUiElement
         RenderAdapter adapter = getRenderAdapter();
         Core2DBounds b = getBounds();
 
-        adapter.drawRect(ctx, b.getX(), b.getY(), b.getWidth(), b.getHeight(), 0xFF1F2933);
-        adapter.drawRect(ctx, getContentX(), getContentY(), b.getWidth() - PADDING * 2, getContentHeight(), 0xFF0F1416);
+        CoreTheme.drawInset(adapter, ctx, b, false);
 
         hovered = scrollbar.isDragging() ? null : getEntryAt(mouseX, mouseY);
 
         if(visibleEntries.isEmpty())
         {
             if(!emptyText.isEmpty())
-                adapter.drawText(ctx, emptyText, b.getHorizontalCenter(adapter.getTextWidth(emptyText)), b.getVerticalCenter(adapter.getFontHeight()), 0xFF808080);
+                adapter.drawText(ctx, emptyText, b.getHorizontalCenter(adapter.getTextWidth(emptyText)), b.getVerticalCenter(adapter.getFontHeight()), CoreTheme.TEXT_MUTED);
             return;
         }
 
@@ -343,8 +342,11 @@ public class CoreList<T> extends CoreUiElement
 
         public void render(RenderContext ctx, int index, int x, int entryTop, int width, int itemHeight, int mouseX, int mouseY, boolean selected, boolean hovered)
         {
-            int background = selected ? 0xAA2B8AE6 : hovered ? 0x552B8AE6 : (index & 1) == 0 ? 0xFF0D1112 : 0;
-            if(background != 0) getRenderAdapter().drawRect(ctx, x, entryTop + 1, width, itemHeight - 2, background);
+            int background = selected ? CoreTheme.ROW_SELECTED : hovered ? CoreTheme.ROW_HOVER : (index & 1) == 1 ? CoreTheme.ROW_ALT : 0;
+            if(background != 0) getRenderAdapter().drawRect(ctx, x, entryTop, width, itemHeight, background);
+            int tint = getTint();
+            if(tint != 0) getRenderAdapter().drawRect(ctx, x, entryTop, width, itemHeight, tint);
+            if(selected) getRenderAdapter().drawRect(ctx, x, entryTop, 2, itemHeight, CoreTheme.ACCENT);
 
             int textX = x + 4;
             if(iconId != null)
@@ -353,9 +355,22 @@ public class CoreList<T> extends CoreUiElement
                 textX += 20;
             }
 
-            int color = selected ? 0xFFFFFFFF : hovered ? 0xFFEFEFEF : 0xFFDDE6EE;
+            int color = getTextColor(selected, hovered);
             String text = trimToWidth(label, x + width - textX - 2);
             getRenderAdapter().drawText(ctx, text, textX, entryTop + (itemHeight - getRenderAdapter().getFontHeight()) / 2 + 1, color);
+        }
+
+        /**
+         * Color drawn over the row background, e.g. to flag an entry. 0 for none.
+         */
+        protected int getTint()
+        {
+            return 0;
+        }
+
+        protected int getTextColor(boolean selected, boolean hovered)
+        {
+            return selected || hovered ? CoreTheme.TEXT_BRIGHT : CoreTheme.TEXT;
         }
 
         /**

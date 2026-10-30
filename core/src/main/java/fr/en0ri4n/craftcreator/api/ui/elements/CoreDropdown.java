@@ -88,6 +88,8 @@ public class CoreDropdown<T> extends CoreUiElement
     @Override
     public void render(RenderContext ctx, int mouseX, int mouseY, float pPartialTick)
     {
+        if(!isVisible()) return;
+
         int actualWidth = Math.max(getBounds().getWidth(), getRenderAdapter().getTextWidth(this.getSelectedValueAsString()) + 10);
 
         CoreScreenDefinition.renderTextureWithSize(ctx, CoreScreenDefinition.GUI_TEXTURE,
@@ -96,9 +98,9 @@ public class CoreDropdown<T> extends CoreUiElement
                 isMouseOver(mouseX, mouseY), false);
 
         // Draw label centered
-        int color = 0xFFFFFFFF;
+        int color = isMouseOver(mouseX, mouseY) ? CoreTheme.TEXT_BRIGHT : CoreTheme.TEXT;
         int textX = getBounds().getX((actualWidth - getRenderAdapter().getTextWidth(this.getSelectedValueAsString())) / 2);
-        int textY = getBounds().getVerticalCenter(getRenderAdapter().getFontHeight());
+        int textY = getBounds().getVerticalCenter(getRenderAdapter().getFontHeight()) + 1;
         getRenderAdapter().drawText(ctx, getSelectedValueAsString(), textX, textY, color);
         
     }

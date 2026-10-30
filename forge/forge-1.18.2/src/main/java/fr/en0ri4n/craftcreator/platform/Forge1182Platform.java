@@ -129,6 +129,8 @@ public class Forge1182Platform implements Platform {
 
     private final ForgeTagProvider tagProvider = new ForgeTagProvider();
 
+    private final ForgeGameDataProvider gameDataProvider = new ForgeGameDataProvider();
+
     @Override
     public SupportedModLoader getLoader() {
         return SupportedModLoader.FORGE;
@@ -227,5 +229,11 @@ public class Forge1182Platform implements Platform {
     public TextComponentProvider<Component> getTextComponentProvider()
     {
         return ForgeTextComponentProvider.get();
+    }
+
+    @Override
+    public ForgeGameDataProvider getGameDataProvider()
+    {
+        return gameDataProvider;
     }
 }

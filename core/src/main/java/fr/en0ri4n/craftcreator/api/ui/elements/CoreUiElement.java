@@ -79,6 +79,11 @@ public abstract class CoreUiElement {
     public boolean mouseReleased(int mouseX, int mouseY, int button) { return false; }
 
     /**
+     * Called when the player clicks somewhere else, e.g. so a text input stops receiving keys.
+     */
+    public void loseFocus() { /* Nothing to do by default */ }
+
+    /**
      * Used by platforms to route events (e.g. mouse wheel) to the element under the mouse.
      */
     public boolean isMouseOverElement(int mouseX, int mouseY)

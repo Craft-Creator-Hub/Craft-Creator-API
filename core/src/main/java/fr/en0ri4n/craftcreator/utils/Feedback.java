@@ -18,6 +18,11 @@ public enum Feedback
     DATAPACK_FILE_ERROR("serializer.message.recipe.datapack_file_error"),
 
     KUBEJS_ADDED("serializer.message.recipe.kubejs_added"),
+    KUBEJS_UPDATED("serializer.message.recipe.kubejs_updated"),
+    KUBEJS_FILE_ERROR("serializer.message.recipe.kubejs_file_error"),
+    NOT_SUPPORTED("serializer.message.recipe.not_supported"),
+    ALREADY_REMOVED("serializer.message.recipe.already_removed"),
+    NO_PERMISSION("serializer.message.recipe.no_permission"),
 
     RECIPE_ALREADY_EXISTS("serializer.message.recipe.already_exists"),;
 

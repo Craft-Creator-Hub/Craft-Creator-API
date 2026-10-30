@@ -5,8 +5,11 @@ import fr.en0ri4n.craftcreator.api.ui.elements.CoreUiElement;
 import fr.en0ri4n.craftcreator.platform.render.ForgeRenderContext;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.TextComponent;
+
+import java.util.List;
 
 public class ForgeWidget extends AbstractWidget implements Widget
 {
@@ -16,6 +19,21 @@ public class ForgeWidget extends AbstractWidget implements Widget
     {
         super(coreUiElement.getBounds().getX(), coreUiElement.getBounds().getY(), coreUiElement.getBounds().getWidth(), coreUiElement.getBounds().getHeight(), new TextComponent(""));
         this.coreUiElement = coreUiElement;
+    }
+
+    public CoreUiElement getCoreElement()
+    {
+        return coreUiElement;
+    }
+
+    /**
+     * Tell every core widget of the screen except the clicked ones that they lost focus.
+     */
+    public static void dispatchFocusLoss(List<? extends GuiEventListener> children, double mouseX, double mouseY)
+    {
+        for(var child : children)
+            if(child instanceof ForgeWidget widget && !widget.isMouseOver(mouseX, mouseY))
+                widget.getCoreElement().loseFocus();
     }
 
     @Override

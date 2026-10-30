@@ -8,6 +8,9 @@ import fr.en0ri4n.craftcreator.api.net.BlockEntityUpdateData;
 import fr.en0ri4n.craftcreator.api.net.FetchData;
 import fr.en0ri4n.craftcreator.api.net.MakeRecipeRequestData;
 import fr.en0ri4n.craftcreator.api.net.OpenContainerRequestData;
+import fr.en0ri4n.craftcreator.api.net.RecipeManagementRequest;
+import fr.en0ri4n.craftcreator.api.net.RecipeManagementState;
+import fr.en0ri4n.craftcreator.api.ui.screen.RecipeManagementListener;
 import fr.en0ri4n.craftcreator.api.net.UiUpdateData;
 import fr.en0ri4n.craftcreator.api.platform.NetworkInteractionAdapter;
 import fr.en0ri4n.craftcreator.platform.Forge1182Platform;
@@ -17,8 +20,13 @@ import fr.en0ri4n.craftcreator.platform.net.FetchDataPacket;
 import fr.en0ri4n.craftcreator.platform.net.MakeRecipeRequestPacket;
 import fr.en0ri4n.craftcreator.platform.net.NetworkHandler;
 import fr.en0ri4n.craftcreator.platform.net.OpenContainerRequestPacket;
+import fr.en0ri4n.craftcreator.platform.net.RecipeManagementRequestPacket;
+import fr.en0ri4n.craftcreator.platform.net.RecipeManagementStatePacket;
 import fr.en0ri4n.craftcreator.platform.net.UiUpdatePacket;
 import fr.en0ri4n.craftcreator.platform.ui.screen.ForgeRecipeCreatorScreen;
+import fr.en0ri4n.craftcreator.platform.ui.screen.ForgeScreen;
+import fr.en0ri4n.craftcreator.recipe.RecipeManagementService;
+import fr.en0ri4n.craftcreator.utils.Feedback;
 import fr.en0ri4n.craftcreator.recipe.RecipeManager;
 import fr.en0ri4n.craftcreator.recipe.utils.RecipeRequestFeedback;
 import fr.en0ri4n.craftcreator.utils.Identifier;
@@ -32,6 +40,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.network.PacketDistributor;
+
+import java.util.List;
 
 public class ForgeNetworkInteractionAdapter implements NetworkInteractionAdapter<ServerPlayer>
 {
@@ -164,5 +174,34 @@ public class ForgeNetworkInteractionAdapter implements NetworkInteractionAdapter
         RecipeRequestFeedback requestFeedback = RecipeManager.get().handleMakeRecipeRequest(blockEntity.getCoreEntity(), data.getContainerId());
 
         player.sendMessage(Forge1182Platform.get().getTextComponentProvider().createFeedbackComponent(requestFeedback), player.getUUID());
+    }
+
+    @Override
+    public void sendManagementRequestToServer(RecipeManagementRequest request)
+    {
+        NetworkHandler.INSTANCE.sendToServer(new RecipeManagementRequestPacket(request));
+    }
+
+    @Override
+    public void handleServerManagementRequest(ServerPlayer player, RecipeManagementRequest request)
+    {
+        if(player == null) return;
+
+        // Editing recipes writes into the server's datapacks and scripts: operators only
+        RecipeManagementState state = player.hasPermissions(2)
+                ? RecipeManagementService.get().handle(request)
+                : new RecipeManagementState(request.getExporter(), List.of(), List.of(), false, Feedback.NO_PERMISSION, false);
+
+        NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new RecipeManagementStatePacket(state));
+    }
+
+    @Override
+    public void handleClientManagementState(RecipeManagementState state)
+    {
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
+        {
+            if(Minecraft.getInstance().screen instanceof ForgeScreen screen && screen.getScreenDefinition() instanceof RecipeManagementListener listener)
+                listener.onManagementState(state);
+        });
     }
 }
