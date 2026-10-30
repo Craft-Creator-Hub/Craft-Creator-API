@@ -62,7 +62,7 @@ public class CoreButton extends CoreUiElement
     @Override
     public void renderForeground(RenderContext ctx, int mouseX, int mouseY)
     {
-        if(isMouseOver(mouseX, mouseY) && getTooltip() != null)
-            getRenderAdapter().drawTooltip(ctx, getTooltip(), mouseX, mouseY);
+        if(isMouseOver(mouseX, mouseY))
+            renderTooltip(ctx, mouseX, mouseY);
     }
 }

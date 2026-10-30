@@ -64,4 +64,17 @@ public interface RenderAdapter
     void enableScissor(RenderContext ctx, int x, int y, int width, int height);
 
     void disableScissor(RenderContext ctx);
+
+    /**
+     * Draw everything (shapes, text and items) on a layer above the current one, until {@link #popLayer(RenderContext)}.
+     * Used by tooltips, which must cover items.
+     */
+    void pushLayer(RenderContext ctx, float z);
+
+    void popLayer(RenderContext ctx);
+
+    /**
+     * @return the translated display name of the item, e.g. "Oak Planks"
+     */
+    String getItemName(CoreItemStack item);
 }

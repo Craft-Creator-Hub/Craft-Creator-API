@@ -109,6 +109,10 @@ public class CoreDropdown<T> extends CoreUiElement
     public void renderForeground(RenderContext ctx, int mouseX, int mouseY)
     {
         if(isMouseOver(mouseX, mouseY))
-            getRenderAdapter().drawTooltip(ctx, getTooltip() + ": " + getSelectedValue().toString(), mouseX, mouseY);
+            CoreTooltip.create()
+                    .title(getTooltip() == null ? "" : getTooltip())
+                    .entry("Selected", getSelectedValueAsString(), CoreTheme.ACCENT)
+                    .subtitle("Click to change")
+                    .render(ctx, mouseX, mouseY);
     }
 }

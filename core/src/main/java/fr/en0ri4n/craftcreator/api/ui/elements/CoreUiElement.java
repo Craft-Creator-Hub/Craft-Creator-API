@@ -57,6 +57,15 @@ public abstract class CoreUiElement {
     public void renderForeground(RenderContext ctx, int mouseX, int mouseY)
     { /* Not implemented by default */ }
 
+    /**
+     * Draw this element's tooltip text, if it has one.
+     */
+    protected void renderTooltip(RenderContext ctx, int mouseX, int mouseY)
+    {
+        if(tooltip != null && !tooltip.isEmpty())
+            CoreTooltip.of(tooltip).render(ctx, mouseX, mouseY);
+    }
+
     protected static RenderAdapter getRenderAdapter() {
         return CraftCreatorAPI.get().getPlatform().getRenderAdapter();
     }

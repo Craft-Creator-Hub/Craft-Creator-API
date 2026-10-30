@@ -374,18 +374,18 @@ public class CoreList<T> extends CoreUiElement
         }
 
         /**
-         * Lines shown when hovering the entry. Labels that don't fit are shown in full by default.
+         * Tooltip shown when hovering the entry, or null for none. By default, labels that don't fit are shown in full.
          */
-        public List<String> getTooltip(int width)
+        public CoreTooltip getTooltip(int width)
         {
             int labelSpace = width - 8 - (iconId != null ? 20 : 0);
-            return getRenderAdapter().getTextWidth(label) > labelSpace ? List.of(label) : List.of();
+            return getRenderAdapter().getTextWidth(label) > labelSpace ? CoreTooltip.of(label) : null;
         }
 
         public void renderForeground(RenderContext ctx, int index, int x, int y, int width, int itemHeight, int mouseX, int mouseY, boolean selected, boolean hovered)
         {
-            List<String> tooltip = getTooltip(width);
-            if(hovered && !tooltip.isEmpty()) getRenderAdapter().drawTooltips(ctx, tooltip, mouseX, mouseY);
+            CoreTooltip tooltip = hovered ? getTooltip(width) : null;
+            if(tooltip != null) tooltip.render(ctx, mouseX, mouseY);
         }
 
         protected static String trimToWidth(String text, int maxWidth)

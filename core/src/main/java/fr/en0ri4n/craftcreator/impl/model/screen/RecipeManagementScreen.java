@@ -17,6 +17,7 @@ import fr.en0ri4n.craftcreator.api.ui.elements.CoreDropdown;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreList;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreTextInput;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreTheme;
+import fr.en0ri4n.craftcreator.api.ui.elements.CoreTooltip;
 import fr.en0ri4n.craftcreator.api.ui.screen.CoreContainerScreenDefinition;
 import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
 import fr.en0ri4n.craftcreator.api.ui.screen.RecipeManagementListener;
@@ -32,6 +33,7 @@ import fr.en0ri4n.craftcreator.utils.Identifier;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -657,15 +659,29 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
             if(!isForeground)
                 getRenderAdapter().drawItem(ctx, itemStack, slotX, slotY, preview.scale());
             else if(mouseX >= slotX && mouseX < slotX + slotSize && mouseY >= slotY && mouseY < slotY + slotSize)
-                getRenderAdapter().drawItemTooltip(ctx, itemStack, getExtraTooltip(entry, possibilities), mouseX, mouseY);
+                getSlotTooltip(entry, itemId, possibilities).render(ctx, mouseX, mouseY);
         }
     }
 
-    private static List<String> getExtraTooltip(RecipeEntry entry, List<Identifier> possibilities)
+    /**
+     * The item currently shown in the slot, and what else the slot accepts.
+     */
+    private static CoreTooltip getSlotTooltip(RecipeEntry entry, Identifier shownItem, List<Identifier> possibilities)
     {
-        if(entry.isTag()) return List.of("§8#" + entry.getId(), "§8" + possibilities.size() + " possible items");
-        if(possibilities.size() > 1) return List.of("§8One of " + possibilities.size() + " items");
-        return List.of();
+        CoreTooltip tooltip = CoreTooltip.create()
+                .title(getRenderAdapter().getItemName(new CoreItemStack(shownItem, 1)), shownItem)
+                .subtitle(shownItem.toString());
+
+        if(entry.getCount() > 1 || entry.isTag() || possibilities.size() > 1) tooltip.separator();
+        if(entry.getCount() > 1) tooltip.entry("Count", String.valueOf(entry.getCount()));
+        if(entry.isTag())
+        {
+            tooltip.entry("Tag", "#" + entry.getId(), CoreTheme.ACCENT);
+            tooltip.entry("Accepts", possibilities.size() + " items");
+        }
+        else if(possibilities.size() > 1)
+            tooltip.entry("Accepts", "one of " + possibilities.size() + " items");
+        return tooltip;
     }
 
     /**
@@ -747,19 +763,72 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
             return null;
         }
 
+        /**
+         * A card: what the recipe makes, its status, ingredients (identical ones merged), results and values.
+         */
         @Override
-        public List<String> getTooltip(int width)
+        public CoreTooltip getTooltip(int width)
         {
             Recipe recipe = getValue().recipe();
-            List<String> tooltips = new ArrayList<>();
-            tooltips.add("§f" + recipe.getName());
-            tooltips.add("§7" + recipe.getType());
-            if(status == Status.PENDING_REMOVAL) tooltips.add("§cRemoved, /reload to apply");
-            if(status == Status.PENDING_DELETION) tooltips.add("§cDeleted, /reload to apply");
-            if(replaced) tooltips.add("§9Items replaced with KubeJS");
-            recipe.getInputs().forEach(input -> tooltips.add("§6- " + (input.isTag() ? "#" : "") + input.getId()));
-            recipe.getOutputs().forEach(output -> tooltips.add("§b> " + output.getId()));
-            return tooltips;
+            Identifier icon = getIcon(recipe);
+            String title = !recipe.getOutputs().isEmpty() ? itemName(recipe.getOutputs().get(0).getId()) : recipe.getName();
+
+            CoreTooltip tooltip = CoreTooltip.create()
+                    .title(title, icon)
+                    .subtitle(recipe.getName())
+                    .subtitle(recipe.getType().toString());
+
+            switch(status)
+            {
+                case PENDING_REMOVAL -> tooltip.text("Removed - /reload to apply", CoreTheme.TEXT_ERROR);
+                case PENDING_DELETION -> tooltip.text("Deleted - /reload to apply", CoreTheme.TEXT_ERROR);
+                case OWN -> tooltip.text("Made with Craft Creator", CoreTheme.ACCENT);
+                case GAME -> {}
+            }
+            if(replaced) tooltip.text("Items replaced with KubeJS", REPLACED_TEXT);
+
+            if(!recipe.getInputs().isEmpty())
+            {
+                tooltip.separator().text("Ingredients", CoreTheme.TEXT_MUTED);
+                Map<String, Integer> counts = new LinkedHashMap<>();
+                Map<String, RecipeEntry> firsts = new LinkedHashMap<>();
+                for(RecipeEntry input : recipe.getInputs())
+                {
+                    String key = (input.isTag() ? "#" : "") + input.getId();
+                    counts.merge(key, Math.max(1, input.getCount()), Integer::sum);
+                    firsts.putIfAbsent(key, input);
+                }
+                counts.forEach((key, count) -> addEntryLine(tooltip, firsts.get(key), count, CoreTheme.TEXT));
+            }
+
+            if(!recipe.getOutputs().isEmpty())
+            {
+                tooltip.separator().text("Result", CoreTheme.TEXT_MUTED);
+                recipe.getOutputs().forEach(output -> addEntryLine(tooltip, output, Math.max(1, output.getCount()), CoreTheme.TEXT_SUCCESS));
+            }
+
+            if(!recipe.getInfos().getParameters().isEmpty())
+            {
+                tooltip.separator();
+                recipe.getInfos().getParameters().forEach(param -> tooltip.entry(humanize(param.getName()), formatValue(param.getRawValue())));
+            }
+            return tooltip;
+        }
+
+        /**
+         * "3x Oak Planks" with the item's icon, or the tag with its first item's icon.
+         */
+        private static void addEntryLine(CoreTooltip tooltip, RecipeEntry entry, int count, int color)
+        {
+            List<Identifier> items = getPossibleItems(entry);
+            Identifier icon = items.isEmpty() ? null : items.get(0);
+            String name = entry.isTag() ? "#" + entry.getId() : itemName(entry.getId());
+            tooltip.item(icon, (count > 1 ? count + "x " : "") + name, color);
+        }
+
+        private static String itemName(Identifier itemId)
+        {
+            return getRenderAdapter().getItemName(new CoreItemStack(itemId, 1));
         }
     }
 

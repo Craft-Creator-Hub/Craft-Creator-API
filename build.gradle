@@ -4,5 +4,7 @@ repositories {}
 
 dependencies {}
 
-// Use the UTF-8 charset for Java compilation
-tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+// Use the UTF-8 charset for Java compilation in every module (Windows defaults to cp1252, which breaks characters like '§')
+allprojects {
+    tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+}

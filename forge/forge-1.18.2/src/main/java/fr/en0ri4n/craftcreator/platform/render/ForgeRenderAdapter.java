@@ -106,8 +106,11 @@ public class ForgeRenderAdapter implements RenderAdapter
         ItemStack platformStack = ForgeItemStackAdapter.get().toPlatform(item);
         RenderSystem.getModelViewStack().pushPose();
         RenderSystem.getModelViewStack().scale(scale, scale, 1.0F);
-        mc.getItemRenderer().renderAndDecorateItem(platformStack, (int) (x / scale), (int) (y / scale));
+        mc.getItemRenderer().renderAndDecorateItem(platformStack, Math.round(x / scale), Math.round(y / scale));
         RenderSystem.getModelViewStack().popPose();
+        // The item renderer re-applies the stack while our scale is still on it: re-apply after removing it,
+        // otherwise everything drawn next (text, shapes) stays scaled
+        RenderSystem.applyModelViewMatrix();
     }
 
     @Override
@@ -195,6 +198,33 @@ public class ForgeRenderAdapter implements RenderAdapter
         int windowHeight = mc.getWindow().getHeight();
         RenderSystem.enableScissor((int) (rect[0] * scale), (int) (windowHeight - rect[3] * scale),
                                    Math.max(0, (int) ((rect[2] - rect[0]) * scale)), Math.max(0, (int) ((rect[3] - rect[1]) * scale)));
+    }
+
+    @Override
+    public void pushLayer(RenderContext ctx, float z)
+    {
+        ForgeRenderContext.from(ctx).poseStack().pushPose();
+        ForgeRenderContext.from(ctx).poseStack().translate(0, 0, z);
+        // Items don't use the pose stack, they have their own offset
+        mc.getItemRenderer().blitOffset += z;
+        layerOffsets.push(z);
+    }
+
+    @Override
+    public void popLayer(RenderContext ctx)
+    {
+        Float z = layerOffsets.poll();
+        if(z == null) return;
+        ForgeRenderContext.from(ctx).poseStack().popPose();
+        mc.getItemRenderer().blitOffset -= z;
+    }
+
+    private final Deque<Float> layerOffsets = new ArrayDeque<>();
+
+    @Override
+    public String getItemName(CoreItemStack item)
+    {
+        return ForgeItemStackAdapter.get().toPlatform(item).getHoverName().getString();
     }
 
     private void bindTexture(Identifier backgroundTexture)

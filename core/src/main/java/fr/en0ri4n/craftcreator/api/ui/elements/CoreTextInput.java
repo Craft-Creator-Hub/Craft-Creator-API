@@ -176,8 +176,8 @@ public class CoreTextInput extends CoreUiElement
     @Override
     public void renderForeground(RenderContext ctx, int mouseX, int mouseY)
     {
-        if(isMouseOver(mouseX, mouseY) && !isFocused && getTooltip() != null && !getTooltip().isEmpty())
-            getRenderAdapter().drawTooltip(ctx, getTooltip(), mouseX, mouseY);
+        if(isMouseOver(mouseX, mouseY) && !isFocused)
+            renderTooltip(ctx, mouseX, mouseY);
     }
 
     /**

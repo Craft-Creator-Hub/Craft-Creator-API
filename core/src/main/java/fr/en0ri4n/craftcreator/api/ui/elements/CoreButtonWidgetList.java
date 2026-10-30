@@ -237,8 +237,8 @@ public class CoreButtonWidgetList extends CoreUiElement
 
         if(!isOpen)
         {
-            if(buttonBounds.contains(mouseX, mouseY) && getTooltip() != null && !getTooltip().isEmpty())
-                getRenderAdapter().drawTooltip(ctx, getTooltip(), mouseX, mouseY);
+            if(buttonBounds.contains(mouseX, mouseY))
+                renderTooltip(ctx, mouseX, mouseY);
             return;
         }
 
