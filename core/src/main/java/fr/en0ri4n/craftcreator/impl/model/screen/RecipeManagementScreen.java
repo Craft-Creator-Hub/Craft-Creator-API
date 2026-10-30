@@ -29,6 +29,7 @@ import fr.en0ri4n.craftcreator.recipe.RecipeFilters;
 import fr.en0ri4n.craftcreator.recipe.model.Recipe;
 import fr.en0ri4n.craftcreator.recipe.utils.RecipeEntry;
 import fr.en0ri4n.craftcreator.recipe.utils.RecipeInfos;
+import fr.en0ri4n.craftcreator.recipe.utils.RecipeParameterFormat;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 
 import java.util.ArrayList;
@@ -56,7 +57,11 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
     private static final int GAP = 4;
     private static final int BUTTON_HEIGHT = 18;
     private static final int TOP = 26;
-    private static final int INFO_WIDTH = 110;
+    private static final int INFO_WIDTH = 120;
+    private static final int PARAMETER_ROW_HEIGHT = 13;
+    /** Name and type lines above the status lines, in the details panel. */
+    private static final int HEADER_LINES_HEIGHT = 24;
+    private static final int STATUS_LINE_HEIGHT = 11;
     private static final int PENDING_TINT = 0x50FF3030;
     private static final int REPLACED_TINT = 0x403A7BD5;
     private static final int REPLACED_TEXT = 0xFF7FA8F0;
@@ -468,24 +473,18 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         getRenderAdapter().drawText(ctx, trim(recipe.getName(), detailsArea.getWidth() - 86), detailsArea.getX(), y, CoreTheme.TEXT_BRIGHT);
         getRenderAdapter().drawText(ctx, trim(recipe.getType().toString(), detailsArea.getWidth()), detailsArea.getX(), y + 11, CoreTheme.TEXT_MUTED);
 
-        String statusText = currentTab == Tab.ALL ? switch(getStatus(recipe))
-        {
-            case PENDING_REMOVAL -> "Removed - /reload to apply";
-            case PENDING_DELETION -> "Deleted - /reload to apply";
-            case OWN -> "Made with Craft Creator";
-            case GAME -> null;
-        } : null;
-        int statusY = y + 22;
+        String statusText = getStatusText(recipe);
+        int statusY = detailsArea.getY(HEADER_LINES_HEIGHT);
         if(statusText != null)
         {
             int color = statusText.startsWith("Made") ? CoreTheme.ACCENT : CoreTheme.TEXT_ERROR;
             getRenderAdapter().drawText(ctx, statusText, detailsArea.getX(), statusY, color);
-            statusY += 11;
+            statusY += STATUS_LINE_HEIGHT;
         }
         for(JsonObject replacement : getReplacementsAffecting(recipe))
         {
             getRenderAdapter().drawText(ctx, trim("Replaced " + RecipeFilters.describe(replacement), detailsArea.getWidth()), detailsArea.getX(), statusY, REPLACED_TEXT);
-            statusY += 11;
+            statusY += STATUS_LINE_HEIGHT;
         }
 
         RecipeCreator<?> creator = RecipeCreators.getRecipeCreator(recipe.getType());
@@ -510,7 +509,31 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
     }
 
     /**
-     * Recipe values (cooking time, mana, energy...) in a column on the right of the preview.
+     * Status shown under the recipe type in the All tab, or null.
+     */
+    private String getStatusText(Recipe recipe)
+    {
+        if(currentTab != Tab.ALL) return null;
+        return switch(getStatus(recipe))
+        {
+            case PENDING_REMOVAL -> "Removed - /reload to apply";
+            case PENDING_DELETION -> "Deleted - /reload to apply";
+            case OWN -> "Made with Craft Creator";
+            case GAME -> null;
+        };
+    }
+
+    /**
+     * Top of the preview and parameters: below the name, type, status and replacement lines.
+     */
+    private int getContentTop(Recipe recipe)
+    {
+        int statusLines = (getStatusText(recipe) != null ? 1 : 0) + getReplacementsAffecting(recipe).size();
+        return detailsArea.getY(HEADER_LINES_HEIGHT + statusLines * STATUS_LINE_HEIGHT + 6);
+    }
+
+    /**
+     * Recipe values (cooking time, mana, energy...) in a panel on the right of the preview: name on the left, value on the right.
      */
     private void renderParameters(RenderContext ctx, Recipe recipe)
     {
@@ -518,30 +541,30 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         if(parameters.isEmpty()) return;
 
         int x = detailsArea.getRight() - INFO_WIDTH;
-        int y = detailsArea.getY(40);
+        int y = getContentTop(recipe);
+
         getRenderAdapter().drawText(ctx, "Parameters", x, y, CoreTheme.TEXT_TITLE);
-        y += 14;
+        getRenderAdapter().drawRect(ctx, x, y + 11, INFO_WIDTH, 1, CoreTheme.ROW_HOVER);
 
-        for(RecipeInfos.RecipeParameter parameter : parameters)
+        int rowsY = y + 15;
+        Core2DBounds box = Core2DBounds.of(x, rowsY, INFO_WIDTH, parameters.size() * PARAMETER_ROW_HEIGHT + 4);
+        CoreTheme.drawInset(getRenderAdapter(), ctx, box, false);
+
+        int rowY = rowsY + 2;
+        for(int i = 0; i < parameters.size(); i++)
         {
-            getRenderAdapter().drawText(ctx, trim(humanize(parameter.getName()), INFO_WIDTH), x, y, CoreTheme.TEXT_MUTED);
-            getRenderAdapter().drawText(ctx, trim(formatValue(parameter.getRawValue()), INFO_WIDTH - 6), x + 6, y + 10, CoreTheme.TEXT_BRIGHT);
-            y += 24;
+            RecipeInfos.RecipeParameter parameter = parameters.get(i);
+            if((i & 1) == 1) getRenderAdapter().drawRect(ctx, x + 2, rowY, INFO_WIDTH - 4, PARAMETER_ROW_HEIGHT, CoreTheme.ROW_ALT);
+
+            String value = trim(RecipeParameterFormat.value(parameter.getName(), parameter.getRawValue()), INFO_WIDTH - 12);
+            int valueWidth = getRenderAdapter().getTextWidth(value);
+            String name = trim(RecipeParameterFormat.name(parameter.getName()), INFO_WIDTH - 14 - valueWidth);
+
+            int textY = rowY + (PARAMETER_ROW_HEIGHT - getRenderAdapter().getFontHeight()) / 2 + 1;
+            getRenderAdapter().drawText(ctx, name, x + 5, textY, CoreTheme.TEXT_MUTED);
+            getRenderAdapter().drawText(ctx, value, x + INFO_WIDTH - 5 - valueWidth, textY, CoreTheme.TEXT_BRIGHT);
+            rowY += PARAMETER_ROW_HEIGHT;
         }
-    }
-
-    /**
-     * "cookingtime" -> "Cooking time", "processingTime" / "water_mod" -> "Processing time" / "Water mod".
-     */
-    private static String humanize(String key)
-    {
-        String spaced = key.equals("cookingtime") ? "cooking time" : key.replaceAll("([a-z])([A-Z])", "$1 $2").replace('_', ' ').toLowerCase();
-        return spaced.isEmpty() ? spaced : Character.toUpperCase(spaced.charAt(0)) + spaced.substring(1);
-    }
-
-    private static String formatValue(String value)
-    {
-        return value.endsWith(".0") ? value.substring(0, value.length() - 2) : value;
     }
 
     private void renderRemovalDetails(RenderContext ctx, JsonObject removal)
@@ -622,8 +645,7 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
     private Preview getPreview(RecipeCreator<?> creator, Recipe recipe)
     {
         Core2DBounds size = creator.getContainerModel().getScreenDefinition().getBackgroundTextureSize();
-        // Below the name, type, status and replacement lines
-        int areaY = detailsArea.getY(36 + 11 * getReplacementsAffecting(recipe).size());
+        int areaY = getContentTop(recipe);
         int areaHeight = detailsArea.getBottom() - 14 - areaY; // keep the last line for messages
         int areaWidth = detailsArea.getWidth() - (recipe.getInfos().getParameters().isEmpty() ? 0 : INFO_WIDTH + 8);
 
@@ -810,7 +832,7 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
             if(!recipe.getInfos().getParameters().isEmpty())
             {
                 tooltip.separator();
-                recipe.getInfos().getParameters().forEach(param -> tooltip.entry(humanize(param.getName()), formatValue(param.getRawValue())));
+                recipe.getInfos().getParameters().forEach(param -> tooltip.entry(RecipeParameterFormat.name(param.getName()), RecipeParameterFormat.value(param.getName(), param.getRawValue())));
             }
             return tooltip;
         }
