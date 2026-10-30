@@ -13,7 +13,7 @@ public class RecipeManagementRequest
 {
     private final Action action;
     private final SupportedRecipeExporter exporter;
-    /** Action argument: {"id": ...} for DELETE_ADDED, the removal filter for REMOVE and RESTORE, empty for LIST. */
+    /** Action argument: {"id": ...} for DELETE_ADDED, the removal filter for REMOVE and RESTORE, the replacement for REPLACE and CANCEL_REPLACEMENT, empty for LIST. */
     private final JsonObject payload;
 
     public RecipeManagementRequest(Action action, SupportedRecipeExporter exporter, JsonObject payload)
@@ -54,6 +54,10 @@ public class RecipeManagementRequest
         /** Remove existing recipes matching a filter (KubeJS only). */
         REMOVE,
         /** Cancel a removal (KubeJS only). */
-        RESTORE
+        RESTORE,
+        /** Replace an item in matching recipes (KubeJS only). */
+        REPLACE,
+        /** Cancel a replacement (KubeJS only). */
+        CANCEL_REPLACEMENT
     }
 }

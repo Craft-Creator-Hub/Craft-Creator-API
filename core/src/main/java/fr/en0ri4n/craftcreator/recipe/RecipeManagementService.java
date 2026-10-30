@@ -32,11 +32,14 @@ public class RecipeManagementService
                     : RecipeRequestFeedback.of(Feedback.INVALID_JSON_RECIPE, false);
             case REMOVE -> advancedExporter != null ? advancedExporter.removeRecipes(request.getPayload()) : RecipeRequestFeedback.of(Feedback.NOT_SUPPORTED, false);
             case RESTORE -> advancedExporter != null ? advancedExporter.restoreRemoval(request.getPayload()) : RecipeRequestFeedback.of(Feedback.NOT_SUPPORTED, false);
+            case REPLACE -> advancedExporter != null ? advancedExporter.addReplacement(request.getPayload()) : RecipeRequestFeedback.of(Feedback.NOT_SUPPORTED, false);
+            case CANCEL_REPLACEMENT -> advancedExporter != null ? advancedExporter.cancelReplacement(request.getPayload()) : RecipeRequestFeedback.of(Feedback.NOT_SUPPORTED, false);
         };
 
         return new RecipeManagementState(request.getExporter(),
                                          exporter.getAddedRecipesJson(),
                                          advancedExporter != null ? advancedExporter.getRemovals() : List.of(),
+                                         advancedExporter != null ? advancedExporter.getReplacements() : List.of(),
                                          advancedExporter != null,
                                          result == null ? null : result.getFeedback(),
                                          result == null || result.isSuccess());

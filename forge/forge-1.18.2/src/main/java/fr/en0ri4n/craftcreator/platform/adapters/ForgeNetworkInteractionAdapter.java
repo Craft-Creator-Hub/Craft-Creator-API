@@ -190,7 +190,7 @@ public class ForgeNetworkInteractionAdapter implements NetworkInteractionAdapter
         // Editing recipes writes into the server's datapacks and scripts: operators only
         RecipeManagementState state = player.hasPermissions(2)
                 ? RecipeManagementService.get().handle(request)
-                : new RecipeManagementState(request.getExporter(), List.of(), List.of(), false, Feedback.NO_PERMISSION, false);
+                : new RecipeManagementState(request.getExporter(), List.of(), List.of(), List.of(), false, Feedback.NO_PERMISSION, false);
 
         NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new RecipeManagementStatePacket(state));
     }

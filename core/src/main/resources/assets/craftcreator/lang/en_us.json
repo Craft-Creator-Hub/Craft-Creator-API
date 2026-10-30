@@ -241,6 +241,7 @@
   "craftcreator.screen.tutorial.page_2.title": "Datapack or KubeJS",
   "craftcreator.screen.tutorial.page_2.text": "The button at the top left of the GUI chooses where the recipe goes: MC for a datapack in your world, KJS for a KubeJS script.\nRun /reload to load new recipes.",
   "craftcreator.screen.tutorial.page_3.title": "Managing Recipes",
-  "craftcreator.screen.tutorial.page_3.text": "Open the recipe management screen with its key (K by default).\nAll: every recipe of the game, remove one with KubeJS.\nAdded: your recipes, delete the ones you don't want.\nRemoved: KubeJS removals, restore them.\nRemove recipes...: remove every recipe matching a filter (id, type, mod, input, output).",
-  "craftcreator.serializer.message.recipe.already_removed": "§eThis recipe is already removed"
+  "craftcreator.screen.tutorial.page_3.text": "Open the recipe management screen with its key (K by default).\nAll: every recipe of the game. Remove one with KubeJS, or replace one of its items.\nAdded: your recipes, delete the ones you don't want.\nReplaced and Removed: your KubeJS changes, cancel them anytime.\nReplace... and Remove... change every recipe matching a filter.",
+  "craftcreator.serializer.message.recipe.already_removed": "§eThis recipe is already removed",
+  "craftcreator.screen.replace_manager.title": "Replace Items in Recipes"
 }

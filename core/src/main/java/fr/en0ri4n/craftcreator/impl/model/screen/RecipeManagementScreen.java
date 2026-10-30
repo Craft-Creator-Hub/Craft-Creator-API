@@ -24,6 +24,7 @@ import fr.en0ri4n.craftcreator.api.ui.screen.ScreenData;
 import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreator;
 import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreators;
 import fr.en0ri4n.craftcreator.recipe.exporter.ModRecipeExporter;
+import fr.en0ri4n.craftcreator.recipe.RecipeFilters;
 import fr.en0ri4n.craftcreator.recipe.model.Recipe;
 import fr.en0ri4n.craftcreator.recipe.utils.RecipeEntry;
 import fr.en0ri4n.craftcreator.recipe.utils.RecipeInfos;
@@ -40,6 +41,7 @@ import java.util.Objects;
  * <ul>
  *     <li>All: every recipe of the game. Your recipes can be deleted, others removed with KubeJS</li>
  *     <li>Added: recipes added through the selected exporter, which can be deleted</li>
+ *     <li>Replaced: KubeJS item replacements, which can be cancelled</li>
  *     <li>Removed: KubeJS removals, which can be cancelled</li>
  * </ul>
  * Changes are made by the server and applied on the next /reload: until then, changed recipes are shown in red.<br>
@@ -54,11 +56,14 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
     private static final int TOP = 26;
     private static final int INFO_WIDTH = 110;
     private static final int PENDING_TINT = 0x50FF3030;
+    private static final int REPLACED_TINT = 0x403A7BD5;
+    private static final int REPLACED_TEXT = 0xFF7FA8F0;
 
     private final Map<Tab, CoreButton> tabButtons = new EnumMap<>(Tab.class);
     private CoreList<ListedItem> listElement;
     private CoreDropdown<SupportedRecipeExporter> exporterDropdown;
     private CoreButton actionButton;
+    private CoreButton replaceItemsButton;
     private Runnable action = () -> {};
 
     /** Panel right of the list, and the area inside it where the selected entry is shown. */
@@ -72,6 +77,7 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
     /** Recipes added through each exporter; an exporter is missing until the server answered. */
     private final Map<SupportedRecipeExporter, List<Recipe>> addedRecipes = new EnumMap<>(SupportedRecipeExporter.class);
     private List<JsonObject> removals = List.of();
+    private List<JsonObject> replacements = List.of();
     private boolean removalSupported = SupportedMod.isKubeJSLoaded();
     private String search = "";
 
@@ -92,7 +98,7 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         getSize().setHeight(screenHeight);
         tabButtons.clear();
 
-        int leftWidth = Math.max(170, Math.min(280, screenWidth * 35 / 100));
+        int leftWidth = Math.max(210, Math.min(300, screenWidth * 35 / 100));
         bottomBarY = screenHeight - MARGIN - BUTTON_HEIGHT;
         int rightX = MARGIN + leftWidth + MARGIN;
         int rightWidth = screenWidth - rightX - MARGIN;
@@ -124,17 +130,19 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
             }
         });
 
-        /* Right side: shortcuts, details, action */
-        int tutorialWidth = 60;
-        int removeScreenWidth = 110;
-        addElement(new CoreButton("open_remove_screen", screenWidth - MARGIN - removeScreenWidth, TOP, removeScreenWidth, BUTTON_HEIGHT, "Remove recipes...", this::openRemoveScreen, "Remove every recipe matching a filter (KubeJS)"));
-        addElement(new CoreButton("open_tutorial", screenWidth - MARGIN - removeScreenWidth - GAP - tutorialWidth, TOP, tutorialWidth, BUTTON_HEIGHT, "Tutorial", () -> getCurrentUiAdapter().openScreen(new TutorialScreen(this)), null));
+        /* Right side: tools, details, action */
+        int toolWidth = Math.min(90, (rightWidth - GAP * 2) / 3);
+        int toolX = screenWidth - MARGIN - toolWidth * 3 - GAP * 2;
+        addElement(new CoreButton("open_tutorial", toolX, TOP, toolWidth, BUTTON_HEIGHT, "Tutorial", () -> getCurrentUiAdapter().openScreen(new TutorialScreen(this)), null));
+        addElement(new CoreButton("open_replace_screen", toolX + toolWidth + GAP, TOP, toolWidth, BUTTON_HEIGHT, "Replace...", () -> openReplaceScreen(null), "Replace an item in many recipes (KubeJS)"));
+        addElement(new CoreButton("open_remove_screen", toolX + (toolWidth + GAP) * 2, TOP, toolWidth, BUTTON_HEIGHT, "Remove...", this::openRemoveScreen, "Remove every recipe matching a filter (KubeJS)"));
 
         int detailsY = TOP + BUTTON_HEIGHT + GAP;
         detailsPanel = Core2DBounds.of(rightX, detailsY, rightWidth, bottomBarY - GAP - detailsY);
         detailsArea = Core2DBounds.of(rightX + 8, detailsY + 6, rightWidth - 16, detailsPanel.getHeight() - 12);
 
         addElement(actionButton = new CoreButton("action", rightX, bottomBarY, 110, BUTTON_HEIGHT, "", () -> action.run(), null));
+        addElement(replaceItemsButton = new CoreButton("replace_items", detailsArea.getRight() - 80, detailsArea.getY(), 80, 14, "Replace items", this::replaceInSelected, "Replace an item of this recipe (KubeJS)"));
 
         int closeWidth = 60;
         addElement(new CoreButton("close", screenWidth - MARGIN - closeWidth, bottomBarY, closeWidth, BUTTON_HEIGHT, "Close", () -> getCurrentUiAdapter().closeScreen(), null));
@@ -171,6 +179,7 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         if(state.getExporter() == SupportedRecipeExporter.KUBE_JS)
         {
             removals = state.getRemovals();
+            replacements = state.getReplacements();
             removalSupported = state.isRemovalSupported();
         }
 
@@ -237,32 +246,14 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         return removals.stream().filter(filter -> matches(filter, recipe)).findFirst().orElse(null);
     }
 
-    /**
-     * Same keys as KubeJS removal filters: every key present must match.
-     */
     private static boolean matches(JsonObject filter, Recipe recipe)
     {
-        for(Map.Entry<String, JsonElement> e : filter.entrySet())
-        {
-            String value = e.getValue().getAsString();
-            boolean match = switch(e.getKey())
-            {
-                case "id" -> recipe.getId().toString().equals(value);
-                case "type" -> recipe.getType().toString().equals(value);
-                case "mod" -> recipe.getId().getNamespace().equals(value);
-                case "output" -> recipe.getOutputs().stream().anyMatch(output -> output.getId().toString().equals(value));
-                case "input" -> recipe.getInputs().stream().anyMatch(input -> acceptsInput(input, value));
-                default -> false;
-            };
-            if(!match) return false;
-        }
-        return true;
+        return RecipeFilters.matches(filter, recipe);
     }
 
-    private static boolean acceptsInput(RecipeEntry input, String value)
+    private List<JsonObject> getReplacementsAffecting(Recipe recipe)
     {
-        if(input.isTag()) return value.equals("#" + input.getId());
-        return input.getId().toString().equals(value) || input.getAlternatives().stream().anyMatch(id -> id.toString().equals(value));
+        return replacements.stream().filter(replacement -> RecipeFilters.affects(replacement, recipe)).toList();
     }
 
     /* ---------------- actions ---------------- */
@@ -282,7 +273,15 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         ListedItem selected = getSelected();
         actionButton.setVisible(selected != null);
         actionButton.setEnabled(true);
+        replaceItemsButton.setVisible(selected != null && selected.recipe() != null);
+        replaceItemsButton.setEnabled(removalSupported);
         if(selected == null) return;
+
+        if(selected.replacement() != null)
+        {
+            setAction("Cancel replacement", () -> sendRequest(new RecipeManagementRequest(RecipeManagementRequest.Action.CANCEL_REPLACEMENT, SupportedRecipeExporter.KUBE_JS, selected.replacement())));
+            return;
+        }
 
         if(selected.removal() != null)
         {
@@ -347,6 +346,17 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         sendRequest(new RecipeManagementRequest(RecipeManagementRequest.Action.DELETE_ADDED, recipeExporter, payload));
     }
 
+    private void replaceInSelected()
+    {
+        ListedItem selected = getSelected();
+        if(selected != null && selected.recipe() != null) openReplaceScreen(selected.recipe());
+    }
+
+    private void openReplaceScreen(Recipe recipe)
+    {
+        getCurrentUiAdapter().openScreen(new ReplaceRecipeScreen(this, recipe));
+    }
+
     private void openRemoveScreen()
     {
         getCurrentUiAdapter().openScreen(new RemoveRecipeScreen(this));
@@ -377,8 +387,9 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         ListedItem previous = getSelected();
         List<CoreList.Entry<ListedItem>> entries = switch(currentTab)
         {
-            case ALL -> gameRecipes.stream().<CoreList.Entry<ListedItem>>map(recipe -> new RecipeListEntry(recipe, getStatus(recipe))).toList();
-            case ADDED -> addedRecipes.getOrDefault(exporter, List.of()).stream().<CoreList.Entry<ListedItem>>map(recipe -> new RecipeListEntry(recipe, Status.OWN)).toList();
+            case ALL -> gameRecipes.stream().<CoreList.Entry<ListedItem>>map(recipe -> new RecipeListEntry(recipe, getStatus(recipe), !getReplacementsAffecting(recipe).isEmpty())).toList();
+            case ADDED -> addedRecipes.getOrDefault(exporter, List.of()).stream().<CoreList.Entry<ListedItem>>map(recipe -> new RecipeListEntry(recipe, Status.OWN, false)).toList();
+            case REPLACED -> replacements.stream().<CoreList.Entry<ListedItem>>map(ReplacementListEntry::new).toList();
             case REMOVED -> removals.stream().<CoreList.Entry<ListedItem>>map(RemovalListEntry::new).toList();
         };
         listElement.setEntries(entries);
@@ -386,6 +397,7 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         {
             case ALL -> "No recipes";
             case ADDED -> addedRecipes.containsKey(exporter) ? "No recipe added yet" : "Loading...";
+            case REPLACED -> removalSupported ? "No item replaced" : "Replacing items needs KubeJS";
             case REMOVED -> removalSupported ? "No recipe removed" : "Removing recipes needs KubeJS";
         });
         applySearch();
@@ -443,9 +455,15 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
             return;
         }
 
+        if(selected.replacement() != null)
+        {
+            renderReplacementDetails(ctx, selected.replacement());
+            return;
+        }
+
         Recipe recipe = selected.recipe();
         int y = detailsArea.getY(2);
-        getRenderAdapter().drawText(ctx, trim(recipe.getName(), detailsArea.getWidth()), detailsArea.getX(), y, CoreTheme.TEXT_BRIGHT);
+        getRenderAdapter().drawText(ctx, trim(recipe.getName(), detailsArea.getWidth() - 86), detailsArea.getX(), y, CoreTheme.TEXT_BRIGHT);
         getRenderAdapter().drawText(ctx, trim(recipe.getType().toString(), detailsArea.getWidth()), detailsArea.getX(), y + 11, CoreTheme.TEXT_MUTED);
 
         String statusText = currentTab == Tab.ALL ? switch(getStatus(recipe))
@@ -455,10 +473,17 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
             case OWN -> "Made with Craft Creator";
             case GAME -> null;
         } : null;
+        int statusY = y + 22;
         if(statusText != null)
         {
             int color = statusText.startsWith("Made") ? CoreTheme.ACCENT : CoreTheme.TEXT_ERROR;
-            getRenderAdapter().drawText(ctx, statusText, detailsArea.getRight() - getRenderAdapter().getTextWidth(statusText), y, color);
+            getRenderAdapter().drawText(ctx, statusText, detailsArea.getX(), statusY, color);
+            statusY += 11;
+        }
+        for(JsonObject replacement : getReplacementsAffecting(recipe))
+        {
+            getRenderAdapter().drawText(ctx, trim("Replaced " + RecipeFilters.describe(replacement), detailsArea.getWidth()), detailsArea.getX(), statusY, REPLACED_TEXT);
+            statusY += 11;
         }
 
         RecipeCreator<?> creator = RecipeCreators.getRecipeCreator(recipe.getType());
@@ -491,7 +516,7 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         if(parameters.isEmpty()) return;
 
         int x = detailsArea.getRight() - INFO_WIDTH;
-        int y = detailsArea.getY(32);
+        int y = detailsArea.getY(40);
         getRenderAdapter().drawText(ctx, "Parameters", x, y, CoreTheme.TEXT_TITLE);
         y += 14;
 
@@ -533,6 +558,35 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         getRenderAdapter().drawText(ctx, matching + " recipe(s) currently match", detailsArea.getX(), y + 8, CoreTheme.TEXT_MUTED);
     }
 
+    private void renderReplacementDetails(RenderContext ctx, JsonObject replacement)
+    {
+        int y = detailsArea.getY(2);
+        boolean input = replacement.get("kind").getAsString().equals("input");
+        getRenderAdapter().drawText(ctx, input ? "Replaced in inputs" : "Replaced in outputs", detailsArea.getX(), y, CoreTheme.TEXT_BRIGHT);
+        y += 16;
+        drawField(ctx, "from:", replacement.get("from").getAsString(), y);
+        y += 12;
+        drawField(ctx, "to:", replacement.get("to").getAsString(), y);
+        y += 18;
+
+        getRenderAdapter().drawText(ctx, "In recipes matching:", detailsArea.getX(), y, CoreTheme.TEXT_BRIGHT);
+        y += 14;
+        for(Map.Entry<String, JsonElement> e : replacement.getAsJsonObject("filter").entrySet())
+        {
+            drawField(ctx, e.getKey() + ":", e.getValue().getAsString(), y);
+            y += 12;
+        }
+
+        long affected = gameRecipes.stream().filter(recipe -> RecipeFilters.affects(replacement, recipe)).count();
+        getRenderAdapter().drawText(ctx, affected + " recipe(s) currently affected", detailsArea.getX(), y + 8, CoreTheme.TEXT_MUTED);
+    }
+
+    private void drawField(RenderContext ctx, String label, String value, int y)
+    {
+        getRenderAdapter().drawText(ctx, label, detailsArea.getX(8), y, CoreTheme.TEXT_MUTED);
+        getRenderAdapter().drawText(ctx, trim(value, detailsArea.getWidth() - 60), detailsArea.getX(56), y, CoreTheme.TEXT);
+    }
+
     private void drawCentered(RenderContext ctx, String text, int y, int color)
     {
         getRenderAdapter().drawText(ctx, text, detailsArea.getHorizontalCenter(getRenderAdapter().getTextWidth(text)), y, color);
@@ -566,7 +620,8 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
     private Preview getPreview(RecipeCreator<?> creator, Recipe recipe)
     {
         Core2DBounds size = creator.getContainerModel().getScreenDefinition().getBackgroundTextureSize();
-        int areaY = detailsArea.getY(28);
+        // Below the name, type, status and replacement lines
+        int areaY = detailsArea.getY(36 + 11 * getReplacementsAffecting(recipe).size());
         int areaHeight = detailsArea.getBottom() - 14 - areaY; // keep the last line for messages
         int areaWidth = detailsArea.getWidth() - (recipe.getInfos().getParameters().isEmpty() ? 0 : INFO_WIDTH + 8);
 
@@ -637,13 +692,14 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
     /* ---------------- list entries ---------------- */
 
     /**
-     * A row of the list: either a recipe or a KubeJS removal filter.
+     * A row of the list: a recipe, a KubeJS removal filter or a KubeJS replacement.
      */
-    public record ListedItem(Recipe recipe, JsonObject removal)
+    public record ListedItem(Recipe recipe, JsonObject removal, JsonObject replacement)
     {
         boolean matches(String search)
         {
             if(removal != null) return removal.toString().toLowerCase().contains(search);
+            if(replacement != null) return replacement.toString().toLowerCase().contains(search);
             return recipe.getName().toLowerCase().contains(search)
                     || recipe.getType().toString().contains(search)
                     || recipe.getEntries().stream().anyMatch(e -> e.getId().toString().contains(search));
@@ -653,11 +709,13 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
     private static class RecipeListEntry extends CoreList.Entry<ListedItem>
     {
         private final Status status;
+        private final boolean replaced;
 
-        private RecipeListEntry(Recipe recipe, Status status)
+        private RecipeListEntry(Recipe recipe, Status status, boolean replaced)
         {
-            super(recipe.getName(), new ListedItem(recipe, null), getIcon(recipe), null);
+            super(recipe.getName(), new ListedItem(recipe, null, null), getIcon(recipe), null);
             this.status = status;
+            this.replaced = replaced;
         }
 
         private boolean isPending()
@@ -668,7 +726,7 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         @Override
         protected int getTint()
         {
-            return isPending() ? PENDING_TINT : 0;
+            return isPending() ? PENDING_TINT : replaced ? REPLACED_TINT : 0;
         }
 
         @Override
@@ -698,6 +756,7 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
             tooltips.add("§7" + recipe.getType());
             if(status == Status.PENDING_REMOVAL) tooltips.add("§cRemoved, /reload to apply");
             if(status == Status.PENDING_DELETION) tooltips.add("§cDeleted, /reload to apply");
+            if(replaced) tooltips.add("§9Items replaced with KubeJS");
             recipe.getInputs().forEach(input -> tooltips.add("§6- " + (input.isTag() ? "#" : "") + input.getId()));
             recipe.getOutputs().forEach(output -> tooltips.add("§b> " + output.getId()));
             return tooltips;
@@ -708,7 +767,7 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
     {
         private RemovalListEntry(JsonObject filter)
         {
-            super(describe(filter), new ListedItem(null, filter), null);
+            super(describe(filter), new ListedItem(null, filter, null), null);
         }
 
         private static String describe(JsonObject filter)
@@ -719,10 +778,28 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         }
     }
 
+    private static class ReplacementListEntry extends CoreList.Entry<ListedItem>
+    {
+        private ReplacementListEntry(JsonObject replacement)
+        {
+            super(RecipeFilters.describe(replacement), new ListedItem(null, null, replacement), getIcon(replacement), null);
+        }
+
+        /**
+         * The new item, unless it's a tag.
+         */
+        private static Identifier getIcon(JsonObject replacement)
+        {
+            String to = replacement.get("to").getAsString();
+            return to.startsWith("#") ? null : Identifier.from(to);
+        }
+    }
+
     private enum Tab
     {
         ALL("All", "Every recipe of the game"),
         ADDED("Added", "Recipes added with Craft Creator"),
+        REPLACED("Replaced", "Items replaced with KubeJS"),
         REMOVED("Removed", "Recipes removed with KubeJS");
 
         private final String label;

@@ -20,17 +20,19 @@ public class RecipeManagementState
     private final SupportedRecipeExporter exporter;
     private final List<JsonObject> addedRecipes;
     private final List<JsonObject> removals;
+    private final List<JsonObject> replacements;
     /** Whether the exporter can remove existing recipes. */
     private final boolean removalSupported;
     /** Result of the action, null for LIST. */
     private final Feedback feedback;
     private final boolean success;
 
-    public RecipeManagementState(SupportedRecipeExporter exporter, List<JsonObject> addedRecipes, List<JsonObject> removals, boolean removalSupported, Feedback feedback, boolean success)
+    public RecipeManagementState(SupportedRecipeExporter exporter, List<JsonObject> addedRecipes, List<JsonObject> removals, List<JsonObject> replacements, boolean removalSupported, Feedback feedback, boolean success)
     {
         this.exporter = exporter;
         this.addedRecipes = List.copyOf(addedRecipes);
         this.removals = List.copyOf(removals);
+        this.replacements = List.copyOf(replacements);
         this.removalSupported = removalSupported;
         this.feedback = feedback;
         this.success = success;
@@ -42,6 +44,7 @@ public class RecipeManagementState
         obj.addProperty("exporter", exporter.name());
         obj.add("added", toArray(addedRecipes));
         obj.add("removals", toArray(removals));
+        obj.add("replacements", toArray(replacements));
         obj.addProperty("removalSupported", removalSupported);
         if(feedback != null) obj.addProperty("feedback", feedback.name());
         obj.addProperty("success", success);
@@ -54,6 +57,7 @@ public class RecipeManagementState
         return new RecipeManagementState(SupportedRecipeExporter.valueOf(obj.get("exporter").getAsString()),
                                          fromArray(obj.getAsJsonArray("added")),
                                          fromArray(obj.getAsJsonArray("removals")),
+                                         fromArray(obj.getAsJsonArray("replacements")),
                                          obj.get("removalSupported").getAsBoolean(),
                                          obj.has("feedback") ? Feedback.valueOf(obj.get("feedback").getAsString()) : null,
                                          obj.get("success").getAsBoolean());

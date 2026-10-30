@@ -17,6 +17,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Writes added and removed recipes into kubejs/server_scripts/craftcreator_recipes.js, one line per entry
@@ -25,6 +27,7 @@ import java.util.List;
  * onEvent('recipes', event => {
  *   event.custom({"type":"minecraft:smelting",...}).id('craftcreator:iron_ingot_from_smelting_1a2b3')
  *   event.remove({"id":"minecraft:stick"})
+ *   event.replaceInput({"input":"minecraft:stick"}, 'minecraft:stick', Ingredient.of('#minecraft:saplings'))
  * })
  * </pre>
  * Deleting a line removes the entry. Other lines written in the event are kept as they are.
@@ -43,6 +46,8 @@ public class KubeJsRecipeExporter extends AdvancedModRecipeExporter
     private static final String CUSTOM_PREFIX = "event.custom(";
     private static final String ID_PREFIX = ").id('" + CCReferences.MOD_ID + ":";
     private static final String REMOVE_PREFIX = "event.remove(";
+    /** event.replaceInput(filter, 'from', Ingredient.of('to')) or event.replaceOutput(filter, 'from', Item.of('to')) */
+    private static final Pattern REPLACE_PATTERN = Pattern.compile("^event\\.replace(Input|Output)\\((\\{.*})\\s*,\\s*'([^']+)'\\s*,\\s*(?:Ingredient|Item)\\.of\\('([^']+)'\\)\\)$");
 
     @Override
     public void loadInternal()
@@ -125,6 +130,51 @@ public class KubeJsRecipeExporter extends AdvancedModRecipeExporter
         return RecipeRequestFeedback.of(Feedback.KUBEJS_UPDATED, true);
     }
 
+    /* ---------------- replacements ---------------- */
+
+    @Override
+    public RecipeRequestFeedback addReplacement(JsonObject replacement)
+    {
+        if(!isValidReplacement(replacement)) return RecipeRequestFeedback.of(Feedback.INVALID_JSON_RECIPE, false);
+
+        List<Line> lines = readLines();
+        if(lines.stream().anyMatch(line -> line.kind() == Kind.REPLACED && line.json().equals(replacement)))
+            return RecipeRequestFeedback.of(Feedback.ALREADY_EXISTS, false);
+
+        lines.add(new Line(Kind.REPLACED, replacement, null));
+        if(!writeLines(lines)) return RecipeRequestFeedback.of(Feedback.KUBEJS_FILE_ERROR, false);
+        return RecipeRequestFeedback.of(Feedback.KUBEJS_UPDATED, true);
+    }
+
+    private static boolean isValidReplacement(JsonObject replacement)
+    {
+        if(!replacement.has("kind") || !replacement.has("filter") || !replacement.has("from") || !replacement.has("to")) return false;
+
+        String kind = replacement.get("kind").getAsString();
+        String to = replacement.get("to").getAsString();
+        // An output must be an item, and quotes would break the script line
+        return (kind.equals("input") || kind.equals("output") && !to.startsWith("#"))
+                && replacement.get("filter").isJsonObject() && replacement.getAsJsonObject("filter").size() > 0
+                && !replacement.get("from").getAsString().contains("'") && !to.contains("'");
+    }
+
+    @Override
+    public List<JsonObject> getReplacements()
+    {
+        return readLines().stream().filter(line -> line.kind() == Kind.REPLACED).map(Line::json).toList();
+    }
+
+    @Override
+    public RecipeRequestFeedback cancelReplacement(JsonObject replacement)
+    {
+        List<Line> lines = readLines();
+        if(!lines.removeIf(line -> line.kind() == Kind.REPLACED && line.json().equals(replacement)))
+            return RecipeRequestFeedback.of(Feedback.DO_NOT_EXISTS, false);
+
+        if(!writeLines(lines)) return RecipeRequestFeedback.of(Feedback.KUBEJS_FILE_ERROR, false);
+        return RecipeRequestFeedback.of(Feedback.KUBEJS_UPDATED, true);
+    }
+
     /* ---------------- script file ---------------- */
 
     private enum Kind
@@ -133,6 +183,8 @@ public class KubeJsRecipeExporter extends AdvancedModRecipeExporter
         ADDED,
         /** event.remove line; json is the filter */
         REMOVED,
+        /** event.replaceInput or event.replaceOutput line; json is the replacement */
+        REPLACED,
         /** Any other line of the event, kept as written */
         OTHER
     }
@@ -155,6 +207,7 @@ public class KubeJsRecipeExporter extends AdvancedModRecipeExporter
             {
                 case ADDED -> CUSTOM_PREFIX + compact(withoutIdAndName(json)) + ID_PREFIX + json.get("name").getAsString() + "')";
                 case REMOVED -> REMOVE_PREFIX + compact(json) + ")";
+                case REPLACED -> replacedScript(json);
                 case OTHER -> raw;
             };
         }
@@ -194,10 +247,28 @@ public class KubeJsRecipeExporter extends AdvancedModRecipeExporter
         return lines;
     }
 
+    private static String replacedScript(JsonObject replacement)
+    {
+        boolean input = replacement.get("kind").getAsString().equals("input");
+        return "event.replace" + (input ? "Input" : "Output") + "(" + compact(replacement.getAsJsonObject("filter")) + ", '"
+                + replacement.get("from").getAsString() + "', " + (input ? "Ingredient" : "Item") + ".of('" + replacement.get("to").getAsString() + "'))";
+    }
+
     private static Line parseLine(String line)
     {
         try
         {
+            Matcher replaceMatcher = REPLACE_PATTERN.matcher(line);
+            if(replaceMatcher.matches())
+            {
+                JsonObject replacement = new JsonObject();
+                replacement.addProperty("kind", replaceMatcher.group(1).toLowerCase());
+                replacement.add("filter", GsonProvider.compactGson().fromJson(replaceMatcher.group(2), JsonObject.class));
+                replacement.addProperty("from", replaceMatcher.group(3));
+                replacement.addProperty("to", replaceMatcher.group(4));
+                return new Line(Kind.REPLACED, replacement, null);
+            }
+
             int idStart = line.lastIndexOf(ID_PREFIX);
             if(line.startsWith(CUSTOM_PREFIX) && idStart > 0 && line.endsWith("')"))
             {

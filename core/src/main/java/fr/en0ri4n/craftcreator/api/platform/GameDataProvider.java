@@ -12,6 +12,8 @@ public interface GameDataProvider
 {
     List<Identifier> getItemIds();
 
+    List<Identifier> getItemTagIds();
+
     List<String> getModIds();
 
     List<Identifier> getRecipeTypeIds();

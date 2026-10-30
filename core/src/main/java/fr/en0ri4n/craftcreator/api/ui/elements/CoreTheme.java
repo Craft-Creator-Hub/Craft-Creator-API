@@ -32,6 +32,26 @@ public final class CoreTheme
     public static final int TEXT_SUCCESS = 0xFF7BE07B;
     public static final int TEXT_TITLE = 0xFFFFC94A;
 
+    private static final int ARROW_HALF_WIDTH = 3;
+
+    /**
+     * Draw a small triangle pointing down or up, made of rectangles (the font has no arrow glyphs).
+     *
+     * @param centerX x of the tip
+     * @param centerY vertical center of the triangle
+     */
+    public static void drawArrow(RenderAdapter adapter, RenderContext ctx, int centerX, int centerY, boolean down, int color)
+    {
+        int rows = ARROW_HALF_WIDTH + 1;
+        int top = centerY - rows / 2;
+        for(int row = 0; row < rows; row++)
+        {
+            // Widest row at the top for a down arrow, at the bottom for an up arrow
+            int halfWidth = down ? ARROW_HALF_WIDTH - row : row;
+            adapter.drawRect(ctx, centerX - halfWidth, top + row, halfWidth * 2 + 1, 1, color);
+        }
+    }
+
     /**
      * Draw a recessed box: 1px border, a darker top/left shadow and the inset color.
      */

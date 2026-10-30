@@ -33,6 +33,14 @@ public class ForgeGameDataProvider implements GameDataProvider
     }
 
     @Override
+    public List<Identifier> getItemTagIds()
+    {
+        var tags = ForgeRegistries.ITEMS.tags();
+        if(tags == null) return List.of();
+        return tags.getTagNames().map(tag -> toCore(tag.location())).sorted(Comparator.comparing(Identifier::toString)).toList();
+    }
+
+    @Override
     public List<String> getModIds()
     {
         return ModList.get().getMods().stream().map(IModInfo::getModId).sorted().toList();
