@@ -4,9 +4,9 @@ import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeExporter;
 import fr.en0ri4n.craftcreator.api.net.MakeRecipeRequestData;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
-import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.api.ui.elements.Core2DBounds;
+import fr.en0ri4n.craftcreator.api.ui.elements.CoreButton;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreTheme;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreButtonWidgetList;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreDropdown;
@@ -25,9 +25,11 @@ public abstract class RecipeCreatorContainerScreenDefinition<T extends RecipeCre
     private static final int TOOLBAR_GAP = 2;
     private static final int TOOLBAR_PADDING = 4;
     private static final int TOOLBAR_SPACING = 4;
+    private static final int TOOLBAR_BUTTONS = 3;
     /** Fits the widest exporter label, "KJS" */
     private static final int TOOLBAR_BUTTON_WIDTH = 26;
-    private static final int TITLE_TAB_HEIGHT = 21;
+    /** Distance between the title and the top of the GUI */
+    private static final int TITLE_GAP = 11;
 
     public RecipeCreatorContainerScreenDefinition(ContainerModel<T> parent, T behavior, Identifier id, String title)
     {
@@ -37,7 +39,7 @@ public abstract class RecipeCreatorContainerScreenDefinition<T extends RecipeCre
     @Override
     public void initElements(int screenWidth, int screenHeight)
     {
-        // Toolbar on the right of the GUI, so nothing covers the texture: exporter, then export
+        // Toolbar on the right of the GUI, so nothing covers the texture: exporter, export, then json preview
         addElement(recipeTypeDropdown = new CoreDropdown<>("recipe_type_dropdown", getToolbarX(), getGuiSize().getY(TOOLBAR_PADDING), TOOLBAR_BUTTON_WIDTH, 20, true, Arrays.stream(SupportedRecipeExporter.values()).toList(), 0,
                 "Recipe Type", this::onRecipeTypeChanged) {
             @Override
@@ -51,8 +53,10 @@ public abstract class RecipeCreatorContainerScreenDefinition<T extends RecipeCre
         });
         //addElement(new RecipeSettingsButton("recipe_settings_button", getRecipeSettingsButtonBounds(), this::openRecipeSettingsScreen, "Recipe Settings"));
         addElement(new ExportButton("export_button", getExportButtonBounds(), this::exportRecipe, "Export Recipe"));
+        addElement(new CoreButton("json_button", getToolbarX(), getGuiSize().getY(TOOLBAR_PADDING + (20 + TOOLBAR_SPACING) * 2), TOOLBAR_BUTTON_WIDTH, 20,
+                                  "{ }", this::previewJson, "Show the recipe's JSON"));
 
-        addElement(settingsList = new CoreButtonWidgetList("recipe_settings", getGuiSize().getX(-120), getGuiSize().getY(), 120, 100, Core2DBounds.ofSize(20, 20), Identifier.fromMod("textures/gui/widgets/settings.png"), "Recipe Settings"));
+        addElement(settingsList = new CoreButtonWidgetList("recipe_settings", getGuiSize().getX(-130), getGuiSize().getY(), 130, 150, Core2DBounds.ofSize(20, 20), Identifier.fromMod("textures/gui/widgets/settings.png"), "Recipe Settings"));
         settingsList.setVisible(hasRecipeSettings());
         addSettings();
     }
@@ -91,45 +95,27 @@ public abstract class RecipeCreatorContainerScreenDefinition<T extends RecipeCre
     {
         // Toolbar panel, attached to the GUI's right side
         CoreScreenDefinition.renderTextureWithSize(ctx, GUI_TEXTURE, getGuiSize().getRight() + TOOLBAR_GAP, getGuiSize().getY(),
-                                                   TOOLBAR_BUTTON_WIDTH + TOOLBAR_PADDING * 2, 40 + TOOLBAR_SPACING + TOOLBAR_PADDING * 2, false, false);
-        if(showsTitleTab())
-        {
-            // Title tab, going under the GUI's top edge so it looks attached
-            CoreScreenDefinition.renderTextureWithSize(ctx, GUI_TEXTURE, getGuiSize().getX(), getTitleTabY(), getTitleTabWidth(), TITLE_TAB_HEIGHT + 4, false, false);
-        }
+                                                   TOOLBAR_BUTTON_WIDTH + TOOLBAR_PADDING * 2, TOOLBAR_BUTTONS * 20 + (TOOLBAR_BUTTONS - 1) * TOOLBAR_SPACING + TOOLBAR_PADDING * 2, false, false);
     }
 
     /**
-     * Title on a tab above the GUI, with the item of the recipe creator.
+     * Title centered above the GUI, in full, without background.
      */
     @Override
     protected void renderTitle(RenderContext ctx)
     {
-        if(!showsTitleTab()) return;
-        Identifier icon = getTitleIcon();
-        int x = getGuiSize().getX();
-        int y = getTitleTabY();
-        if(icon != null)
-            getRenderAdapter().drawItem(ctx, new CoreItemStack(icon, 1), x + 4, y + 3, 1F);
-        getRenderAdapter().drawText(ctx, translateToString(getTitle()), x + 6 + (icon == null ? 0 : 18), y + 7, CoreTheme.TEXT_TITLE);
+        if(!showsTitleAbove()) return;
+        String title = translateToString(getTitle());
+        int x = getGuiSize().getHorizontalCenter(getRenderAdapter().getTextWidth(title));
+        getRenderAdapter().drawText(ctx, title, x, getGuiSize().getY() - TITLE_GAP, CoreTheme.TEXT_BRIGHT);
     }
 
     /**
-     * @return whether the title is drawn on a tab above the GUI; false when the GUI shows it itself
+     * @return whether the title is drawn above the GUI; false when the GUI shows it itself
      */
-    protected boolean showsTitleTab()
+    protected boolean showsTitleAbove()
     {
         return true;
-    }
-
-    private int getTitleTabY()
-    {
-        return getGuiSize().getY() - TITLE_TAB_HEIGHT;
-    }
-
-    private int getTitleTabWidth()
-    {
-        return getRenderAdapter().getTextWidth(translateToString(getTitle())) + (getTitleIcon() == null ? 0 : 18) + 12;
     }
 
     /**
@@ -157,6 +143,14 @@ public abstract class RecipeCreatorContainerScreenDefinition<T extends RecipeCre
     private void onRecipeTypeChanged(SupportedRecipeExporter recipeExporter)
     {
         getScreenData().getBehavior().setSerializationType(recipeExporter);
+    }
+
+    /**
+     * Ask the server for the recipe's json without exporting it: it opens in the json preview screen.
+     */
+    protected void previewJson()
+    {
+        CraftCreatorAPI.get().getPlatform().getNetworkInteractionAdapter().sendMakeRecipeRequestToServer(new MakeRecipeRequestData(getParentContainerModel().getBlockEntityPos(), getId(), true));
     }
 
     protected void exportRecipe()

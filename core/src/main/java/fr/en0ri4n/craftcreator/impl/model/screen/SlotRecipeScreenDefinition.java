@@ -1,5 +1,6 @@
 package fr.en0ri4n.craftcreator.impl.model.screen;
 
+import fr.en0ri4n.craftcreator.api.CCReferences;
 import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.api.ui.elements.Core2DBounds;
@@ -66,7 +67,7 @@ public class SlotRecipeScreenDefinition extends RecipeCreatorContainerScreenDefi
     }
 
     @Override
-    protected boolean showsTitleTab()
+    protected boolean showsTitleAbove()
     {
         return type.getTitlePosition() == null;
     }
@@ -107,7 +108,7 @@ public class SlotRecipeScreenDefinition extends RecipeCreatorContainerScreenDefi
                 // Icon style: the variant's item instead of its label
                 if(!isVisible() || getSelectedValue() == null) return;
                 CoreButtonStyle.State state = CoreButtonStyle.State.of(true, false, isMouseOver(mouseX, mouseY));
-                CoreButtonStyle.draw(ctx, getBounds(), state);
+                // CoreButtonStyle.draw(ctx, getBounds(), state);
                 getRenderAdapter().drawItem(ctx, new CoreItemStack(getSelectedValue().icon(), 1),
                                             getBounds().getHorizontalCenter(16), CoreButtonStyle.textY(getBounds(), 16, state), 1F);
             }
@@ -218,7 +219,7 @@ public class SlotRecipeScreenDefinition extends RecipeCreatorContainerScreenDefi
             if(decoration instanceof SlotRecipeType.Arrow arrow)
                 drawArrow(ctx, getGuiSize().getX(arrow.x()), getGuiSize().getY(arrow.y()), arrow.length(), arrow.down());
             else if(decoration instanceof SlotRecipeType.Label label)
-                drawText(ctx, translateToString(label.text()), label.x(), label.y(), label.color());
+                drawText(ctx, labelText(label.text()), label.x(), label.y(), label.color());
         }
     }
 
@@ -272,6 +273,16 @@ public class SlotRecipeScreenDefinition extends RecipeCreatorContainerScreenDefi
             tooltip.render(ctx, mouseX, mouseY);
             return;
         }
+    }
+
+    /**
+     * A label's translation, or the label itself when it's plain text (e.g. a step number): an untranslated key
+     * would show as "craftcreator.1".
+     */
+    private static String labelText(String text)
+    {
+        String translated = translateToString(text);
+        return translated.equals(CCReferences.MOD_ID + "." + text) ? text : translated;
     }
 
     /**
