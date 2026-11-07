@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Every recipe type made from slots and values. Each one gets its own recipe creator block.<br>
@@ -442,31 +443,342 @@ public class SlotRecipeTypes
             });
 
     /* ---------------- Create ---------------- */
+    // The GUI textures hold the panel and the slots; arrows and machines are decorations drawn by the screen
 
-    private static SlotRecipeType create(String name, String icon, int defaultTime)
+    private static final String CREATE_FIELD = "screen.create_recipe_creator.field.";
+    private static final int CREATE_OUTPUTS_X = 112;
+    private static final int[] CREATE_OUTPUTS = {CREATE_OUTPUTS_X, 29, CREATE_OUTPUTS_X + 18, 29, CREATE_OUTPUTS_X, 47, CREATE_OUTPUTS_X + 18, 47};
+
+    private static SlotRecipeType.Builder create(String name, String icon)
     {
-        return withChances(SlotRecipeType.builder(SupportedMod.CREATE, name)
-                        .icon(icon)
-                        .gui(256, 256, 256, 48, 174)
-                        .slot(SlotSpec.input("input", 55, 74))
-                        .outputs("output", 168, 56, 190, 56, 168, 78, 190, 78)
-                        .param(ParamSpec.integer("processing_time", FIELD + "processing_time", defaultTime)), 4)
+        return SlotRecipeType.builder(SupportedMod.CREATE, name)
+                .icon(icon)
+                .gui(256, 176, 166, 8, 84)
+                .titleAt(8, 6);
+    }
+
+    /**
+     * One input, an arrow with the machines above it and up to 4 outputs with chances: crushing, milling, washing...
+     */
+    private static SlotRecipeType.Builder createProcessing(String name, String icon, String... machines)
+    {
+        SlotRecipeType.Builder builder = withChances(create(name, icon), 4)
+                .slot(SlotSpec.input("input", 30, 38))
+                .arrow(52, 42, 48)
+                .outputs("output", CREATE_OUTPUTS);
+        int x = 76 - machines.length * 9;
+        for(String machine : machines)
+        {
+            builder.item(machine, x, 21);
+            x += 18;
+        }
+        return builder;
+    }
+
+    /**
+     * Create ingredients have no count: a stack of n items is written n times, like Create's own recipes.
+     */
+    private static JsonArray createIngredients(SlotRecipeContext ctx, List<RecipeEntry> entries)
+    {
+        JsonArray array = new JsonArray();
+        for(RecipeEntry entry : entries)
+            for(int i = 0; i < Math.max(1, entry.getCount()); i++)
+                array.add(ctx.ingredient(entry));
+        return array;
+    }
+
+    private static JsonArray createIngredient(SlotRecipeContext ctx, String slot)
+    {
+        JsonArray array = new JsonArray();
+        if(ctx.has(slot)) array.add(ctx.ingredient(ctx.get(slot)));
+        return array;
+    }
+
+    /** Ingredients, results with chances and the processing time when the type has one (0 = Create's default). */
+    private static void writeProcessing(SlotRecipeContext ctx, JsonObject out)
+    {
+        out.add("ingredients", createIngredient(ctx, "input"));
+        out.add("results", thermalResults(ctx, "output"));
+        if(ctx.getType().getParam("processing_time").isPresent())
+            ctx.addIfPositive(out, "processingTime", "processing_time");
+    }
+
+    private static ParamSpec processingTime(int defaultTime)
+    {
+        return ParamSpec.integer("processing_time", FIELD + "processing_time", defaultTime);
+    }
+
+    public static final SlotRecipeType CRUSHING = createProcessing("crushing", "create:crushing_wheel", "create:crushing_wheel")
+            .param(processingTime(250))
+            .writer(SlotRecipeTypes::writeProcessing);
+
+    public static final SlotRecipeType MILLING = createProcessing("milling", "create:millstone", "create:millstone")
+            .param(processingTime(100))
+            .writer(SlotRecipeTypes::writeProcessing);
+
+    public static final SlotRecipeType CUTTING = createProcessing("cutting", "create:mechanical_saw", "create:mechanical_saw")
+            .param(processingTime(100))
+            .writer(SlotRecipeTypes::writeProcessing);
+
+    public static final SlotRecipeType PRESSING = createProcessing("pressing", "create:mechanical_press", "create:mechanical_press", "create:depot")
+            .writer(SlotRecipeTypes::writeProcessing);
+
+    /** Bulk washing: an encased fan blowing through water. */
+    public static final SlotRecipeType SPLASHING = createProcessing("splashing", "create:encased_fan", "create:encased_fan", "minecraft:water_bucket")
+            .writer(SlotRecipeTypes::writeProcessing);
+
+    /** Bulk haunting: an encased fan blowing through soul fire. */
+    public static final SlotRecipeType HAUNTING = createProcessing("haunting", "create:encased_fan", "create:encased_fan", "minecraft:soul_campfire")
+            .writer(SlotRecipeTypes::writeProcessing);
+
+    public static final SlotRecipeType SANDPAPER_POLISHING = createProcessing("sandpaper_polishing", "create:sand_paper", "create:sand_paper")
+            .writer(SlotRecipeTypes::writeProcessing);
+
+    /**
+     * The held item is applied to the input: by a deployer, or by a player for item application.
+     */
+    private static SlotRecipeType createApplying(String name, String icon, String machine)
+    {
+        return withChances(create(name, icon), 4)
+                .slot(SlotSpec.input("held", 30, 29))
+                .slot(SlotSpec.input("input", 30, 47))
+                .arrow(52, 42, 48)
+                .item(machine, 68, 21)
+                .outputs("output", CREATE_OUTPUTS)
+                .param(ParamSpec.bool("keep_held_item", CREATE_FIELD + "keep_held_item", false))
                 .writer((ctx, out) ->
                 {
-                    JsonArray ingredients = new JsonArray();
-                    ingredients.add(ctx.ingredient(ctx.get("input")));
+                    JsonArray ingredients = createIngredient(ctx, "input");
+                    ingredients.addAll(createIngredient(ctx, "held"));
                     out.add("ingredients", ingredients);
                     out.add("results", thermalResults(ctx, "output"));
-                    out.addProperty("processingTime", ctx.paramInt("processing_time"));
+                    if(ctx.paramBool("keep_held_item")) out.addProperty("keepHeldItem", true);
                 });
     }
 
-    public static final SlotRecipeType CRUSHING = create("crushing", "create:crushing_wheel", 250);
-    public static final SlotRecipeType CUTTING = create("cutting", "create:mechanical_saw", 100);
+    public static final SlotRecipeType DEPLOYING = createApplying("deploying", "create:deployer", "create:deployer");
+    public static final SlotRecipeType ITEM_APPLICATION = createApplying("item_application", "create:andesite_casing", "create:andesite_casing");
+
+    /** A spout pours a fluid on the input. */
+    public static final SlotRecipeType FILLING = create("filling", "create:spout")
+            .slot(SlotSpec.input("fluid", 30, 29).as(SlotSpec.Kind.FLUID))
+            .slot(SlotSpec.input("input", 30, 47))
+            .arrow(52, 42, 48)
+            .item("create:spout", 68, 21)
+            .slot(SlotSpec.output("output_0", 121, 38))
+            .param(ParamSpec.integer("fluid_amount", FIELD + "fluid_amount", 250))
+            .writer((ctx, out) ->
+            {
+                JsonArray ingredients = createIngredient(ctx, "input");
+                if(ctx.has("fluid")) ingredients.add(ctx.fluid(ctx.get("fluid"), ctx.paramInt("fluid_amount")));
+                out.add("ingredients", ingredients);
+                out.add("results", ctx.items(ctx.all("output")));
+            });
+
+    /** An item drain empties the input into an item and a fluid. */
+    public static final SlotRecipeType EMPTYING = create("emptying", "create:item_drain")
+            .slot(SlotSpec.input("input", 30, 38))
+            .arrow(52, 42, 48)
+            .item("create:item_drain", 68, 21)
+            .slot(SlotSpec.output("output_0", 121, 29))
+            .slot(SlotSpec.output("fluid_output", 121, 47).as(SlotSpec.Kind.FLUID))
+            .param(ParamSpec.integer("fluid_amount", FIELD + "fluid_amount", 250))
+            .writer((ctx, out) ->
+            {
+                out.add("ingredients", createIngredient(ctx, "input"));
+                JsonArray results = ctx.items(ctx.all("output"));
+                if(ctx.has("fluid_output")) results.add(ctx.fluid(ctx.get("fluid_output"), ctx.paramInt("fluid_amount")));
+                out.add("results", results);
+            });
+
+    /**
+     * Recipes made in a basin: up to 9 items and 2 fluids in, 4 items and a fluid out, with a heat level.
+     */
+    private static SlotRecipeType createBasin(String name, String icon, String machine)
+    {
+        return withChances(create(name, icon), 4)
+                .inputs("input", 8, 20, 26, 20, 44, 20, 8, 38, 26, 38, 44, 38, 8, 56, 26, 56, 44, 56)
+                .slot(SlotSpec.input("fluid_in_0", 66, 29).as(SlotSpec.Kind.FLUID))
+                .slot(SlotSpec.input("fluid_in_1", 66, 47).as(SlotSpec.Kind.FLUID))
+                .arrow(87, 42, 21)
+                .item(machine, 89, 21)
+                .paramIcon("heat", 89, 57, Map.of("heated", "create:blaze_burner", "superheated", "create:blaze_cake"))
+                .outputs("output", CREATE_OUTPUTS)
+                .slot(SlotSpec.output("fluid_out_0", 152, 38).as(SlotSpec.Kind.FLUID))
+                .param(ParamSpec.choice("heat", CREATE_FIELD + "heat", "none", "heated", "superheated"))
+                .param(ParamSpec.integer("fluid_amount_0", CREATE_FIELD + "fluid_amount_0", 250))
+                .param(ParamSpec.integer("fluid_amount_1", CREATE_FIELD + "fluid_amount_1", 250))
+                .param(ParamSpec.integer("output_fluid_amount", CREATE_FIELD + "output_fluid_amount", 250))
+                .param(ParamSpec.integer("processing_time", CREATE_FIELD + "processing_time", 0))
+                .writer((ctx, out) ->
+                {
+                    JsonArray ingredients = createIngredients(ctx, ctx.all("input"));
+                    for(int i = 0; i < 2; i++)
+                        if(ctx.has("fluid_in_" + i))
+                            ingredients.add(ctx.fluid(ctx.get("fluid_in_" + i), ctx.paramInt("fluid_amount_" + i)));
+                    out.add("ingredients", ingredients);
+
+                    JsonArray results = thermalResults(ctx, "output");
+                    if(ctx.has("fluid_out_0")) results.add(ctx.fluid(ctx.get("fluid_out_0"), ctx.paramInt("output_fluid_amount")));
+                    out.add("results", results);
+
+                    if(!ctx.param("heat").equals("none")) out.addProperty("heatRequirement", ctx.param("heat"));
+                    ctx.addIfPositive(out, "processingTime", "processing_time");
+                });
+    }
+
+    public static final SlotRecipeType MIXING = createBasin("mixing", "create:mechanical_mixer", "create:mechanical_mixer");
+    public static final SlotRecipeType COMPACTING = createBasin("compacting", "create:mechanical_press", "create:mechanical_press");
+
+    /** Largest mechanical crafting grid, kept small enough for the GUI to fit the screen at GUI scale 4. */
+    private static final int CRAFTER_SIZE = 7;
+
+    /** Mechanical crafters: shaped recipes on a grid up to 7x7. */
+    public static final SlotRecipeType MECHANICAL_CRAFTING = mechanicalCrafting();
+
+    private static SlotRecipeType mechanicalCrafting()
+    {
+        int[] positions = new int[CRAFTER_SIZE * CRAFTER_SIZE * 2];
+        for(int i = 0; i < CRAFTER_SIZE * CRAFTER_SIZE; i++)
+        {
+            positions[i * 2] = 8 + (i % CRAFTER_SIZE) * 18;
+            positions[i * 2 + 1] = 20 + (i / CRAFTER_SIZE) * 18;
+        }
+        return SlotRecipeType.builder(SupportedMod.CREATE, "mechanical_crafting")
+                .icon("create:mechanical_crafter")
+                .gui(256, 194, 242, 17, 160)
+                .titleAt(8, 6)
+                .inputs("input", positions)
+                .arrow(142, 78, 22)
+                .item("create:mechanical_crafter", 145, 57)
+                .slot(SlotSpec.output("output", 170, 74))
+                .param(ParamSpec.bool("accept_mirrored", CREATE_FIELD + "accept_mirrored", true))
+                .inputReader(json -> readPatternInputs(json, CRAFTER_SIZE))
+                .writer((ctx, out) ->
+                {
+                    CraftingGrid grid = new CraftingGrid(CRAFTER_SIZE, CRAFTER_SIZE);
+                    ctx.all("input").forEach(input -> grid.set(input.getSlot() % CRAFTER_SIZE, input.getSlot() / CRAFTER_SIZE, input));
+                    RecipeSerializer.PatternAndKey patternAndKey = RecipeSerializer.buildPatternAndKey(grid);
+                    out.add("pattern", patternAndKey.pattern());
+                    out.add("key", patternAndKey.key());
+                    out.add("result", ctx.result(ctx.get("output")));
+                    out.addProperty("acceptMirrored", ctx.paramBool("accept_mirrored"));
+                });
+    }
+
+    private static final int ASSEMBLY_STEPS = 5;
+    private static final int ASSEMBLY_STEP_X = 46;
+    private static final int ASSEMBLY_STEP_SPACING = 22;
+
+    /**
+     * Sequenced assembly: the input goes through up to 5 steps (deploying, filling, pressing or cutting) as the
+     * transitional item, a number of times, then gives one of the outputs, picked by weight.
+     */
+    public static final SlotRecipeType SEQUENCED_ASSEMBLY = sequencedAssembly();
+
+    private static SlotRecipeType sequencedAssembly()
+    {
+        SlotRecipeType.Builder builder = withWeights(SlotRecipeType.builder(SupportedMod.CREATE, "sequenced_assembly")
+                .icon("create:precision_mechanism")
+                .gui(256, 176, 194, 8, 112)
+                .titleAt(8, 6)
+                .slot(SlotSpec.input("input", 10, 34))
+                .arrow(29, 38, 14)
+                .slot(SlotSpec.input("transitional", 10, 72))
+                .arrow(30, 76, 76)
+                .outputs("output", 112, 63, 130, 63, 112, 81, 130, 81)
+                .param(ParamSpec.integer("loops", CREATE_FIELD + "loops", 1)));
+
+        Map<String, String> stepIcons = Map.of("deploying", "create:deployer", "filling", "create:spout",
+                                                "pressing", "create:mechanical_press", "cutting", "create:mechanical_saw");
+        for(int i = 0; i < ASSEMBLY_STEPS; i++)
+        {
+            int x = ASSEMBLY_STEP_X + i * ASSEMBLY_STEP_SPACING;
+            builder.slot(SlotSpec.input("step_" + i, x, 34))
+                    .paramIcon("step_type_" + i, x, 16, stepIcons)
+                    .label(String.valueOf(i + 1), x + 5, 54, 0xFFE6D3A3);
+            // The first step is set by default so a new recipe already does something
+            builder.param(i == 0
+                                  ? ParamSpec.choice("step_type_" + i, CREATE_FIELD + "step_type_" + i, "deploying", "filling", "pressing", "cutting", "none")
+                                  : ParamSpec.choice("step_type_" + i, CREATE_FIELD + "step_type_" + i, "none", "deploying", "filling", "pressing", "cutting"));
+            builder.param(ParamSpec.integer("step_amount_" + i, CREATE_FIELD + "step_amount_" + i, 250));
+        }
+
+        return builder.writer((ctx, out) ->
+        {
+            if(ctx.has("input")) out.add("ingredient", ctx.ingredient(ctx.get("input")));
+            RecipeEntry transitional = ctx.has("transitional") ? ctx.get("transitional") : ctx.get("output_0");
+            JsonObject transitionalItem = new JsonObject();
+            if(transitional != null) transitionalItem.addProperty("item", transitional.getId().toString());
+            out.add("transitionalItem", transitionalItem);
+
+            JsonArray sequence = new JsonArray();
+            for(int i = 0; i < ASSEMBLY_STEPS; i++)
+            {
+                String stepType = ctx.param("step_type_" + i);
+                if(!stepType.equals("none"))
+                    sequence.add(assemblyStep(ctx, i, stepType, transitionalItem));
+            }
+            out.add("sequence", sequence);
+
+            // Create uses the chances of sequenced assembly results as weights
+            out.add("results", thermalResults(ctx, "output"));
+            out.addProperty("loops", Math.max(1, ctx.paramInt("loops")));
+        });
+    }
+
+    private static JsonObject assemblyStep(SlotRecipeContext ctx, int index, String stepType, JsonObject transitionalItem)
+    {
+        JsonObject step = new JsonObject();
+        step.addProperty("type", "create:" + stepType);
+
+        JsonArray ingredients = new JsonArray();
+        ingredients.add(transitionalItem.deepCopy());
+        String slot = "step_" + index;
+        if(stepType.equals("deploying") && ctx.has(slot))
+            ingredients.add(ctx.ingredient(ctx.get(slot)));
+        if(stepType.equals("filling"))
+        {
+            RecipeEntry fluid = ctx.fluidOf(slot);
+            if(fluid != null) ingredients.add(ctx.fluid(fluid, ctx.paramInt("step_amount_" + index)));
+        }
+        step.add("ingredients", ingredients);
+
+        JsonArray results = new JsonArray();
+        results.add(transitionalItem.deepCopy());
+        step.add("results", results);
+        return step;
+    }
+
+    private static SlotRecipeType.Builder withWeights(SlotRecipeType.Builder builder)
+    {
+        for(int i = 0; i < 4; i++)
+            builder.param(ParamSpec.decimal("chance_" + i, CREATE_FIELD + "weight_" + i, 1.0));
+        return builder;
+    }
+
+    /**
+     * Inputs of a shaped pattern with their slot, on a square grid of the given size.
+     */
+    private static List<RecipeEntry> readPatternInputs(JsonObject json, int size)
+    {
+        List<RecipeEntry> inputs = new ArrayList<>();
+        if(!json.has("pattern")) return inputs;
+        JsonArray pattern = json.getAsJsonArray("pattern");
+        JsonObject key = json.has("key") ? json.getAsJsonObject("key") : new JsonObject();
+        for(int row = 0; row < Math.min(pattern.size(), size); row++)
+        {
+            String line = pattern.get(row).getAsString();
+            for(int col = 0; col < Math.min(line.length(), size); col++)
+                addInput(inputs, key.get(String.valueOf(line.charAt(col))), row * size + col);
+        }
+        return inputs;
+    }
 
     public static final List<SlotRecipeType> ALL = List.of(
             CRAFTING_TABLE, FURNACE, STONECUTTING, SMITHING,
             MANA_INFUSION, ELVEN_TRADE, PURE_DAISY, BREWERY, PETAL_APOTHECARY, RUNIC_ALTAR, TERRA_PLATE,
             TREE_EXTRACTOR, PULVERIZER, SAWMILL, SMELTER, INSOLATOR, PRESS, THERMAL_FURNACE, CENTRIFUGE, CHILLER, CRUCIBLE, REFINERY, BOTTLER, PYROLYZER,
-            CRUSHING, CUTTING);
+            CRUSHING, MILLING, CUTTING, PRESSING, SPLASHING, HAUNTING, SANDPAPER_POLISHING, DEPLOYING, ITEM_APPLICATION,
+            FILLING, EMPTYING, MIXING, COMPACTING, MECHANICAL_CRAFTING, SEQUENCED_ASSEMBLY);
 }

@@ -43,5 +43,15 @@ public class CoreShapes
     public static class CreateRecipeCreatorShapes {
         /** The casing only: the blade sticking out at the back has no collision, like Create's saw */
         public static final CoreVoxelShape SHAPE_MECHANICAL_SAW = CoreVoxelShape.single(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 12.0D);
+        /** Millstone: the wide base, then the gear case and the stone */
+        public static final CoreVoxelShape SHAPE_MILLSTONE = CoreVoxelShape.builder()
+                .add(0.0D, 0.0D, 0.0D, 16.0D, 6.0D, 16.0D)
+                .add(2.0D, 6.0D, 2.0D, 14.0D, 16.0D, 14.0D)
+                .build();
+        /** Depot and item drain: 13 pixels high */
+        public static final CoreVoxelShape SHAPE_DEPOT = CoreVoxelShape.single(0.0D, 0.0D, 0.0D, 16.0D, 13.0D, 16.0D);
+        public static final CoreVoxelShape SHAPE_SPOUT = CoreVoxelShape.single(1.0D, 0.0D, 1.0D, 15.0D, 16.0D, 15.0D);
+        /** The deployer's body, without the hand */
+        public static final CoreVoxelShape SHAPE_DEPLOYER = CoreVoxelShape.single(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 14.0D);
     }
 }

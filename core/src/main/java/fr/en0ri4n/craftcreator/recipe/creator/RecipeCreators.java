@@ -25,19 +25,25 @@ public class RecipeCreators
      * Shape (collision and outline) of slot recipe blocks whose model isn't a full cube, given facing north:
      * it is rotated with the block. Types not listed here are full blocks.
      */
-    private static final Map<SlotRecipeType, CoreVoxelShape> SLOT_RECIPE_SHAPES = Map.of(
+    private static final Map<SlotRecipeType, CoreVoxelShape> SLOT_RECIPE_SHAPES = Map.ofEntries(
             // Minecraft
-            SlotRecipeTypes.CRAFTING_TABLE, CoreShapes.MinecraftRecipeCreatorShapes.SHAPE_NORTH,
-            SlotRecipeTypes.STONECUTTING, CoreShapes.MinecraftRecipeCreatorShapes.SHAPE_STONECUTTER,
+            Map.entry(SlotRecipeTypes.CRAFTING_TABLE, CoreShapes.MinecraftRecipeCreatorShapes.SHAPE_NORTH),
+            Map.entry(SlotRecipeTypes.STONECUTTING, CoreShapes.MinecraftRecipeCreatorShapes.SHAPE_STONECUTTER),
             // Botania
-            SlotRecipeTypes.MANA_INFUSION, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_MANA_POOL,
-            SlotRecipeTypes.PURE_DAISY, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_PURE_DAISY,
-            SlotRecipeTypes.BREWERY, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_BREWERY,
-            SlotRecipeTypes.PETAL_APOTHECARY, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_PETAL_APOTHECARY,
-            SlotRecipeTypes.RUNIC_ALTAR, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_RUNIC_ALTAR,
-            SlotRecipeTypes.TERRA_PLATE, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_TERRA_PLATE,
+            Map.entry(SlotRecipeTypes.MANA_INFUSION, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_MANA_POOL),
+            Map.entry(SlotRecipeTypes.PURE_DAISY, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_PURE_DAISY),
+            Map.entry(SlotRecipeTypes.BREWERY, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_BREWERY),
+            Map.entry(SlotRecipeTypes.PETAL_APOTHECARY, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_PETAL_APOTHECARY),
+            Map.entry(SlotRecipeTypes.RUNIC_ALTAR, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_RUNIC_ALTAR),
+            Map.entry(SlotRecipeTypes.TERRA_PLATE, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_TERRA_PLATE),
             // Create
-            SlotRecipeTypes.CUTTING, CoreShapes.CreateRecipeCreatorShapes.SHAPE_MECHANICAL_SAW);
+            Map.entry(SlotRecipeTypes.CUTTING, CoreShapes.CreateRecipeCreatorShapes.SHAPE_MECHANICAL_SAW),
+            Map.entry(SlotRecipeTypes.MILLING, CoreShapes.CreateRecipeCreatorShapes.SHAPE_MILLSTONE),
+            Map.entry(SlotRecipeTypes.DEPLOYING, CoreShapes.CreateRecipeCreatorShapes.SHAPE_DEPLOYER),
+            Map.entry(SlotRecipeTypes.FILLING, CoreShapes.CreateRecipeCreatorShapes.SHAPE_SPOUT),
+            Map.entry(SlotRecipeTypes.EMPTYING, CoreShapes.CreateRecipeCreatorShapes.SHAPE_DEPOT),
+            Map.entry(SlotRecipeTypes.SANDPAPER_POLISHING, CoreShapes.CreateRecipeCreatorShapes.SHAPE_DEPOT),
+            Map.entry(SlotRecipeTypes.SEQUENCED_ASSEMBLY, CoreShapes.CreateRecipeCreatorShapes.SHAPE_DEPOT));
 
     static {
         SlotRecipeTypes.ALL.forEach(type -> ALL_RECIPE_CREATORS.add(slotRecipeCreator(type)));
