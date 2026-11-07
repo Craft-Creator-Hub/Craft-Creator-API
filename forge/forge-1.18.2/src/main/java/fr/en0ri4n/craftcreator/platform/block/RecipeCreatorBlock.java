@@ -38,7 +38,8 @@ public class RecipeCreatorBlock extends Block implements EntityBlock
 
     public RecipeCreatorBlock(CoreBlockDef coreBlockId)
     {
-        super(BlockBehaviour.Properties.of(Material.METAL).strength(3.0f, 3.0f).requiresCorrectToolForDrops());
+        // Models don't fill the whole block (altars, pools, saws...): don't hide the faces of neighbouring blocks
+        super(BlockBehaviour.Properties.of(Material.METAL).strength(3.0f, 3.0f).requiresCorrectToolForDrops().noOcclusion());
         this.coreBlockDef = coreBlockId;
     }
 

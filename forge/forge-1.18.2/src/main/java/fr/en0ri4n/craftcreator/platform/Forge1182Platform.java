@@ -105,7 +105,7 @@ public class Forge1182Platform implements Platform {
 
     private final UiAdapter<Widget> uiAdapter = new ForgeUiAdapter();
 
-    private final RegistryAdapter registryAdapter = new ForgeRegistryAdapter();
+    private final RegistryAdapter registryAdapter = ForgeRegistryAdapter.get();
 
     private final BlockShapeAdapter<VoxelShape> blockShapeAdapter = new ForgeBlockShapeAdapter();
 

@@ -9,6 +9,8 @@ import fr.en0ri4n.craftcreator.platform.ui.container.ForgeRecipeCreatorMenu;
 import fr.en0ri4n.craftcreator.platform.ui.screen.ForgeRecipeCreatorScreen;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.network.chat.TextComponent;
@@ -33,6 +35,9 @@ public class ClientSetup
     public static void onClientSetup(FMLClientSetupEvent event)
     {
         MenuScreens.register(ForgeRegistryAdapter.RECIPE_CREATOR_MENU.get(), ForgeRecipeCreatorScreen::new);
+
+        // Block models can have transparent pixels (flowers, glass, saw blades)
+        ForgeRegistryAdapter.get().getRegisteredBlocks().forEach(block -> ItemBlockRenderTypes.setRenderLayer(block, RenderType.cutout()));
 
         openManagementScreenKey = new KeyMapping(
                 InitManager.OPEN_MANAGEMENT_SCREEN_KEYBIND.getName(),

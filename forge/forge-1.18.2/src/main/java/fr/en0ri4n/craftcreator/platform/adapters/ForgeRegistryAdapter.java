@@ -46,6 +46,11 @@ public class ForgeRegistryAdapter implements RegistryAdapter
 
     private final List<RegistryObject<Block>> registeredBlocksWithEntity = new ArrayList<>();
 
+    public List<Block> getRegisteredBlocks()
+    {
+        return registeredBlocksWithEntity.stream().map(RegistryObject::get).toList();
+    }
+
     public void registerDefferredRegisters(IEventBus bus)
     {
         BLOCKS.register(bus);
