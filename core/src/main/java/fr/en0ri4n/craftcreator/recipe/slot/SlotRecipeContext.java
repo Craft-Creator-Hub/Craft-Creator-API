@@ -27,6 +27,7 @@ public class SlotRecipeContext
     private final SlotRecipeType.Variant variant;
     /** Entry of each slot, by slot index; null for empty slots. */
     private final RecipeEntry[] entries;
+    private final List<CoreItemStack> inventory;
     private final Map<String, String> params;
 
     public SlotRecipeContext(SlotRecipeType type, SlotRecipeType.Variant variant, List<CoreItemStack> inventory, Map<Integer, Identifier> taggedSlots, Map<String, String> params)
@@ -35,6 +36,7 @@ public class SlotRecipeContext
         this.variant = variant;
         this.params = params;
         this.entries = new RecipeEntry[type.getSlots().size()];
+        this.inventory = inventory;
 
         for(int i = 0; i < entries.length && i < inventory.size(); i++)
             entries[i] = toEntry(type.getSlots().get(i), i, inventory.get(i), taggedSlots.get(i));
@@ -100,6 +102,17 @@ public class SlotRecipeContext
         return result;
     }
 
+    /**
+     * @return the fluid contained in the item of this slot (e.g. a bucket), whatever the slot's kind, or null
+     */
+    public RecipeEntry fluidOf(String slotName)
+    {
+        int index = type.indexOf(slotName);
+        if(index < 0 || index >= inventory.size() || inventory.get(index) == null || inventory.get(index).isEmpty()) return null;
+        Identifier fluid = CraftCreatorAPI.get().getPlatform().getItemStackAdapter().getContainedFluid(inventory.get(index));
+        return fluid == null ? null : RecipeEntry.fluid(fluid, 1);
+    }
+
     /* ---------------- values ---------------- */
 
     public String param(String key)
@@ -131,6 +144,11 @@ public class SlotRecipeContext
         {
             return type.getParam(key).map(p -> Double.parseDouble(p.defaultValue())).orElse(0D);
         }
+    }
+
+    public boolean paramBool(String key)
+    {
+        return Boolean.parseBoolean(param(key));
     }
 
     /**

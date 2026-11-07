@@ -8,6 +8,7 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -43,6 +44,10 @@ public class SlotRecipeType
     private final Writer writer;
     /** Reads the inputs of a recipe json with their slots, null to use the generic reader. */
     private final Function<JsonObject, List<RecipeEntry>> inputReader;
+    /** Where the screen draws the title, null when the texture already shows it. */
+    private final int[] titlePosition;
+    /** Arrows, items and labels drawn by the screen over the texture. */
+    private final List<Decoration> decorations;
 
     private SlotRecipeType(Builder builder)
     {
@@ -64,6 +69,8 @@ public class SlotRecipeType
         this.variantSelector = this.variants.size() > 1 ? Objects.requireNonNull(builder.variantSelector, "variant selector") : null;
         this.writer = Objects.requireNonNull(builder.writer, "writer");
         this.inputReader = builder.inputReader;
+        this.titlePosition = builder.titlePosition;
+        this.decorations = List.copyOf(builder.decorations);
     }
 
     /**
@@ -137,6 +144,31 @@ public class SlotRecipeType
      */
     public record VariantSelector(int x, int y, int width, int height, boolean showIcon) {}
 
+    /**
+     * Something the screen draws over the GUI texture, at a position relative to the GUI.
+     */
+    public sealed interface Decoration permits Arrow, Item, Label, ParamIcon {}
+
+    /**
+     * A progress arrow pointing right (or down) from (x, y).
+     */
+    public record Arrow(int x, int y, int length, boolean down) implements Decoration {}
+
+    /**
+     * An item (e.g. the machine doing the recipe) drawn at (x, y), with a tooltip naming it.
+     */
+    public record Item(Identifier itemId, int x, int y) implements Decoration {}
+
+    /**
+     * A text, translation key or plain text, drawn at (x, y).
+     */
+    public record Label(String text, int x, int y, int color) implements Decoration {}
+
+    /**
+     * An item showing the current value of a {@link ParamSpec.Type#CHOICE} param, e.g. the machine of an assembly step.
+     */
+    public record ParamIcon(String paramKey, int x, int y, Map<String, Identifier> icons) implements Decoration {}
+
     public static class Builder
     {
         private Identifier id;
@@ -157,6 +189,8 @@ public class SlotRecipeType
         private VariantSelector variantSelector;
         private Writer writer;
         private Function<JsonObject, List<RecipeEntry>> inputReader;
+        private int[] titlePosition;
+        private final List<Decoration> decorations = new ArrayList<>();
 
         private Builder(SupportedMod mod, String name)
         {
@@ -275,6 +309,50 @@ public class SlotRecipeType
         public Builder inputReader(Function<JsonObject, List<RecipeEntry>> inputReader)
         {
             this.inputReader = inputReader;
+            return this;
+        }
+
+        /**
+         * Let the screen draw the title at (x, y), for textures that don't show it.
+         */
+        public Builder titleAt(int x, int y)
+        {
+            this.titlePosition = new int[] {x, y};
+            return this;
+        }
+
+        public Builder arrow(int x, int y, int length)
+        {
+            this.decorations.add(new Arrow(x, y, length, false));
+            return this;
+        }
+
+        public Builder arrowDown(int x, int y, int length)
+        {
+            this.decorations.add(new Arrow(x, y, length, true));
+            return this;
+        }
+
+        public Builder item(String itemId, int x, int y)
+        {
+            this.decorations.add(new Item(Identifier.from(itemId), x, y));
+            return this;
+        }
+
+        public Builder label(String text, int x, int y, int color)
+        {
+            this.decorations.add(new Label(text, x, y, color));
+            return this;
+        }
+
+        /**
+         * @param icons item shown for each value of the param; values without an item show nothing
+         */
+        public Builder paramIcon(String paramKey, int x, int y, Map<String, String> icons)
+        {
+            Map<String, Identifier> ids = new java.util.LinkedHashMap<>();
+            icons.forEach((value, item) -> ids.put(value, Identifier.from(item)));
+            this.decorations.add(new ParamIcon(paramKey, x, y, ids));
             return this;
         }
 
