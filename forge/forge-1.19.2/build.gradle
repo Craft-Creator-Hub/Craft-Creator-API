@@ -1,0 +1,174 @@
+buildscript {
+    repositories {
+        maven { url = 'https://maven.minecraftforge.net' }
+        maven { url = 'https://maven.parchmentmc.org' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '[6.0,6.2)', changing: true
+        classpath 'org.parchmentmc:librarian:1.+'
+    }
+}
+
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
+
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'org.parchmentmc.librarian.forgegradle'
+
+version = "${craftcreator_version}"
+group = 'fr.en0ri4n.craftcreator' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "${craftcreator_name}"
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+
+minecraft {
+
+    mappings channel: 'parchment', version: "${mc_version}-${parchment_version}"
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                craftcreator {
+                    source sourceSets.main
+                    source project(':core').sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run/SERVER')
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                craftcreator {
+                    source sourceSets.main
+                    source project(':core').sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run')
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
+            args '--mod', "${craftcreator_id}", '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+
+            mods {
+                craftcreator {
+                    source sourceSets.main
+                    source project(':core').sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+
+repositories {
+    // Modrinth Maven: every test mod for 1.19.2
+    maven {
+        url "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
+
+    // Curseforge Maven
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+
+    maven {
+        // location of the maven that hosts JEI files
+        name = "Progwml6 maven"
+        url = "https://dvs1.progwml6.com/files/maven/"
+    }
+    maven {
+        // location of a maven mirror for JEI files, as a fallback
+        name = "ModMaven"
+        url = "https://modmaven.dev"
+    }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
+
+    implementation project(':core')
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+    // JEI
+    implementation fg.deobf("maven.modrinth:jei:${jei_version}")
+
+    // KubeJS
+    implementation fg.deobf("maven.modrinth:kubejs:${kubejs_version}")
+    // Rhino (KubeJS Dependency)
+    implementation fg.deobf("maven.modrinth:rhino:${rhino_version}")
+    // Architectury (KubeJS Dependency)
+    implementation fg.deobf("maven.modrinth:architectury-api:${architectury_version}")
+
+    // Botania
+    implementation fg.deobf("maven.modrinth:botania:${botania_version}")
+    // Curios (Botania Dependency)
+    implementation fg.deobf("maven.modrinth:curios:${curios_version}")
+    // Patchouli (Botania Dependency)
+    implementation fg.deobf("maven.modrinth:patchouli:${patchouli_version}")
+
+    // Thermal Expansion
+    implementation fg.deobf("maven.modrinth:thermal-expansion:${thermal_expansion_version}")
+    // Thermal Foundation (Thermal Expansion Dependency)
+    implementation fg.deobf("maven.modrinth:thermal-foundation:${thermal_foundation_version}")
+    // CoFH Core (Thermal Dependency)
+    implementation fg.deobf("maven.modrinth:cofh-core:${cofh_core_version}")
+
+    // Create (Flywheel and Registrate are inside)
+    implementation fg.deobf("maven.modrinth:create:${create_version}")
+}
+
+jar {
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+
+    manifest {
+        attributes([
+                "Specification-Title"     : "${craftcreator_name}",
+                "Specification-Vendor"    : "En0ri4n",
+                "Specification-Version"   : project.version, // We are version 1 of ourselves
+                "Implementation-Title"    : "${craftcreator_name}",
+                "Implementation-Version"  : project.version,
+                "Implementation-Vendor"   : "En0ri4n",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}

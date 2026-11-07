@@ -1,0 +1,24 @@
+modLoader="javafml" #mandatory
+loaderVersion="[43,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
+license="All rights reserved"
+issueTrackerURL="https://github.com/En0ri4n/Craft-Creator/issues" #optional
+[[mods]] #mandatory
+modId="craftcreator" #mandatory
+version="1.0.0" #mandatory
+displayName="Craft Creator" #mandatory
+# updateJSONURL="http://myurl.me/" #optional
+# displayURL="http://example.com/" #optional
+logoFile="logo.png" #optional
+credits="Thanks to MFF, and others supports" #optional
+authors="En0ri4n (Enooow#4595 on Discord!)" #optional
+description='''
+Craft Creator is a mod that allows you to create your own crafts in Minecraft! (with kubeJS system or just datapacks)
+'''
+# A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
+# Here's another dependency
+[[dependencies.craftcreator]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.19.2]"
+    ordering="NONE"
+    side="BOTH"

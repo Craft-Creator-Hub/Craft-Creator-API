@@ -1,0 +1,51 @@
+package fr.en0ri4n.craftcreator.platform.render;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+import fr.en0ri4n.craftcreator.api.render.RenderContext;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
+
+/**
+ * Concrete Forge render context that wraps the PoseStack and BufferSource.
+ */
+public class ForgeRenderContext implements RenderContext {
+
+    private final PoseStack poseStack;
+    private final MultiBufferSource.BufferSource bufferSource;
+
+    /**
+     * Create a new context for the current frame.
+     *
+     * @param poseStack    the current PoseStack from Screen.render (must be non-null)
+     * @param bufferSource the current MultiBufferSource.BufferSource (may be null if not used)
+     */
+    public ForgeRenderContext(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource) {
+        this.poseStack = poseStack;
+        this.bufferSource = bufferSource;
+    }
+
+    /**
+     * The PoseStack provided by the screen render loop. Never cache this beyond the frame.
+     */
+    public PoseStack poseStack() {
+        return poseStack;
+    }
+
+    /**
+     * The buffer source for batched rendering (may be null on some call sites).
+     */
+    public MultiBufferSource.BufferSource bufferSource() {
+        return bufferSource;
+    }
+
+    public static ForgeRenderContext from(RenderContext ctx) {
+        if (!(ctx instanceof ForgeRenderContext forgeCtx)) {
+            throw new IllegalArgumentException("Expected ForgeRenderContext, got: " + ctx.getClass().getName());
+        }
+        return forgeCtx;
+    }
+
+    public static ForgeRenderContext of(PoseStack stack) {
+        return new ForgeRenderContext(stack, Minecraft.getInstance().renderBuffers().bufferSource());
+    }
+}
