@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.api.mod.SupportedMod;
+import fr.en0ri4n.craftcreator.api.mod.SupportedVersion;
 import fr.en0ri4n.craftcreator.recipe.model.CraftingGrid;
 import fr.en0ri4n.craftcreator.recipe.serialize.RecipeSerializer;
 import fr.en0ri4n.craftcreator.recipe.utils.RecipeEntry;
@@ -122,17 +123,49 @@ public class SlotRecipeTypes
                 out.addProperty("count", ctx.get("output").getCount());
             });
 
-    public static final SlotRecipeType SMITHING = SlotRecipeType.builder(SupportedMod.MINECRAFT, "smithing")
-            .icon("minecraft:smithing_table")
-            .slot(SlotSpec.input("base", 27, 47))
-            .slot(SlotSpec.input("addition", 76, 47))
-            .slot(SlotSpec.output("output", 134, 47))
-            .writer((ctx, out) ->
-            {
-                out.add("base", ctx.ingredient(ctx.get("base")));
-                out.add("addition", ctx.ingredient(ctx.get("addition")));
-                out.add("result", ctx.item(ctx.get("output")));
-            });
+    /**
+     * Smithing table. Since 1.20 it takes a template too, and makes either an upgrade (transform) or an armor trim,
+     * which has no result.
+     */
+    public static final SlotRecipeType SMITHING = SupportedVersion.isGreaterOrEquals(SupportedVersion.V1_20_1) ? smithingWithTemplate() : smithing();
+
+    private static SlotRecipeType smithing()
+    {
+        return SlotRecipeType.builder(SupportedMod.MINECRAFT, "smithing")
+                .icon("minecraft:smithing_table")
+                .slot(SlotSpec.input("base", 27, 47))
+                .slot(SlotSpec.input("addition", 76, 47))
+                .slot(SlotSpec.output("output", 134, 47))
+                .writer((ctx, out) ->
+                {
+                    out.add("base", ctx.ingredient(ctx.get("base")));
+                    out.add("addition", ctx.ingredient(ctx.get("addition")));
+                    out.add("result", ctx.item(ctx.get("output")));
+                });
+    }
+
+    private static SlotRecipeType smithingWithTemplate()
+    {
+        return SlotRecipeType.builder(SupportedMod.MINECRAFT, "smithing")
+                .icon("minecraft:smithing_table")
+                .texture("textures/gui/container/minecraft/smithing_1_20_recipe_creator.png")
+                .slot(SlotSpec.input("template", 9, 47))
+                .slot(SlotSpec.input("base", 33, 47))
+                .slot(SlotSpec.input("addition", 76, 47))
+                .slot(SlotSpec.output("output", 134, 47))
+                .variant("transform", "minecraft:smithing_transform", "Upgrade", "minecraft:netherite_upgrade_smithing_template")
+                .variant("trim", "minecraft:smithing_trim", "Armor Trim", "minecraft:coast_armor_trim_smithing_template")
+                .variantSelector(100, 20, 70, 14, false)
+                .writer((ctx, out) ->
+                {
+                    if(ctx.has("template")) out.add("template", ctx.ingredient(ctx.get("template")));
+                    if(ctx.has("base")) out.add("base", ctx.ingredient(ctx.get("base")));
+                    if(ctx.has("addition")) out.add("addition", ctx.ingredient(ctx.get("addition")));
+                    // Trims change the item itself: no result
+                    if(ctx.getVariant().name().equals("transform") && ctx.has("output"))
+                        out.add("result", ctx.item(ctx.get("output")));
+                });
+    }
 
     /* ---------------- Botania ---------------- */
 
@@ -194,6 +227,13 @@ public class SlotRecipeTypes
             {
                 out.add("output", ctx.item(ctx.get("output")));
                 out.add("ingredients", ctx.ingredients(ctx.all("input")));
+                // Since 1.19 the apothecary also uses up a reagent (seeds by default)
+                if(SupportedVersion.isGreaterOrEquals(SupportedVersion.V1_19_4))
+                {
+                    JsonObject reagent = new JsonObject();
+                    reagent.addProperty("tag", "botania:seed_apothecary_reagent");
+                    out.add("reagent", reagent);
+                }
             });
 
     public static final SlotRecipeType RUNIC_ALTAR = SlotRecipeType.builder(SupportedMod.BOTANIA, "runic_altar")
