@@ -4,7 +4,7 @@ license="All rights reserved"
 issueTrackerURL="https://github.com/En0ri4n/Craft-Creator/issues" #optional
 [[mods]] #mandatory
 modId="craftcreator" #mandatory
-version="1.0.0" #mandatory
+version="${file.jarVersion}" # From the jar manifest: <mod_version>+<Minecraft version> #mandatory
 displayName="Craft Creator" #mandatory
 # updateJSONURL="http://myurl.me/" #optional
 # displayURL="http://example.com/" #optional

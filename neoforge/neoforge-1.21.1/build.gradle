@@ -3,7 +3,7 @@ plugins {
     id 'net.neoforged.moddev' version '2.0.148'
 }
 
-version = "${craftcreator_version}"
+version = "${mod_version}+${mc_version}"
 group = 'fr.en0ri4n.craftcreator'
 base.archivesName = "${craftcreator_name}"
 

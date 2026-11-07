@@ -5,7 +5,7 @@ issueTrackerURL="https://github.com/En0ri4n/Craft-Creator/issues"
 
 [[mods]]
 modId="craftcreator"
-version="1.0.0"
+version="${mod_version}" # Filled by processResources: <mod_version>+<Minecraft version>
 displayName="Craft Creator"
 logoFile="logo.png"
 credits="Thanks to MFF, and others supports"

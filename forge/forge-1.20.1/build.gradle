@@ -16,7 +16,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.parchmentmc.librarian.forgegradle'
 
-version = "${craftcreator_version}"
+version = "${mod_version}+${mc_version}"
 group = 'fr.en0ri4n.craftcreator' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "${craftcreator_name}"
 
