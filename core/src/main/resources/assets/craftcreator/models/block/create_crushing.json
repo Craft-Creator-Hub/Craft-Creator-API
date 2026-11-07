@@ -1,3 +1,51 @@
 {
-    "parent": "craftcreator:block/create_recipe_creator"
+  "parent": "block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "axis": "craftcreator:block/create_crushing/axis",
+    "axis_top": "craftcreator:block/create_crushing/axis_top",
+    "plates": "craftcreator:block/create_crushing/crushing_wheel_plates",
+    "insert": "craftcreator:block/create_crushing/insert",
+    "spruce_log_top": "block/spruce_log_top",
+    "particle": "craftcreator:block/create_crushing/andesite_cut"
+  },
+  "loader": "forge:obj",
+  "flip-v": true,
+  "model": "craftcreator:models/block/create_crushing/crushing_wheel.obj",
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.45,
+        0.45,
+        0.45
+      ]
+    },
+    "fixed": {
+      "rotation": [
+        90,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.45,
+        0.45,
+        0.45
+      ]
+    }
+  }
 }

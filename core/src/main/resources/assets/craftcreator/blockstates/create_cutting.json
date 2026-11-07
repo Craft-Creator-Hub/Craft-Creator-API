@@ -1,17 +1,17 @@
 {
     "variants": {
-        "facing=north": {
+        "facing=south": {
             "model": "craftcreator:block/create_cutting"
         },
-        "facing=east": {
+        "facing=west": {
             "model": "craftcreator:block/create_cutting",
             "y": 90
         },
-        "facing=south": {
+        "facing=north": {
             "model": "craftcreator:block/create_cutting",
             "y": 180
         },
-        "facing=west": {
+        "facing=east": {
             "model": "craftcreator:block/create_cutting",
             "y": 270
         }
