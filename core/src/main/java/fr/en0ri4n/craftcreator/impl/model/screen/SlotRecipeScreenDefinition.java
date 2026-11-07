@@ -3,6 +3,7 @@ package fr.en0ri4n.craftcreator.impl.model.screen;
 import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.api.ui.elements.Core2DBounds;
+import fr.en0ri4n.craftcreator.api.ui.elements.CoreButtonStyle;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreDropdown;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreTextInput;
 import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
@@ -85,9 +86,10 @@ public class SlotRecipeScreenDefinition extends RecipeCreatorContainerScreenDefi
                 }
                 // Icon style: the variant's item instead of its label
                 if(!isVisible() || getSelectedValue() == null) return;
-                CoreScreenDefinition.renderTextureWithBounds(ctx, GUI_TEXTURE, getBounds(), isMouseOver(mouseX, mouseY), false);
+                CoreButtonStyle.State state = CoreButtonStyle.State.of(true, false, isMouseOver(mouseX, mouseY));
+                CoreButtonStyle.draw(ctx, getBounds(), state);
                 getRenderAdapter().drawItem(ctx, new CoreItemStack(getSelectedValue().icon(), 1),
-                                            getBounds().getHorizontalCenter(16), getBounds().getVerticalCenter(16), 1F);
+                                            getBounds().getHorizontalCenter(16), CoreButtonStyle.textY(getBounds(), 16, state), 1F);
             }
         };
     }

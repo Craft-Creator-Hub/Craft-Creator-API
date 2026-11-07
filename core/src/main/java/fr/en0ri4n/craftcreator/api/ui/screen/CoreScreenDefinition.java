@@ -105,11 +105,22 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
      */
     public static void renderTextureWithSize(RenderContext ctx, Identifier texture, int left, int top, int width, int height, boolean isHovered, boolean isDisabled)
     {
+        renderNineSlice(ctx, texture, 48, isDisabled ? 2 : isHovered ? 1 : 0, left, top, width, height);
+    }
+
+    /**
+     * Draw one 16x16 tile of a texture made of tiles stacked vertically, stretched to the given size: the 5px corners
+     * are kept, the edges and the center are stretched.
+     *
+     * @param textureHeight height of the texture file (16 per tile)
+     * @param tile          index of the tile, from the top
+     */
+    public static void renderNineSlice(RenderContext ctx, Identifier texture, int textureHeight, int tile, int left, int top, int width, int height)
+    {
         RenderAdapter adapter = CraftCreatorAPI.get().getPlatform().getRenderAdapter();
 
         final int textureWidth = 16;
-        final int textureHeight = 48;
-        int baseY = isDisabled ? 32 : isHovered ? 16 : 0;
+        int baseY = tile * 16;
 
         // Top left
         adapter.drawTexture(ctx, texture, left, top, 5, 5, textureWidth, textureHeight, 0, baseY, 5, 5);

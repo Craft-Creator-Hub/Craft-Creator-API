@@ -213,8 +213,9 @@ public class CoreButtonWidgetList extends CoreUiElement
     {
         if(ctx == null || !isVisible()) return;
 
-        CoreScreenDefinition.renderTextureWithBounds(ctx, CoreScreenDefinition.GUI_TEXTURE, buttonBounds, buttonBounds.contains(mouseX, mouseY), false);
-        getRenderAdapter().drawTexture(ctx, buttonTexture, buttonBounds.getX(4), buttonBounds.getY(4), buttonBounds.getWidth(-8), buttonBounds.getHeight(-8), 24, 24, 0, 0, 24, 24);
+        CoreButtonStyle.State state = CoreButtonStyle.State.of(true, isOpen, buttonBounds.contains(mouseX, mouseY));
+        CoreButtonStyle.draw(ctx, buttonBounds, state);
+        getRenderAdapter().drawTexture(ctx, buttonTexture, buttonBounds.getX(4), buttonBounds.getY(4 + state.getContentOffsetY()),buttonBounds.getWidth(-8), buttonBounds.getHeight(-8), 24, 24, 0, 0, 24, 24);
 
         if(!isOpen) return;
 

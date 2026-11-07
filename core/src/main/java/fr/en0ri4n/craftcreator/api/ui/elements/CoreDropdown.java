@@ -2,7 +2,6 @@ package fr.en0ri4n.craftcreator.api.ui.elements;
 
 import fr.en0ri4n.craftcreator.api.platform.UiAdapter;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
-import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
 import lombok.Getter;
 
 import java.util.List;
@@ -92,15 +91,13 @@ public class CoreDropdown<T> extends CoreUiElement
 
         int actualWidth = Math.max(getBounds().getWidth(), getRenderAdapter().getTextWidth(this.getSelectedValueAsString()) + 10);
 
-        CoreScreenDefinition.renderTextureWithSize(ctx, CoreScreenDefinition.GUI_TEXTURE,
-                getBounds().getX(), getBounds().getY(),
-                actualWidth, getBounds().getHeight(),
-                isMouseOver(mouseX, mouseY), false);
+        CoreButtonStyle.State state = CoreButtonStyle.State.of(true, false, isMouseOver(mouseX, mouseY));
+        CoreButtonStyle.draw(ctx, getBounds().getX(), getBounds().getY(), actualWidth, getBounds().getHeight(), state);
 
         // Draw label centered
         int color = isMouseOver(mouseX, mouseY) ? CoreTheme.TEXT_BRIGHT : CoreTheme.TEXT;
         int textX = getBounds().getX((actualWidth - getRenderAdapter().getTextWidth(this.getSelectedValueAsString())) / 2);
-        int textY = getBounds().getVerticalCenter(getRenderAdapter().getFontHeight()) + 1;
+        int textY = CoreButtonStyle.textY(getBounds(), getRenderAdapter().getFontHeight(), state);
         getRenderAdapter().drawText(ctx, getSelectedValueAsString(), textX, textY, color);
         
     }

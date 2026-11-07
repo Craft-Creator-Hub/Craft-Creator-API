@@ -2,7 +2,6 @@ package fr.en0ri4n.craftcreator.api.ui.elements;
 
 import fr.en0ri4n.craftcreator.api.platform.UiAdapter;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
-import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -53,10 +52,12 @@ public class CoreButton extends CoreUiElement
         if(!isVisible()) return;
 
         boolean hovered = enabled && !selected && isMouseOver(mouseX, mouseY);
-        CoreScreenDefinition.renderTextureWithBounds(ctx, CoreScreenDefinition.GUI_TEXTURE, getBounds(), hovered || selected, !enabled);
+        CoreButtonStyle.State state = CoreButtonStyle.State.of(enabled, selected, hovered);
+        CoreButtonStyle.draw(ctx, getBounds(), state);
 
         int color = selected ? CoreTheme.ACCENT : !enabled ? CoreTheme.TEXT_DISABLED : hovered ? CoreTheme.TEXT_BRIGHT : CoreTheme.TEXT;
-        getRenderAdapter().drawText(ctx, label, getBounds().getHorizontalCenter(getRenderAdapter().getTextWidth(label)), getBounds().getVerticalCenter(getRenderAdapter().getFontHeight()) + 1, color);
+        getRenderAdapter().drawText(ctx, label, getBounds().getHorizontalCenter(getRenderAdapter().getTextWidth(label)),
+                                    CoreButtonStyle.textY(getBounds(), getRenderAdapter().getFontHeight(), state), color);
     }
 
     @Override
