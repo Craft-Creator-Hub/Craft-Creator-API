@@ -26,6 +26,9 @@ public enum Feedback
 
     RECIPE_ALREADY_EXISTS("serializer.message.recipe.already_exists"),
 
+    /** A KubeJS export asked in a game without KubeJS */
+    KUBEJS_NOT_LOADED("serializer.message.recipe.kubejs_not_loaded"),
+
     /** The recipe's json, made without exporting it */
     JSON_PREVIEW("serializer.message.recipe.json_preview"),;
 

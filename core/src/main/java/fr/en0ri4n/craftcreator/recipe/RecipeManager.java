@@ -2,6 +2,8 @@ package fr.en0ri4n.craftcreator.recipe;
 
 import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntity;
+import fr.en0ri4n.craftcreator.api.mod.SupportedMod;
+import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeExporter;
 import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.RecipeCreatorBlockEntityBehavior;
 import fr.en0ri4n.craftcreator.recipe.exporter.RecipeExporterRegistry;
 import fr.en0ri4n.craftcreator.recipe.serialize.RecipeSerializer;
@@ -44,6 +46,10 @@ public class RecipeManager
             shown.remove("name");
             return RecipeRequestFeedback.of(Feedback.JSON_PREVIEW, true, behavior.getSerializationType(), name, GsonProvider.prettyGson().toJson(shown), null);
         }
+
+        // The screen only offers KubeJS when it's installed, but a block can still be set to it (e.g. KubeJS was removed)
+        if(behavior.getSerializationType() == SupportedRecipeExporter.KUBE_JS && !SupportedMod.isKubeJSLoaded())
+            return RecipeRequestFeedback.of(Feedback.KUBEJS_NOT_LOADED, false);
 
         return RecipeExporterRegistry.get()
                 .getExporter(behavior.getSerializationType())

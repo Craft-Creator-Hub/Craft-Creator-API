@@ -35,6 +35,7 @@ import fr.en0ri4n.craftcreator.utils.Identifier;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -86,6 +87,8 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
     private List<JsonObject> removals = List.of();
     private List<JsonObject> replacements = List.of();
     private boolean removalSupported = SupportedMod.isKubeJSLoaded();
+    /** Without KubeJS, the KubeJS exporter, tabs and actions are hidden */
+    private final boolean kubeJsLoaded = SupportedMod.isKubeJSLoaded();
     private String search = "";
 
     private String message;
@@ -111,10 +114,14 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         int rightWidth = screenWidth - rightX - MARGIN;
 
         /* Left column: tabs, search, list, exporter */
-        int tabWidth = (leftWidth - GAP * (Tab.values().length - 1)) / Tab.values().length;
-        for(Tab tab : Tab.values())
+        // Without KubeJS there's nothing to replace or remove: only All and Added
+        List<Tab> tabs = Arrays.stream(Tab.values()).filter(tab -> kubeJsLoaded || !tab.needsKubeJs).toList();
+        if(!tabs.contains(currentTab)) currentTab = Tab.ALL;
+        int tabWidth = (leftWidth - GAP * (tabs.size() - 1)) / tabs.size();
+        for(int i = 0; i < tabs.size(); i++)
         {
-            CoreButton button = new CoreButton("tab_" + tab.name().toLowerCase(), MARGIN + tab.ordinal() * (tabWidth + GAP), TOP, tabWidth, BUTTON_HEIGHT, tab.label, () -> setTab(tab), tab.tooltip);
+            Tab tab = tabs.get(i);
+            CoreButton button = new CoreButton("tab_" + tab.name().toLowerCase(), MARGIN + i * (tabWidth + GAP), TOP, tabWidth, BUTTON_HEIGHT, tab.label, () -> setTab(tab), tab.tooltip);
             tabButtons.put(tab, button);
             addElement(button);
         }
@@ -128,7 +135,11 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         addElement(listElement = new CoreList<>(MARGIN, listY, leftWidth, bottomBarY - GAP - listY, 20, List.of()));
         listElement.setSelectionListener(selected -> updateAction());
 
-        addElement(exporterDropdown = new CoreDropdown<>("exporter", MARGIN, bottomBarY, leftWidth, BUTTON_HEIGHT, true, List.of(SupportedRecipeExporter.values()), exporter.ordinal(), "Recipes added with", this::setExporter)
+        // The KubeJS exporter is only offered when KubeJS is installed
+        List<SupportedRecipeExporter> exporters = Arrays.stream(SupportedRecipeExporter.values())
+                .filter(e -> kubeJsLoaded || e != SupportedRecipeExporter.KUBE_JS).toList();
+        if(!exporters.contains(exporter)) exporter = SupportedRecipeExporter.MINECRAFT_DATAPACK;
+        addElement(exporterDropdown = new CoreDropdown<>("exporter", MARGIN, bottomBarY, leftWidth, BUTTON_HEIGHT, true, exporters, exporters.indexOf(exporter), "Recipes added with", this::setExporter)
         {
             @Override
             public String getSelectedValueAsString()
@@ -141,8 +152,12 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         int toolWidth = Math.min(90, (rightWidth - GAP * 2) / 3);
         int toolX = screenWidth - MARGIN - toolWidth * 3 - GAP * 2;
         addElement(new CoreButton("open_tutorial", toolX, TOP, toolWidth, BUTTON_HEIGHT, "Tutorial", () -> getCurrentUiAdapter().openScreen(new TutorialScreen(this)), null));
-        addElement(new CoreButton("open_replace_screen", toolX + toolWidth + GAP, TOP, toolWidth, BUTTON_HEIGHT, "Replace...", () -> openReplaceScreen(null), "Replace an item in many recipes (KubeJS)"));
-        addElement(new CoreButton("open_remove_screen", toolX + (toolWidth + GAP) * 2, TOP, toolWidth, BUTTON_HEIGHT, "Remove...", this::openRemoveScreen, "Remove every recipe matching a filter (KubeJS)"));
+        // Replacing and removing recipes write KubeJS scripts
+        if(kubeJsLoaded)
+        {
+            addElement(new CoreButton("open_replace_screen", toolX + toolWidth + GAP, TOP, toolWidth, BUTTON_HEIGHT, "Replace...", () -> openReplaceScreen(null), "Replace an item in many recipes (KubeJS)"));
+            addElement(new CoreButton("open_remove_screen", toolX + (toolWidth + GAP) * 2, TOP, toolWidth, BUTTON_HEIGHT, "Remove...", this::openRemoveScreen, "Remove every recipe matching a filter (KubeJS)"));
+        }
 
         int detailsY = TOP + BUTTON_HEIGHT + GAP;
         detailsPanel = Core2DBounds.of(rightX, detailsY, rightWidth, bottomBarY - GAP - detailsY);
@@ -280,7 +295,7 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         ListedItem selected = getSelected();
         actionButton.setVisible(selected != null);
         actionButton.setEnabled(true);
-        replaceItemsButton.setVisible(selected != null && selected.recipe() != null);
+        replaceItemsButton.setVisible(kubeJsLoaded && selected != null && selected.recipe() != null);
         replaceItemsButton.setEnabled(removalSupported);
         if(selected == null) return;
 
@@ -307,8 +322,10 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
         {
             case GAME ->
             {
+                // A game recipe can only be removed with KubeJS
                 setAction("Remove (KubeJS)", () -> removeWithKubeJs(recipe));
                 actionButton.setEnabled(removalSupported);
+                actionButton.setVisible(kubeJsLoaded);
             }
             case OWN ->
             {
@@ -888,18 +905,20 @@ public class RecipeManagementScreen extends CoreScreenDefinition<RecipeManagemen
 
     private enum Tab
     {
-        ALL("All", "Every recipe of the game"),
-        ADDED("Added", "Recipes added with Craft Creator"),
-        REPLACED("Replaced", "Items replaced with KubeJS"),
-        REMOVED("Removed", "Recipes removed with KubeJS");
+        ALL("All", "Every recipe of the game", false),
+        ADDED("Added", "Recipes added with Craft Creator", false),
+        REPLACED("Replaced", "Items replaced with KubeJS", true),
+        REMOVED("Removed", "Recipes removed with KubeJS", true);
 
         private final String label;
         private final String tooltip;
+        private final boolean needsKubeJs;
 
-        Tab(String label, String tooltip)
+        Tab(String label, String tooltip, boolean needsKubeJs)
         {
             this.label = label;
             this.tooltip = tooltip;
+            this.needsKubeJs = needsKubeJs;
         }
     }
 

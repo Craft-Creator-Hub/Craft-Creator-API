@@ -1,6 +1,7 @@
 package fr.en0ri4n.craftcreator.api.ui.screen;
 
 import fr.en0ri4n.craftcreator.CraftCreatorAPI;
+import fr.en0ri4n.craftcreator.api.mod.SupportedMod;
 import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeExporter;
 import fr.en0ri4n.craftcreator.api.net.MakeRecipeRequestData;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
@@ -16,6 +17,7 @@ import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.RecipeCreatorBlockEnti
 import fr.en0ri4n.craftcreator.utils.Identifier;
 
 import java.util.Arrays;
+import java.util.List;
 
 public abstract class RecipeCreatorContainerScreenDefinition<T extends RecipeCreatorBlockEntityBehavior> extends TaggableSlotsContainerScreenDefinition<T>
 {
@@ -40,7 +42,7 @@ public abstract class RecipeCreatorContainerScreenDefinition<T extends RecipeCre
     public void initElements(int screenWidth, int screenHeight)
     {
         // Toolbar on the right of the GUI, so nothing covers the texture: exporter, export, then json preview
-        addElement(recipeTypeDropdown = new CoreDropdown<>("recipe_type_dropdown", getToolbarX(), getGuiSize().getY(TOOLBAR_PADDING), TOOLBAR_BUTTON_WIDTH, 20, true, Arrays.stream(SupportedRecipeExporter.values()).toList(), 0,
+        addElement(recipeTypeDropdown = new CoreDropdown<>("recipe_type_dropdown", getToolbarX(), getGuiSize().getY(TOOLBAR_PADDING), TOOLBAR_BUTTON_WIDTH, 20, true, getAvailableExporters(), 0,
                 "Recipe Type", this::onRecipeTypeChanged) {
             @Override
             public String getSelectedValueAsString()
@@ -136,8 +138,25 @@ public abstract class RecipeCreatorContainerScreenDefinition<T extends RecipeCre
     @Override
     protected void onDataUpdated(T behavior)
     {
-        recipeTypeDropdown.setSelectedValue(behavior.getSerializationType());
+        // A recipe creator set to KubeJS in a game without KubeJS falls back to the datapack
+        SupportedRecipeExporter exporter = behavior.getSerializationType();
+        if(!getAvailableExporters().contains(exporter))
+        {
+            exporter = SupportedRecipeExporter.MINECRAFT_DATAPACK;
+            behavior.setSerializationType(exporter);
+        }
+        recipeTypeDropdown.setSelectedValue(exporter);
         settingsList.setOpen(behavior.hasSettingsOpen());
+    }
+
+    /**
+     * Where recipes can be exported: the datapack always, the KubeJS script only when KubeJS is installed.
+     */
+    private static List<SupportedRecipeExporter> getAvailableExporters()
+    {
+        return Arrays.stream(SupportedRecipeExporter.values())
+                .filter(exporter -> exporter != SupportedRecipeExporter.KUBE_JS || SupportedMod.isKubeJSLoaded())
+                .toList();
     }
 
     private void onRecipeTypeChanged(SupportedRecipeExporter recipeExporter)
