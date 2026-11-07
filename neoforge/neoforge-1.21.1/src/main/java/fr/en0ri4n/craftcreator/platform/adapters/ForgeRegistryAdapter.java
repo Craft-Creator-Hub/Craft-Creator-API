@@ -1,5 +1,6 @@
 package fr.en0ri4n.craftcreator.platform.adapters;
 
+import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreators;
 import fr.en0ri4n.craftcreator.api.CCReferences;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockDef;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockItemDef;
@@ -95,7 +96,9 @@ public class ForgeRegistryAdapter implements RegistryAdapter
             Item.Properties props = new Item.Properties();
             if(itemDef.getMaxStackSize() != 64) props.stacksTo(itemDef.getMaxStackSize());
 
-            registeredItems.add(ITEMS.register(name, () -> new BlockItem(regBlock.get(), props)));
+            DeferredHolder<Item, Item> item = ITEMS.register(name, () -> new BlockItem(regBlock.get(), props));
+            // Recipe creators for mods that aren't installed are left out of the creative tab
+            if(RecipeCreators.isBlockAvailable(blockDef.getId())) registeredItems.add(item);
         }
     }
 

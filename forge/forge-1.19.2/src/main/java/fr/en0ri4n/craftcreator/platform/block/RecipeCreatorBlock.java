@@ -1,5 +1,7 @@
 package fr.en0ri4n.craftcreator.platform.block;
 
+import net.minecraft.network.chat.Component;
+import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreators;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockDef;
 import fr.en0ri4n.craftcreator.api.init.shapes.CoreShapes;
 import fr.en0ri4n.craftcreator.api.init.shapes.CoreVoxelShape;
@@ -82,6 +84,13 @@ public class RecipeCreatorBlock extends Block implements EntityBlock
     public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
     {
         if(world.isClientSide()) return InteractionResult.SUCCESS;
+
+        // The mod this recipe creator is for isn't installed: say so instead of opening it
+        if(!RecipeCreators.isBlockAvailable(coreBlockDef.getId()))
+        {
+            player.displayClientMessage(Component.translatable("craftcreator.message.recipe_creator.missing_mod", RecipeCreators.getRequiredModName(coreBlockDef.getId())), true);
+            return InteractionResult.CONSUME;
+        }
 
         if(player instanceof ServerPlayer serverPlayer)
         {

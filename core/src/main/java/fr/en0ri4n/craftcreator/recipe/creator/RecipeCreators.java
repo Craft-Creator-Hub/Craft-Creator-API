@@ -1,6 +1,8 @@
 package fr.en0ri4n.craftcreator.recipe.creator;
 
 
+import fr.en0ri4n.craftcreator.api.mod.SupportedMod;
+import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityDefinition;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockDef;
 import fr.en0ri4n.craftcreator.api.init.definitions.FacingType;
@@ -89,6 +91,35 @@ public class RecipeCreators
     public static RecipeCreator<?> getRecipeCreator(Identifier recipeTypeId)
     {
         return ALL_RECIPE_CREATORS.stream().filter(rc -> rc.handlesRecipeType(recipeTypeId)).findFirst().orElse(null);
+    }
+
+    /**
+     * @return the mod whose recipes the recipe creator block with this id makes, or null if no recipe creator has this id
+     */
+    public static SupportedMod getModOfBlock(Identifier blockId)
+    {
+        return ALL_RECIPE_CREATORS.stream().filter(rc -> rc.getId().equals(blockId)).map(RecipeCreator::getMod).findFirst().orElse(null);
+    }
+
+    /**
+     * A recipe creator block is usable when the mod it makes recipes for is installed (always for Minecraft's).
+     * Blocks of missing mods stay registered, so worlds keep them, but they're left out of the creative tab and don't open.
+     */
+    public static boolean isBlockAvailable(Identifier blockId)
+    {
+        SupportedMod mod = getModOfBlock(blockId);
+        return mod == null || mod == SupportedMod.MINECRAFT || CraftCreatorAPI.get().getPlatform().getServices().IsModLoaded(mod);
+    }
+
+    /**
+     * @return the name of the mod the block needs, e.g. "Create", for messages
+     */
+    public static String getRequiredModName(Identifier blockId)
+    {
+        SupportedMod mod = getModOfBlock(blockId);
+        if(mod == null) return "";
+        String id = mod.getModId();
+        return Character.toUpperCase(id.charAt(0)) + id.substring(1);
     }
 
     public static void registerAll()

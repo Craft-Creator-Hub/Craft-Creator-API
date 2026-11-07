@@ -1,5 +1,8 @@
 package fr.en0ri4n.craftcreator.platform.adapters;
 
+import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreators;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ItemStack;
 import fr.en0ri4n.craftcreator.api.CCReferences;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockDef;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockItemDef;
@@ -45,6 +48,20 @@ public class ForgeRegistryAdapter implements RegistryAdapter
     public static RegistryObject<BlockEntityType<ForgeGenericBlockEntity>> GENERIC_BLOCK_ENTITY;
 
     private final List<RegistryObject<Block>> registeredBlocksWithEntity = new ArrayList<>();
+    /** Items shown in the creative tab: the recipe creators of the installed mods */
+    private final List<RegistryObject<Item>> tabItems = new ArrayList<>();
+
+    /**
+     * Craft Creator's creative tab, named by the "itemGroup.craftcreator" translation.
+     */
+    public static final CreativeModeTab TAB = new CreativeModeTab(CCReferences.MOD_ID)
+    {
+        @Override
+        public ItemStack makeIcon()
+        {
+            return get().tabItems.isEmpty() ? new ItemStack(Items.CRAFTING_TABLE) : new ItemStack(get().tabItems.get(0).get());
+        }
+    };
 
     public List<Block> getRegisteredBlocks()
     {
@@ -76,10 +93,14 @@ public class ForgeRegistryAdapter implements RegistryAdapter
         if(blockItemDef.hasItem())
         {
             CoreItemDef itemDef = blockItemDef.getItem();
-            Item.Properties props = new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS);
+            // Recipe creators for mods that aren't installed are left out of the creative tab
+            boolean available = RecipeCreators.isBlockAvailable(blockDef.getId());
+            Item.Properties props = new Item.Properties();
+            if(available) props.tab(TAB);
             if(itemDef.getMaxStackSize() != 64) props.stacksTo(itemDef.getMaxStackSize());
 
-            ITEMS.register(name, () -> new BlockItem(regBlock.get(), props));
+            RegistryObject<Item> item = ITEMS.register(name, () -> new BlockItem(regBlock.get(), props));
+            if(available) tabItems.add(item);
         }
     }
 

@@ -362,5 +362,6 @@
   "craftcreator.screen.thermal_recipe_creator.field.duration_mod": "Duration x:",
   "craftcreator.screen.thermal_recipe_creator.field.fuel_energy": "Energy (RF):",
   "craftcreator.serializer.message.recipe.json_preview": "§aRecipe JSON ready",
-  "craftcreator.screen.json_preview.title": "Recipe JSON"
+  "craftcreator.screen.json_preview.title": "Recipe JSON",
+  "craftcreator.message.recipe_creator.missing_mod": "§cThis recipe creator needs %s"
 }
