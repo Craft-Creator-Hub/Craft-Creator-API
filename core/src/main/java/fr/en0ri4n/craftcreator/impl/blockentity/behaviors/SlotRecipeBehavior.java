@@ -9,20 +9,32 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Behavior of recipe creators built from a {@link SlotRecipeType}: stores the values typed in the settings panel.
+ * Behavior of recipe creators built from a {@link SlotRecipeType}: stores the selected variant and the values typed in
+ * the settings panel.
  */
 @Getter
 public class SlotRecipeBehavior extends RecipeCreatorBlockEntityBehavior
 {
     private static final String PARAMS_KEY = "params";
+    private static final String VARIANT_KEY = "variant";
 
     private final SlotRecipeType type;
+    private SlotRecipeType.Variant variant;
     /** Values typed by the player, by param key. */
     private final Map<String, String> params = new HashMap<>();
 
     public SlotRecipeBehavior(SlotRecipeType type)
     {
         this.type = type;
+        this.variant = type.getVariants().get(0);
+    }
+
+    /**
+     * @param name a variant of the type; unknown names select the default variant
+     */
+    public void setVariant(String name)
+    {
+        this.variant = type.getVariant(name);
     }
 
     public void setParam(String key, String value)
@@ -34,6 +46,7 @@ public class SlotRecipeBehavior extends RecipeCreatorBlockEntityBehavior
     public void save(CoreBlockEntity entity, JsonObject out)
     {
         super.save(entity, out);
+        out.addProperty(VARIANT_KEY, variant.name());
         JsonObject paramsObj = new JsonObject();
         params.forEach(paramsObj::addProperty);
         out.add(PARAMS_KEY, paramsObj);
@@ -43,6 +56,8 @@ public class SlotRecipeBehavior extends RecipeCreatorBlockEntityBehavior
     public void load(CoreBlockEntity entity, JsonObject in)
     {
         super.load(entity, in);
+        if(in.has(VARIANT_KEY))
+            setVariant(in.get(VARIANT_KEY).getAsString());
         if(in.has(PARAMS_KEY))
         {
             params.clear();

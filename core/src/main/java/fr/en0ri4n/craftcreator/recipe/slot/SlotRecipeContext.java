@@ -22,13 +22,17 @@ public class SlotRecipeContext
 {
     @Getter
     private final SlotRecipeType type;
+    /** Recipe type being made, among the type's variants. */
+    @Getter
+    private final SlotRecipeType.Variant variant;
     /** Entry of each slot, by slot index; null for empty slots. */
     private final RecipeEntry[] entries;
     private final Map<String, String> params;
 
-    public SlotRecipeContext(SlotRecipeType type, List<CoreItemStack> inventory, Map<Integer, Identifier> taggedSlots, Map<String, String> params)
+    public SlotRecipeContext(SlotRecipeType type, SlotRecipeType.Variant variant, List<CoreItemStack> inventory, Map<Integer, Identifier> taggedSlots, Map<String, String> params)
     {
         this.type = type;
+        this.variant = variant;
         this.params = params;
         this.entries = new RecipeEntry[type.getSlots().size()];
 
@@ -189,6 +193,14 @@ public class SlotRecipeContext
         JsonArray array = new JsonArray();
         entries.forEach(entry -> array.add(item(entry)));
         return array;
+    }
+
+    /**
+     * {"item": id, "count": n} with the item key of the current Minecraft version ("id" in 1.21.2+); count always written.
+     */
+    public JsonObject result(RecipeEntry entry)
+    {
+        return RecipeSerializer.resultJson(entry);
     }
 
     /**

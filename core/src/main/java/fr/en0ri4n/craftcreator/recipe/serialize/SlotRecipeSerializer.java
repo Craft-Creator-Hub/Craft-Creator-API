@@ -37,7 +37,7 @@ public class SlotRecipeSerializer extends RecipeSerializer
     private SlotRecipeContext createContext(CoreBlockEntity cbe)
     {
         SlotRecipeBehavior behavior = (SlotRecipeBehavior) cbe.getBehavior();
-        return new SlotRecipeContext(type, cbe.getInventory(), behavior.getTaggedSlots(), behavior.getParams());
+        return new SlotRecipeContext(type, behavior.getVariant(), cbe.getInventory(), behavior.getTaggedSlots(), behavior.getParams());
     }
 
     /**
@@ -67,13 +67,15 @@ public class SlotRecipeSerializer extends RecipeSerializer
     {
         SlotRecipeContext ctx = createContext(cbe);
 
+        Identifier recipeTypeId = ctx.getVariant().recipeTypeId();
+
         JsonObject out = new JsonObject();
-        out.addProperty("type", type.getRecipeTypeId().toString());
+        out.addProperty("type", recipeTypeId.toString());
         type.getWriter().write(ctx, out);
 
         RecipeEntry output = findFirst(ctx.entries(), RecipeEntry.EntryType.OUTPUT);
         String outputName = output == RecipeEntry.EMPTY ? ctx.entries().get(0).getId().getPath() : output.getId().getPath();
-        return withIdAndName(out, outputName + "_" + type.getRecipeTypeId().getPath());
+        return withIdAndName(out, outputName + "_" + recipeTypeId.getPath());
     }
 
     /**
@@ -90,11 +92,20 @@ public class SlotRecipeSerializer extends RecipeSerializer
 
             List<RecipeEntry> inputs = new ArrayList<>();
             List<RecipeEntry> outputs = new ArrayList<>();
-            INPUT_KEYS.forEach(key -> collect(in.get(key), inputs));
             OUTPUT_KEYS.forEach(key -> collect(in.get(key), outputs));
-
-            assignSlots(type, inputs, false);
             assignSlots(type, outputs, true);
+
+            if(type.getInputReader() != null)
+            {
+                // The type knows where its inputs go (e.g. shaped patterns)
+                inputs.addAll(type.getInputReader().apply(in));
+                inputs.forEach(entry -> entry.setType(RecipeEntry.EntryType.INPUT));
+            }
+            else
+            {
+                INPUT_KEYS.forEach(key -> collect(in.get(key), inputs));
+                assignSlots(type, inputs, false);
+            }
 
             RecipeInfos infos = RecipeInfos.create();
             in.entrySet().stream()
