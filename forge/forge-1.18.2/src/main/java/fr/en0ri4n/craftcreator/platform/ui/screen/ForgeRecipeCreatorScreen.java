@@ -18,6 +18,7 @@ import net.minecraft.world.entity.player.Inventory;
 @Getter
 public class ForgeRecipeCreatorScreen extends AbstractContainerScreen<ForgeRecipeCreatorMenu> implements WidgetRenderer
 {
+    @lombok.Getter
     private final ContainerModel<?> model;
 
     public ForgeRecipeCreatorScreen(ForgeRecipeCreatorMenu menu, Inventory playerInv, Component title)

@@ -24,14 +24,16 @@ public class MakeRecipeRequestPacket
     {
         buf.writeBlockPos(fr.en0ri4n.craftcreator.platform.Forge1182Platform.get().getBlockPosAdapter().fromCore(packet.getData().getPos()));
         buf.writeUtf(packet.getData().getContainerId().toString());
+        buf.writeBoolean(packet.getData().isPreview());
     }
 
     public static MakeRecipeRequestPacket decode(FriendlyByteBuf buf)
     {
         CoreBlockPos pos = Forge1182Platform.get().getBlockPosAdapter().toCore(buf.readBlockPos());
         Identifier containerId = Identifier.from(buf.readUtf());
+        boolean preview = buf.readBoolean();
 
-        MakeRecipeRequestData data = new MakeRecipeRequestData(pos, containerId);
+        MakeRecipeRequestData data = new MakeRecipeRequestData(pos, containerId, preview);
         return new MakeRecipeRequestPacket(data);
     }
 

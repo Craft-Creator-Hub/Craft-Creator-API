@@ -35,6 +35,12 @@ public class ForgeUiAdapter implements UiAdapter<Widget>
     }
 
     @Override
+    public boolean isShiftKeyDown()
+    {
+        return Screen.hasShiftDown();
+    }
+
+    @Override
     public Widget createWidget(CoreUiElement element)
     {
         return new ForgeWidget(element);
@@ -60,5 +66,11 @@ public class ForgeUiAdapter implements UiAdapter<Widget>
             if(current instanceof ForgeScreen)
                 mc.setScreen(null);
         });
+    }
+
+    @Override
+    public void setClipboard(String text)
+    {
+        mc.keyboardHandler.setClipboard(text);
     }
 }

@@ -360,5 +360,7 @@
   "craftcreator.screen.thermal_recipe_creator.field.loot_table": "Loot table:",
   "craftcreator.screen.thermal_recipe_creator.field.amplifier": "Amplifier:",
   "craftcreator.screen.thermal_recipe_creator.field.duration_mod": "Duration x:",
-  "craftcreator.screen.thermal_recipe_creator.field.fuel_energy": "Energy (RF):"
+  "craftcreator.screen.thermal_recipe_creator.field.fuel_energy": "Energy (RF):",
+  "craftcreator.serializer.message.recipe.json_preview": "§aRecipe JSON ready",
+  "craftcreator.screen.json_preview.title": "Recipe JSON"
 }

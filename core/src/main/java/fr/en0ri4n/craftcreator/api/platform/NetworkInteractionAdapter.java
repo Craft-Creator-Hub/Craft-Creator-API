@@ -1,5 +1,7 @@
 package fr.en0ri4n.craftcreator.api.platform;
 
+import fr.en0ri4n.craftcreator.recipe.utils.RecipeRequestFeedback;
+
 import fr.en0ri4n.craftcreator.api.net.BlockEntityUpdateData;
 import fr.en0ri4n.craftcreator.api.net.FetchData;
 import fr.en0ri4n.craftcreator.api.net.MakeRecipeRequestData;
@@ -29,6 +31,11 @@ public interface NetworkInteractionAdapter<T>
     void sendMakeRecipeRequestToServer(MakeRecipeRequestData data);
 
     void handleServerMakeRecipeRequest(T player, MakeRecipeRequestData data);
+
+    /**
+     * Client side: show the server's answer to a recipe request in the open screen (or in the chat when there is none).
+     */
+    void handleClientRecipeFeedback(RecipeRequestFeedback feedback);
 
     void sendManagementRequestToServer(RecipeManagementRequest request);
 

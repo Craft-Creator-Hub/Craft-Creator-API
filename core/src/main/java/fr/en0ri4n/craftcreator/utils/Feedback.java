@@ -24,7 +24,10 @@ public enum Feedback
     ALREADY_REMOVED("serializer.message.recipe.already_removed"),
     NO_PERMISSION("serializer.message.recipe.no_permission"),
 
-    RECIPE_ALREADY_EXISTS("serializer.message.recipe.already_exists"),;
+    RECIPE_ALREADY_EXISTS("serializer.message.recipe.already_exists"),
+
+    /** The recipe's json, made without exporting it */
+    JSON_PREVIEW("serializer.message.recipe.json_preview"),;
 
     private final String messageKey;
 }

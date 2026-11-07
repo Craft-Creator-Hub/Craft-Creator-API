@@ -13,11 +13,18 @@ public interface UiAdapter<T> {
 
     boolean isCtrlKeyDown();
 
+    boolean isShiftKeyDown();
+
     T createWidget(CoreUiElement element);
 
     void playSound(UiSound sound);
 
     void closeScreen();
+
+    /**
+     * Put the text in the system clipboard.
+     */
+    void setClipboard(String text);
 
     enum UiSound
     {

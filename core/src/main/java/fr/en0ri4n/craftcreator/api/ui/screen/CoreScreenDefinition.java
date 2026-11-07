@@ -6,6 +6,7 @@ import fr.en0ri4n.craftcreator.api.platform.RenderAdapter;
 import fr.en0ri4n.craftcreator.api.platform.UiAdapter;
 import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.api.ui.elements.Core2DBounds;
+import fr.en0ri4n.craftcreator.api.ui.elements.CoreNotifications;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreUiElement;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import lombok.Getter;
@@ -26,6 +27,7 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
     private final T screenData;
     private final Core2DBounds size;
     private final List<CoreUiElement> elements = new ArrayList<>();
+    private final CoreNotifications notifications = new CoreNotifications();
 
     public CoreScreenDefinition(Identifier id, String title, T data, Core2DBounds size)
     {
@@ -61,6 +63,15 @@ public abstract class CoreScreenDefinition<T extends ScreenData>
     {
         renderTitle(ctx);
         getElements().forEach(element -> element.renderForeground(ctx, mouseX, mouseY));
+        notifications.render(ctx, getRenderAdapter(), getRenderAdapter().getScreenWidth() / 2, 6);
+    }
+
+    /**
+     * Show a short message at the top of the screen for a few seconds.
+     */
+    public void notify(String text, CoreNotifications.Kind kind)
+    {
+        notifications.push(text, kind);
     }
 
     protected void renderTitle(RenderContext ctx)

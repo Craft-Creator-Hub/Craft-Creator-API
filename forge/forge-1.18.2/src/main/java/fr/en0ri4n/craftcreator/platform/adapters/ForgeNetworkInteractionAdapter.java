@@ -10,6 +10,7 @@ import fr.en0ri4n.craftcreator.api.net.MakeRecipeRequestData;
 import fr.en0ri4n.craftcreator.api.net.OpenContainerRequestData;
 import fr.en0ri4n.craftcreator.api.net.RecipeManagementRequest;
 import fr.en0ri4n.craftcreator.api.net.RecipeManagementState;
+import fr.en0ri4n.craftcreator.api.ui.screen.CoreScreenDefinition;
 import fr.en0ri4n.craftcreator.api.ui.screen.RecipeManagementListener;
 import fr.en0ri4n.craftcreator.api.net.UiUpdateData;
 import fr.en0ri4n.craftcreator.api.platform.NetworkInteractionAdapter;
@@ -21,6 +22,7 @@ import fr.en0ri4n.craftcreator.platform.net.MakeRecipeRequestPacket;
 import fr.en0ri4n.craftcreator.platform.net.NetworkHandler;
 import fr.en0ri4n.craftcreator.platform.net.OpenContainerRequestPacket;
 import fr.en0ri4n.craftcreator.platform.net.RecipeManagementRequestPacket;
+import fr.en0ri4n.craftcreator.platform.net.RecipeFeedbackPacket;
 import fr.en0ri4n.craftcreator.platform.net.RecipeManagementStatePacket;
 import fr.en0ri4n.craftcreator.platform.net.UiUpdatePacket;
 import fr.en0ri4n.craftcreator.platform.ui.screen.ForgeRecipeCreatorScreen;
@@ -28,10 +30,12 @@ import fr.en0ri4n.craftcreator.platform.ui.screen.ForgeScreen;
 import fr.en0ri4n.craftcreator.recipe.RecipeManagementService;
 import fr.en0ri4n.craftcreator.utils.Feedback;
 import fr.en0ri4n.craftcreator.recipe.RecipeManager;
+import fr.en0ri4n.craftcreator.recipe.utils.RecipeFeedbackDisplay;
 import fr.en0ri4n.craftcreator.recipe.utils.RecipeRequestFeedback;
 import fr.en0ri4n.craftcreator.utils.Identifier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
@@ -171,9 +175,30 @@ public class ForgeNetworkInteractionAdapter implements NetworkInteractionAdapter
         if(blockEntity == null)
             return;
 
-        RecipeRequestFeedback requestFeedback = RecipeManager.get().handleMakeRecipeRequest(blockEntity.getCoreEntity(), data.getContainerId());
+        RecipeRequestFeedback requestFeedback = RecipeManager.get().handleMakeRecipeRequest(blockEntity.getCoreEntity(), data.getContainerId(), data.isPreview());
 
-        player.sendMessage(Forge1182Platform.get().getTextComponentProvider().createFeedbackComponent(requestFeedback), player.getUUID());
+        // The open screen shows the message (or the json preview); an exported recipe also gets its chat message, with its file and json links
+        NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new RecipeFeedbackPacket(requestFeedback));
+        if(requestFeedback.isSuccess() && !data.isPreview())
+            player.sendMessage(Forge1182Platform.get().getTextComponentProvider().createFeedbackComponent(requestFeedback), player.getUUID());
+    }
+
+    @Override
+    public void handleClientRecipeFeedback(RecipeRequestFeedback feedback)
+    {
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
+        {
+            Minecraft mc = Minecraft.getInstance();
+            CoreScreenDefinition<?> screen = null;
+            if(mc.screen instanceof ForgeScreen forgeScreen)
+                screen = forgeScreen.getScreenDefinition();
+            else if(mc.screen instanceof ForgeRecipeCreatorScreen recipeCreatorScreen)
+                screen = recipeCreatorScreen.getModel().getScreenDefinition();
+
+            // No Craft Creator screen open anymore: errors go to the chat (successes are already there)
+            if(!RecipeFeedbackDisplay.show(screen, feedback) && !feedback.isSuccess() && mc.player != null)
+                mc.player.displayClientMessage(new TextComponent(RecipeFeedbackDisplay.message(feedback)), false);
+        });
     }
 
     @Override

@@ -6,7 +6,7 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public class NetworkHandler {
-    private static final String PROTOCOL = "1";
+    private static final String PROTOCOL = "2";
     public static final ResourceLocation CHANNEL_NAME = new ResourceLocation(CCReferences.MOD_ID, "main");
     public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
             CHANNEL_NAME,
@@ -39,6 +39,9 @@ public class NetworkHandler {
         // Register server -> client packet (RecipeManagementStatePacket)
         INSTANCE.registerMessage(id++, RecipeManagementStatePacket.class,
                 RecipeManagementStatePacket::encode, RecipeManagementStatePacket::decode, RecipeManagementStatePacket::handleClient);
+        // Register server -> client packet (RecipeFeedbackPacket)
+        INSTANCE.registerMessage(id++, RecipeFeedbackPacket.class,
+                RecipeFeedbackPacket::encode, RecipeFeedbackPacket::decode, RecipeFeedbackPacket::handleClient);
     }
 
     private NetworkHandler() {}
