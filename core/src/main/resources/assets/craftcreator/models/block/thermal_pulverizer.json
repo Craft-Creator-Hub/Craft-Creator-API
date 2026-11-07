@@ -1,3 +1,52 @@
 {
-    "parent": "craftcreator:block/thermal_recipe_creator"
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down",
+          "cullface": "down"
+        },
+        "up": {
+          "texture": "#up",
+          "cullface": "up"
+        },
+        "north": {
+          "texture": "#north",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#south",
+          "cullface": "south"
+        },
+        "west": {
+          "texture": "#west",
+          "cullface": "west"
+        },
+        "east": {
+          "texture": "#east",
+          "cullface": "east"
+        }
+      }
+    }
+  ],
+  "textures": {
+    "particle": "craftcreator:block/thermal_pulverizer/particle",
+    "down": "craftcreator:block/thermal_pulverizer/machine_bottom",
+    "up": "craftcreator:block/thermal_pulverizer/particle",
+    "east": "craftcreator:block/thermal_pulverizer/machine_side",
+    "west": "craftcreator:block/thermal_pulverizer/machine_side",
+    "south": "craftcreator:block/thermal_pulverizer/machine_side",
+    "north": "craftcreator:block/thermal_pulverizer/machine_pulverizer"
+  }
 }
