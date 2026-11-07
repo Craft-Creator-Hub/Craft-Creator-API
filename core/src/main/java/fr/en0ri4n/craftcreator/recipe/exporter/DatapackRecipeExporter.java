@@ -61,7 +61,7 @@ public class DatapackRecipeExporter extends ModRecipeExporter
 
         // Create folders
         // The recipe folder is "recipe" since 1.21
-        String recipeFolder = SupportedVersion.isGreaterOrEquals(SupportedVersion.V1_21_2) ? "recipe" : "recipes";
+        String recipeFolder = SupportedVersion.isGreaterOrEquals(SupportedVersion.V1_21_1) ? "recipe" : "recipes";
         File dataDir = new File(datapackDir, "data/" + ApiReferences.MOD_ID + "/" + recipeFolder);
 
         if(!dataDir.exists())
