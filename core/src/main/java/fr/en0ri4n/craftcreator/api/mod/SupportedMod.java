@@ -16,9 +16,9 @@ public enum SupportedMod
 
     KUBEJS("kubejs", new SupportedModLoader[] {SupportedModLoader.FORGE, SupportedModLoader.FABRIC, SupportedModLoader.NEOFORGE}),
 
-    BOTANIA("botania", new SupportedModLoader[] {SupportedModLoader.FORGE, SupportedModLoader.FABRIC}),
-    THERMAL("thermal", new SupportedModLoader[] {SupportedModLoader.FORGE}),
-    CREATE("create", new SupportedModLoader[] {SupportedModLoader.FORGE}),;
+    BOTANIA("botania", new SupportedModLoader[] {SupportedModLoader.FORGE, SupportedModLoader.FABRIC, SupportedModLoader.NEOFORGE}),
+    THERMAL("thermal", new SupportedModLoader[] {SupportedModLoader.FORGE, SupportedModLoader.NEOFORGE}),
+    CREATE("create", new SupportedModLoader[] {SupportedModLoader.FORGE, SupportedModLoader.NEOFORGE}),;
 
     private final String modId;
     private final SupportedModLoader[] modLoaders;

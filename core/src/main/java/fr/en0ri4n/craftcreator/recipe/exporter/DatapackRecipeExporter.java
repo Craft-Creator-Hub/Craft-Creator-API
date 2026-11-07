@@ -1,5 +1,6 @@
 package fr.en0ri4n.craftcreator.recipe.exporter;
 
+import fr.en0ri4n.craftcreator.api.mod.SupportedVersion;
 import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.ApiReferences;
 import fr.en0ri4n.craftcreator.CraftCreatorAPI;
@@ -41,26 +42,27 @@ public class DatapackRecipeExporter extends ModRecipeExporter
 
         if(!datapackDir.exists()) datapackDir.mkdirs();
 
-        // Create pack.mcmeta
+        // pack.mcmeta, with the data pack format of the running version (rewritten each time, as the world can be opened in another version)
         File packMcmeta = new File(datapackDir, "pack.mcmeta");
-
-        if(!packMcmeta.exists())
+        try
         {
-            // Get file from resources assets/craftcreator/pack.mcmeta
-            try(InputStream inputStream = CraftCreatorAPI.class.getResourceAsStream("/assets/craftcreator/presets/pack.mcmeta"))
-            {
-                if(inputStream == null) throw new IOException("pack.mcmeta resource not found");
-
-                Files.copy(inputStream, packMcmeta.toPath());
-            }
-            catch(IOException e)
-            {
-                CraftCreatorAPI.LOGGER.error("Failed to create pack.mcmeta for datapack", e);
-            }
+            JsonObject pack = new JsonObject();
+            int format = CraftCreatorAPI.get().getPlatform().getMinecraftVersion().getDataPackFormat();
+            pack.addProperty("pack_format", format > 0 ? format : SupportedVersion.V1_21_10.getDataPackFormat());
+            pack.addProperty("description", "CraftCreator Generated Datapack");
+            JsonObject root = new JsonObject();
+            root.add("pack", pack);
+            Files.writeString(packMcmeta.toPath(), GsonProvider.prettyGson().toJson(root));
+        }
+        catch(IOException e)
+        {
+            CraftCreatorAPI.LOGGER.error("Failed to create pack.mcmeta for datapack", e);
         }
 
         // Create folders
-        File dataDir = new File(datapackDir, "data/" + ApiReferences.MOD_ID + "/recipes");
+        // The recipe folder is "recipe" since 1.21
+        String recipeFolder = SupportedVersion.isGreaterOrEquals(SupportedVersion.V1_21_2) ? "recipe" : "recipes";
+        File dataDir = new File(datapackDir, "data/" + ApiReferences.MOD_ID + "/" + recipeFolder);
 
         if(!dataDir.exists())
             dataDir.mkdirs();

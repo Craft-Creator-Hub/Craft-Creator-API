@@ -107,7 +107,11 @@ public class SlotRecipeTypes
             .writer((ctx, out) ->
             {
                 out.add("ingredient", ctx.ingredient(ctx.get("input")));
-                out.addProperty("result", ctx.get("output").getId().toString());
+                // An item stack object since 1.20.5, the item id before
+                if(SupportedVersion.isGreaterOrEquals(SupportedVersion.V1_20_6))
+                    out.add("result", ctx.result(ctx.get("output")));
+                else
+                    out.addProperty("result", ctx.get("output").getId().toString());
                 out.addProperty("experience", ctx.paramDouble("experience"));
                 out.addProperty("cookingtime", ctx.paramInt("cookingtime"));
             });
@@ -119,8 +123,16 @@ public class SlotRecipeTypes
             .writer((ctx, out) ->
             {
                 out.add("ingredient", ctx.ingredient(ctx.get("input")));
-                out.addProperty("result", ctx.get("output").getId().toString());
-                out.addProperty("count", ctx.get("output").getCount());
+                // An item stack object since 1.20.5, the item id and a count before
+                if(SupportedVersion.isGreaterOrEquals(SupportedVersion.V1_20_6))
+                {
+                    out.add("result", ctx.result(ctx.get("output")));
+                }
+                else
+                {
+                    out.addProperty("result", ctx.get("output").getId().toString());
+                    out.addProperty("count", ctx.get("output").getCount());
+                }
             });
 
     /**
@@ -163,7 +175,7 @@ public class SlotRecipeTypes
                     if(ctx.has("addition")) out.add("addition", ctx.ingredient(ctx.get("addition")));
                     // Trims change the item itself: no result
                     if(ctx.getVariant().name().equals("transform") && ctx.has("output"))
-                        out.add("result", ctx.item(ctx.get("output")));
+                        out.add("result", ctx.result(ctx.get("output")));
                 });
     }
 

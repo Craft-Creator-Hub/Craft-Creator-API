@@ -110,11 +110,11 @@ public abstract class RecipeSerializer
     }
 
     /**
-     * Key of the item id in results: "id" in 1.21.2+, "item" before.
+     * Key of the item id in results: "id" since 1.20.5 (item stacks are written with codecs), "item" before.
      */
     public static String resultIdKey()
     {
-        return usesNewIngredientFormat() ? "id" : "item";
+        return SupportedVersion.isGreaterOrEquals(SupportedVersion.V1_20_6) ? "id" : "item";
     }
 
     /**
