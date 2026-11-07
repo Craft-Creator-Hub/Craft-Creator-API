@@ -759,13 +759,83 @@ public class SlotRecipeTypes
         return array;
     }
 
+    /**
+     * Create 6 (1.21.1) writes its recipes with codecs: snake_case keys, results as {"id", "count", "chance"},
+     * fluid ingredients as NeoForge sized fluid ingredients and fluid results as {"id", "amount"}.
+     */
+    private static boolean isCreate6()
+    {
+        return SupportedVersion.isGreaterOrEquals(SupportedVersion.V1_21_1);
+    }
+
+    /** A Create key: camelCase before Create 6, snake_case since. */
+    private static String createKey(String camelCase, String snakeCase)
+    {
+        return isCreate6() ? snakeCase : camelCase;
+    }
+
+    /** An item result without chance: {"item"|"id": id, "count": n}, count only written when greater than one. */
+    private static JsonObject createItem(SlotRecipeContext ctx, RecipeEntry entry)
+    {
+        if(!isCreate6()) return ctx.item(entry);
+        JsonObject result = new JsonObject();
+        result.addProperty("id", entry.getId().toString());
+        if(entry.getCount() > 1) result.addProperty("count", entry.getCount());
+        return result;
+    }
+
+    private static JsonArray createItems(SlotRecipeContext ctx, List<RecipeEntry> entries)
+    {
+        JsonArray array = new JsonArray();
+        entries.forEach(entry -> array.add(createItem(ctx, entry)));
+        return array;
+    }
+
+    /** Item results with "chance" when it's not 100%. */
+    private static JsonArray createResults(SlotRecipeContext ctx, String prefix)
+    {
+        if(!isCreate6()) return thermalResults(ctx, prefix);
+        JsonArray results = new JsonArray();
+        for(RecipeEntry output : ctx.all(prefix))
+        {
+            JsonObject result = createItem(ctx, output);
+            String slotName = ctx.getType().getSlots().get(output.getSlot()).name();
+            double chance = ctx.paramDouble("chance_" + slotName.substring(slotName.lastIndexOf('_') + 1));
+            if(chance != 1.0) result.addProperty("chance", chance);
+            results.add(result);
+        }
+        return results;
+    }
+
+    /** A fluid ingredient: {"fluid", "amount"}, or {"type": "neoforge:single", "fluid", "amount"} since Create 6. */
+    private static JsonObject createFluidIngredient(SlotRecipeContext ctx, RecipeEntry entry, int amount)
+    {
+        JsonObject fluid = ctx.fluid(entry, amount);
+        if(!isCreate6()) return fluid;
+        JsonObject ingredient = new JsonObject();
+        ingredient.addProperty("type", "neoforge:single");
+        ingredient.add("fluid", fluid.get("fluid"));
+        ingredient.add("amount", fluid.get("amount"));
+        return ingredient;
+    }
+
+    /** A fluid result: {"fluid", "amount"}, or {"id", "amount"} since Create 6. */
+    private static JsonObject createFluidResult(SlotRecipeContext ctx, RecipeEntry entry, int amount)
+    {
+        if(!isCreate6()) return ctx.fluid(entry, amount);
+        JsonObject result = new JsonObject();
+        result.addProperty("id", entry.getId().toString());
+        result.addProperty("amount", amount);
+        return result;
+    }
+
     /** Ingredients, results with chances and the processing time when the type has one (0 = Create's default). */
     private static void writeProcessing(SlotRecipeContext ctx, JsonObject out)
     {
         out.add("ingredients", createIngredient(ctx, "input"));
-        out.add("results", thermalResults(ctx, "output"));
+        out.add("results", createResults(ctx, "output"));
         if(ctx.getType().getParam("processing_time").isPresent())
-            ctx.addIfPositive(out, "processingTime", "processing_time");
+            ctx.addIfPositive(out, createKey("processingTime", "processing_time"), "processing_time");
     }
 
     private static ParamSpec processingTime(int defaultTime)
@@ -816,8 +886,8 @@ public class SlotRecipeTypes
                     JsonArray ingredients = createIngredient(ctx, "input");
                     ingredients.addAll(createIngredient(ctx, "held"));
                     out.add("ingredients", ingredients);
-                    out.add("results", thermalResults(ctx, "output"));
-                    if(ctx.paramBool("keep_held_item")) out.addProperty("keepHeldItem", true);
+                    out.add("results", createResults(ctx, "output"));
+                    if(ctx.paramBool("keep_held_item")) out.addProperty(createKey("keepHeldItem", "keep_held_item"), true);
                 });
     }
 
@@ -835,9 +905,9 @@ public class SlotRecipeTypes
             .writer((ctx, out) ->
             {
                 JsonArray ingredients = createIngredient(ctx, "input");
-                if(ctx.has("fluid")) ingredients.add(ctx.fluid(ctx.get("fluid"), ctx.paramInt("fluid_amount")));
+                if(ctx.has("fluid")) ingredients.add(createFluidIngredient(ctx, ctx.get("fluid"), ctx.paramInt("fluid_amount")));
                 out.add("ingredients", ingredients);
-                out.add("results", ctx.items(ctx.all("output")));
+                out.add("results", createItems(ctx, ctx.all("output")));
             });
 
     /** An item drain empties the input into an item and a fluid. */
@@ -851,8 +921,8 @@ public class SlotRecipeTypes
             .writer((ctx, out) ->
             {
                 out.add("ingredients", createIngredient(ctx, "input"));
-                JsonArray results = ctx.items(ctx.all("output"));
-                if(ctx.has("fluid_output")) results.add(ctx.fluid(ctx.get("fluid_output"), ctx.paramInt("fluid_amount")));
+                JsonArray results = createItems(ctx, ctx.all("output"));
+                if(ctx.has("fluid_output")) results.add(createFluidResult(ctx, ctx.get("fluid_output"), ctx.paramInt("fluid_amount")));
                 out.add("results", results);
             });
 
@@ -880,15 +950,15 @@ public class SlotRecipeTypes
                     JsonArray ingredients = createIngredients(ctx, ctx.all("input"));
                     for(int i = 0; i < 2; i++)
                         if(ctx.has("fluid_in_" + i))
-                            ingredients.add(ctx.fluid(ctx.get("fluid_in_" + i), ctx.paramInt("fluid_amount_" + i)));
+                            ingredients.add(createFluidIngredient(ctx, ctx.get("fluid_in_" + i), ctx.paramInt("fluid_amount_" + i)));
                     out.add("ingredients", ingredients);
 
-                    JsonArray results = thermalResults(ctx, "output");
-                    if(ctx.has("fluid_out_0")) results.add(ctx.fluid(ctx.get("fluid_out_0"), ctx.paramInt("output_fluid_amount")));
+                    JsonArray results = createResults(ctx, "output");
+                    if(ctx.has("fluid_out_0")) results.add(createFluidResult(ctx, ctx.get("fluid_out_0"), ctx.paramInt("output_fluid_amount")));
                     out.add("results", results);
 
-                    if(!ctx.param("heat").equals("none")) out.addProperty("heatRequirement", ctx.param("heat"));
-                    ctx.addIfPositive(out, "processingTime", "processing_time");
+                    if(!ctx.param("heat").equals("none")) out.addProperty(createKey("heatRequirement", "heat_requirement"), ctx.param("heat"));
+                    ctx.addIfPositive(out, createKey("processingTime", "processing_time"), "processing_time");
                 });
     }
 
@@ -927,7 +997,7 @@ public class SlotRecipeTypes
                     out.add("pattern", patternAndKey.pattern());
                     out.add("key", patternAndKey.key());
                     out.add("result", ctx.result(ctx.get("output")));
-                    out.addProperty("acceptMirrored", ctx.paramBool("accept_mirrored"));
+                    out.addProperty(createKey("acceptMirrored", "accept_mirrored"), ctx.paramBool("accept_mirrored"));
                 });
     }
 
@@ -973,44 +1043,50 @@ public class SlotRecipeTypes
         {
             if(ctx.has("input")) out.add("ingredient", ctx.ingredient(ctx.get("input")));
             RecipeEntry transitional = ctx.has("transitional") ? ctx.get("transitional") : ctx.get("output_0");
-            JsonObject transitionalItem = new JsonObject();
-            if(transitional != null) transitionalItem.addProperty("item", transitional.getId().toString());
-            out.add("transitionalItem", transitionalItem);
+            // The transitional item is an ingredient of each step ({"item"}) and their result ({"id"} since Create 6)
+            JsonObject transitionalIngredient = new JsonObject();
+            JsonObject transitionalResult = new JsonObject();
+            if(transitional != null)
+            {
+                transitionalIngredient.addProperty("item", transitional.getId().toString());
+                transitionalResult.addProperty(isCreate6() ? "id" : "item", transitional.getId().toString());
+            }
+            out.add(createKey("transitionalItem", "transitional_item"), transitionalResult);
 
             JsonArray sequence = new JsonArray();
             for(int i = 0; i < ASSEMBLY_STEPS; i++)
             {
                 String stepType = ctx.param("step_type_" + i);
                 if(!stepType.equals("none"))
-                    sequence.add(assemblyStep(ctx, i, stepType, transitionalItem));
+                    sequence.add(assemblyStep(ctx, i, stepType, transitionalIngredient, transitionalResult));
             }
             out.add("sequence", sequence);
 
             // Create uses the chances of sequenced assembly results as weights
-            out.add("results", thermalResults(ctx, "output"));
+            out.add("results", createResults(ctx, "output"));
             out.addProperty("loops", Math.max(1, ctx.paramInt("loops")));
         });
     }
 
-    private static JsonObject assemblyStep(SlotRecipeContext ctx, int index, String stepType, JsonObject transitionalItem)
+    private static JsonObject assemblyStep(SlotRecipeContext ctx, int index, String stepType, JsonObject transitionalIngredient, JsonObject transitionalResult)
     {
         JsonObject step = new JsonObject();
         step.addProperty("type", "create:" + stepType);
 
         JsonArray ingredients = new JsonArray();
-        ingredients.add(transitionalItem.deepCopy());
+        ingredients.add(transitionalIngredient.deepCopy());
         String slot = "step_" + index;
         if(stepType.equals("deploying") && ctx.has(slot))
             ingredients.add(ctx.ingredient(ctx.get(slot)));
         if(stepType.equals("filling"))
         {
             RecipeEntry fluid = ctx.fluidOf(slot);
-            if(fluid != null) ingredients.add(ctx.fluid(fluid, ctx.paramInt("step_amount_" + index)));
+            if(fluid != null) ingredients.add(createFluidIngredient(ctx, fluid, ctx.paramInt("step_amount_" + index)));
         }
         step.add("ingredients", ingredients);
 
         JsonArray results = new JsonArray();
-        results.add(transitionalItem.deepCopy());
+        results.add(transitionalResult.deepCopy());
         step.add("results", results);
         return step;
     }

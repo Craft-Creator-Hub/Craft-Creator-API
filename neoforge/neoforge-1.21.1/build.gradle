@@ -1,0 +1,88 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.148'
+}
+
+version = "${craftcreator_version}"
+group = 'fr.en0ri4n.craftcreator'
+base.archivesName = "${craftcreator_name}"
+
+// Minecraft 1.21.1 runs on Java 21; the core stays on Java 17 bytecode, which Java 21 reads
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+neoForge {
+    version = project.neoforge_version
+
+    parchment {
+        minecraftVersion = project.parchment_minecraft_version
+        mappingsVersion = project.parchment_mappings_version
+    }
+
+    runs {
+        client {
+            client()
+            gameDirectory = project.file('run')
+        }
+        server {
+            server()
+            gameDirectory = project.file('run/SERVER')
+            programArgument '--nogui'
+        }
+        configureEach {
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+    }
+
+    mods {
+        craftcreator {
+            sourceSet sourceSets.main
+            sourceSet project(':core').sourceSets.main
+        }
+    }
+}
+
+repositories {
+    // Modrinth Maven: the test mods
+    maven {
+        url "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
+}
+
+dependencies {
+    implementation project(':core')
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+    // Test mods
+    runtimeOnly "maven.modrinth:jei:${jei_version}"
+    runtimeOnly "maven.modrinth:create:${create_version}"
+    runtimeOnly "maven.modrinth:kubejs:${kubejs_version}"
+    runtimeOnly "maven.modrinth:rhino:${rhino_version}"
+}
+
+// Fill the version and ids into neoforge.mods.toml
+tasks.named('processResources', ProcessResources) {
+    def props = [mod_version: project.version, mc_version: project.mc_version]
+    inputs.properties props
+    filesMatching('META-INF/neoforge.mods.toml') { expand props }
+}
+
+jar {
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    manifest {
+        attributes([
+                "Specification-Title"     : "${craftcreator_name}",
+                "Specification-Vendor"    : "En0ri4n",
+                "Specification-Version"   : project.version,
+                "Implementation-Title"    : "${craftcreator_name}",
+                "Implementation-Version"  : project.version,
+                "Implementation-Vendor"   : "En0ri4n",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
