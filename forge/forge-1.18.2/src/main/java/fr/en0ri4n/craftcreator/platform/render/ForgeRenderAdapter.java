@@ -90,7 +90,10 @@ public class ForgeRenderAdapter implements RenderAdapter
     public void drawText(RenderContext ctx, String text, boolean shadow, int x, int y, int color)
     {
         ForgeRenderContext forgeRenderContext = ForgeRenderContext.from(ctx);
-        mc.font.drawShadow(forgeRenderContext.poseStack(), text, x, y, color);
+        if(shadow)
+            mc.font.drawShadow(forgeRenderContext.poseStack(), text, x, y, color);
+        else
+            mc.font.draw(forgeRenderContext.poseStack(), text, x, y, color);
     }
 
     @Override
