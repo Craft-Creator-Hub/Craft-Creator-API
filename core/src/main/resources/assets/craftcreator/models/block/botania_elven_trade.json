@@ -1,3 +1,52 @@
 {
-    "parent": "craftcreator:block/botania_recipe_creator"
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down",
+          "cullface": "down"
+        },
+        "up": {
+          "texture": "#up",
+          "cullface": "up"
+        },
+        "north": {
+          "texture": "#north",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#south",
+          "cullface": "south"
+        },
+        "west": {
+          "texture": "#west",
+          "cullface": "west"
+        },
+        "east": {
+          "texture": "#east",
+          "cullface": "east"
+        }
+      }
+    }
+  ],
+  "textures": {
+    "down": "craftcreator:block/botania_elven_trade/alfheim_portal",
+    "north": "craftcreator:block/botania_elven_trade/alfheim_portal",
+    "south": "craftcreator:block/botania_elven_trade/alfheim_portal",
+    "west": "craftcreator:block/botania_elven_trade/alfheim_portal",
+    "east": "craftcreator:block/botania_elven_trade/alfheim_portal",
+    "particle": "craftcreator:block/botania_elven_trade/alfheim_portal",
+    "up": "craftcreator:block/botania_elven_trade/up"
+  }
 }
