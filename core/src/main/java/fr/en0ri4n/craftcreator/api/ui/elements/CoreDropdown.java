@@ -89,7 +89,7 @@ public class CoreDropdown<T> extends CoreUiElement
     {
         if(!isVisible()) return;
 
-        int actualWidth = Math.max(getBounds().getWidth(), getRenderAdapter().getTextWidth(this.getSelectedValueAsString()) + 10);
+        int actualWidth = hasFixedWidth ? getBounds().getWidth() : Math.max(getBounds().getWidth(), getRenderAdapter().getTextWidth(this.getSelectedValueAsString()) + 10);
 
         CoreButtonStyle.State state = CoreButtonStyle.State.of(true, false, isMouseOver(mouseX, mouseY));
         CoreButtonStyle.draw(ctx, getBounds().getX(), getBounds().getY(), actualWidth, getBounds().getHeight(), state);

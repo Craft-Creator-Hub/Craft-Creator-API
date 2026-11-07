@@ -4,7 +4,10 @@ import fr.en0ri4n.craftcreator.CraftCreatorAPI;
 import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeExporter;
 import fr.en0ri4n.craftcreator.api.net.MakeRecipeRequestData;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
+import fr.en0ri4n.craftcreator.api.item.CoreItemStack;
+import fr.en0ri4n.craftcreator.api.render.RenderContext;
 import fr.en0ri4n.craftcreator.api.ui.elements.Core2DBounds;
+import fr.en0ri4n.craftcreator.api.ui.elements.CoreTheme;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreButtonWidgetList;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreDropdown;
 import fr.en0ri4n.craftcreator.api.ui.elements.CoreUiElement;
@@ -19,6 +22,13 @@ public abstract class RecipeCreatorContainerScreenDefinition<T extends RecipeCre
     private CoreDropdown<SupportedRecipeExporter> recipeTypeDropdown;
     private CoreButtonWidgetList settingsList;
 
+    private static final int TOOLBAR_GAP = 2;
+    private static final int TOOLBAR_PADDING = 4;
+    private static final int TOOLBAR_SPACING = 4;
+    /** Fits the widest exporter label, "KJS" */
+    private static final int TOOLBAR_BUTTON_WIDTH = 26;
+    private static final int TITLE_TAB_HEIGHT = 21;
+
     public RecipeCreatorContainerScreenDefinition(ContainerModel<T> parent, T behavior, Identifier id, String title)
     {
         super(parent, behavior, id, title);
@@ -27,7 +37,8 @@ public abstract class RecipeCreatorContainerScreenDefinition<T extends RecipeCre
     @Override
     public void initElements(int screenWidth, int screenHeight)
     {
-        addElement(recipeTypeDropdown = new CoreDropdown<>("recipe_type_dropdown", getGuiSize().getX(), getGuiSize().getY(), 20, 20, false, Arrays.stream(SupportedRecipeExporter.values()).toList(), 0,
+        // Toolbar on the right of the GUI, so nothing covers the texture: exporter, then export
+        addElement(recipeTypeDropdown = new CoreDropdown<>("recipe_type_dropdown", getToolbarX(), getGuiSize().getY(TOOLBAR_PADDING), TOOLBAR_BUTTON_WIDTH, 20, true, Arrays.stream(SupportedRecipeExporter.values()).toList(), 0,
                 "Recipe Type", this::onRecipeTypeChanged) {
             @Override
             public String getSelectedValueAsString()
@@ -66,7 +77,67 @@ public abstract class RecipeCreatorContainerScreenDefinition<T extends RecipeCre
 
     protected Core2DBounds getExportButtonBounds()
     {
-        return Core2DBounds.ofPos(getGuiSize().getRight(-26), getGuiSize().getY(60));
+        // The export button is 20 wide: centered in the toolbar
+        return Core2DBounds.ofPos(getToolbarX() + (TOOLBAR_BUTTON_WIDTH - 20) / 2, getGuiSize().getY(TOOLBAR_PADDING + 20 + TOOLBAR_SPACING));
+    }
+
+    private int getToolbarX()
+    {
+        return getGuiSize().getRight() + TOOLBAR_GAP + TOOLBAR_PADDING;
+    }
+
+    @Override
+    protected void renderBehindTexture(RenderContext ctx)
+    {
+        // Toolbar panel, attached to the GUI's right side
+        CoreScreenDefinition.renderTextureWithSize(ctx, GUI_TEXTURE, getGuiSize().getRight() + TOOLBAR_GAP, getGuiSize().getY(),
+                                                   TOOLBAR_BUTTON_WIDTH + TOOLBAR_PADDING * 2, 40 + TOOLBAR_SPACING + TOOLBAR_PADDING * 2, false, false);
+        if(showsTitleTab())
+        {
+            // Title tab, going under the GUI's top edge so it looks attached
+            CoreScreenDefinition.renderTextureWithSize(ctx, GUI_TEXTURE, getGuiSize().getX(), getTitleTabY(), getTitleTabWidth(), TITLE_TAB_HEIGHT + 4, false, false);
+        }
+    }
+
+    /**
+     * Title on a tab above the GUI, with the item of the recipe creator.
+     */
+    @Override
+    protected void renderTitle(RenderContext ctx)
+    {
+        if(!showsTitleTab()) return;
+        Identifier icon = getTitleIcon();
+        int x = getGuiSize().getX();
+        int y = getTitleTabY();
+        if(icon != null)
+            getRenderAdapter().drawItem(ctx, new CoreItemStack(icon, 1), x + 4, y + 3, 1F);
+        getRenderAdapter().drawText(ctx, translateToString(getTitle()), x + 6 + (icon == null ? 0 : 18), y + 7, CoreTheme.TEXT_TITLE);
+    }
+
+    /**
+     * @return whether the title is drawn on a tab above the GUI; false when the GUI shows it itself
+     */
+    protected boolean showsTitleTab()
+    {
+        return true;
+    }
+
+    private int getTitleTabY()
+    {
+        return getGuiSize().getY() - TITLE_TAB_HEIGHT;
+    }
+
+    private int getTitleTabWidth()
+    {
+        return getRenderAdapter().getTextWidth(translateToString(getTitle())) + (getTitleIcon() == null ? 0 : 18) + 12;
+    }
+
+    /**
+     * @return item shown next to the title, or null for none
+     */
+    protected Identifier getTitleIcon()
+    {
+        return null;
     }
 
     @Override

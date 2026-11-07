@@ -36,6 +36,7 @@ public abstract class CoreContainerScreenDefinition<T extends BlockEntityBehavio
     public void renderBackground(RenderContext ctx)
     {
         super.renderBackground(ctx);
+        renderBehindTexture(ctx);
         Core2DBounds size = getBackgroundTextureSize();
 
         getRenderAdapter().drawTexture(ctx, getBackgroundTexture(),
@@ -43,6 +44,11 @@ public abstract class CoreContainerScreenDefinition<T extends BlockEntityBehavio
                                        getTextureFileSize(), getTextureFileSize(),
                                        0, 0, size.getWidth(), size.getHeight());
     }
+
+    /**
+     * Draw things the GUI texture should cover, e.g. panels attached to its edges.
+     */
+    protected void renderBehindTexture(RenderContext ctx) { /* Nothing by default */ }
 
     public abstract Identifier getBackgroundTexture();
 
