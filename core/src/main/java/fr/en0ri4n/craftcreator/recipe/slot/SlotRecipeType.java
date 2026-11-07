@@ -46,6 +46,10 @@ public class SlotRecipeType
     private final Function<JsonObject, List<RecipeEntry>> inputReader;
     /** Where the screen draws the title, null when the texture already shows it. */
     private final int[] titlePosition;
+    private final int titleColor;
+    /** Colors of the arrow decorations: fill and outline. */
+    private final int arrowColor;
+    private final int arrowOutline;
     /** Arrows, items and labels drawn by the screen over the texture. */
     private final List<Decoration> decorations;
 
@@ -70,6 +74,9 @@ public class SlotRecipeType
         this.writer = Objects.requireNonNull(builder.writer, "writer");
         this.inputReader = builder.inputReader;
         this.titlePosition = builder.titlePosition;
+        this.titleColor = builder.titleColor;
+        this.arrowColor = builder.arrowColor;
+        this.arrowOutline = builder.arrowOutline;
         this.decorations = List.copyOf(builder.decorations);
     }
 
@@ -190,6 +197,9 @@ public class SlotRecipeType
         private Writer writer;
         private Function<JsonObject, List<RecipeEntry>> inputReader;
         private int[] titlePosition;
+        private int titleColor = 0xFFFFC94A;
+        private int arrowColor = 0xFFE3B553;
+        private int arrowOutline = 0xFF5A3E16;
         private final List<Decoration> decorations = new ArrayList<>();
 
         private Builder(SupportedMod mod, String name)
@@ -318,6 +328,22 @@ public class SlotRecipeType
         public Builder titleAt(int x, int y)
         {
             this.titlePosition = new int[] {x, y};
+            return this;
+        }
+
+        /**
+         * Draw the title at (x, y) in this color; dark colors are drawn without shadow, like vanilla GUI titles.
+         */
+        public Builder titleAt(int x, int y, int color)
+        {
+            this.titleColor = color;
+            return titleAt(x, y);
+        }
+
+        public Builder arrowColors(int fill, int outline)
+        {
+            this.arrowColor = fill;
+            this.arrowOutline = outline;
             return this;
         }
 

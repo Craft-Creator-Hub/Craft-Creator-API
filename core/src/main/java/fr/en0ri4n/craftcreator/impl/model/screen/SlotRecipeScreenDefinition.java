@@ -29,8 +29,6 @@ import java.util.function.Consumer;
  */
 public class SlotRecipeScreenDefinition extends RecipeCreatorContainerScreenDefinition<SlotRecipeBehavior>
 {
-    private static final int ARROW_COLOR = 0xFFE3B553;
-    private static final int ARROW_SHADOW = 0xFF5A3E16;
     private static final int ARROW_HEAD = 4;
 
     private final SlotRecipeType type;
@@ -220,7 +218,7 @@ public class SlotRecipeScreenDefinition extends RecipeCreatorContainerScreenDefi
             if(decoration instanceof SlotRecipeType.Arrow arrow)
                 drawArrow(ctx, getGuiSize().getX(arrow.x()), getGuiSize().getY(arrow.y()), arrow.length(), arrow.down());
             else if(decoration instanceof SlotRecipeType.Label label)
-                getRenderAdapter().drawText(ctx, translateToString(label.text()), getGuiSize().getX(label.x()), getGuiSize().getY(label.y()), label.color());
+                drawText(ctx, translateToString(label.text()), label.x(), label.y(), label.color());
         }
     }
 
@@ -238,7 +236,7 @@ public class SlotRecipeScreenDefinition extends RecipeCreatorContainerScreenDefi
         if(type.getTitlePosition() != null)
         {
             int[] position = type.getTitlePosition();
-            getRenderAdapter().drawText(ctx, translateToString(getTitle()), getGuiSize().getX(position[0]), getGuiSize().getY(position[1]), CoreTheme.TEXT_TITLE);
+            drawText(ctx, translateToString(getTitle()), position[0], position[1], type.getTitleColor());
         }
     }
 
@@ -274,6 +272,15 @@ public class SlotRecipeScreenDefinition extends RecipeCreatorContainerScreenDefi
             tooltip.render(ctx, mouseX, mouseY);
             return;
         }
+    }
+
+    /**
+     * Text at a GUI position: light colors get a shadow, dark ones don't, like vanilla GUI labels.
+     */
+    private void drawText(RenderContext ctx, String text, int x, int y, int color)
+    {
+        int brightness = ((color >> 16 & 0xFF) + (color >> 8 & 0xFF) + (color & 0xFF)) / 3;
+        getRenderAdapter().drawText(ctx, text, brightness > 100, getGuiSize().getX(x), getGuiSize().getY(y), color);
     }
 
     private boolean isOver(int mouseX, int mouseY, int x, int y)
@@ -322,31 +329,40 @@ public class SlotRecipeScreenDefinition extends RecipeCreatorContainerScreenDefi
     }
 
     /**
-     * A thick arrow with an outline, pointing right or down from (x, y): 9 pixels wide across.
+     * A thick arrow pointing right or down from (x, y), 9 pixels across, fully outlined: the outline is the
+     * arrow's shape grown by one pixel on every side (tail, back of the head and tip included), then the fill goes over it.
      */
     private void drawArrow(RenderContext ctx, int x, int y, int length, boolean down)
     {
         int shaft = length - ARROW_HEAD - 1;
+        drawArrowShape(ctx, x, y, shaft, down, 1, type.getArrowOutline());
+        drawArrowShape(ctx, x, y, shaft, down, 0, type.getArrowColor());
+    }
+
+    /**
+     * @param grow pixels added around the shape: 1 for the outline, 0 for the fill
+     */
+    private void drawArrowShape(RenderContext ctx, int x, int y, int shaft, boolean down, int grow, int color)
+    {
+        // Shaft: 3 pixels thick, centered on the head
+        rect(ctx, down, x, y, -grow, 3 - grow, shaft + grow, 3 + grow * 2, color);
+        // Head: columns getting shorter towards the tip, plus one more column for the outline's tip
+        for(int step = -grow; step <= ARROW_HEAD + grow; step++)
+        {
+            int half = Math.min(ARROW_HEAD, ARROW_HEAD - step) + grow;
+            rect(ctx, down, x, y, shaft + step, 4 - half, 1, half * 2 + 1, color);
+        }
+    }
+
+    /**
+     * A rectangle given along the arrow (along, across), drawn right or down from (x, y).
+     */
+    private void rect(RenderContext ctx, boolean down, int x, int y, int along, int across, int length, int thickness, int color)
+    {
         if(down)
-        {
-            getRenderAdapter().drawRect(ctx, x + 2, y, 5, shaft, ARROW_SHADOW);
-            getRenderAdapter().drawRect(ctx, x + 3, y, 3, shaft, ARROW_COLOR);
-            for(int row = 0; row <= ARROW_HEAD; row++)
-            {
-                int half = ARROW_HEAD - row;
-                getRenderAdapter().drawRect(ctx, x + 4 - half - 1, y + shaft + row, half * 2 + 3, 1, ARROW_SHADOW);
-                getRenderAdapter().drawRect(ctx, x + 4 - half, y + shaft + row, half * 2 + 1, 1, ARROW_COLOR);
-            }
-            return;
-        }
-        getRenderAdapter().drawRect(ctx, x, y + 2, shaft, 5, ARROW_SHADOW);
-        getRenderAdapter().drawRect(ctx, x, y + 3, shaft, 3, ARROW_COLOR);
-        for(int col = 0; col <= ARROW_HEAD; col++)
-        {
-            int half = ARROW_HEAD - col;
-            getRenderAdapter().drawRect(ctx, x + shaft + col, y + 4 - half - 1, 1, half * 2 + 3, ARROW_SHADOW);
-            getRenderAdapter().drawRect(ctx, x + shaft + col, y + 4 - half, 1, half * 2 + 1, ARROW_COLOR);
-        }
+            getRenderAdapter().drawRect(ctx, x + across, y + along, thickness, length, color);
+        else
+            getRenderAdapter().drawRect(ctx, x + along, y + across, length, thickness, color);
     }
 
     /**
