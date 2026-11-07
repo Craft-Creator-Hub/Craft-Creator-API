@@ -71,6 +71,10 @@ tasks.named('processResources', ProcessResources) {
 
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+
+    // The core isn't a separate mod: its classes and assets (textures, models, translations) go inside this jar.
+    // The module's own files come first, so they win over the core's when both have one (e.g. pack.mcmeta)
+    from(project(':core').sourceSets.main.output)
     manifest {
         attributes([
                 "Specification-Title"     : "${craftcreator_name}",
