@@ -1,0 +1,48 @@
+package fr.en0ri4n.craftcreator.platform.net;
+
+import fr.en0ri4n.craftcreator.api.CCReferences;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.simple.SimpleChannel;
+
+public class NetworkHandler {
+    private static final String PROTOCOL = "2";
+    public static final ResourceLocation CHANNEL_NAME = new ResourceLocation(CCReferences.MOD_ID, "main");
+    public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
+            CHANNEL_NAME,
+            () -> PROTOCOL,
+            PROTOCOL::equals,
+            PROTOCOL::equals
+    );
+
+    private static int id = 0;
+
+    public static void registerPackets() {
+        // Register client -> server packet (PacketUiUpdate)
+        INSTANCE.registerMessage(id++, UiUpdatePacket.class,
+                UiUpdatePacket::encode, UiUpdatePacket::decode, UiUpdatePacket::clientHandle);
+        // Register server -> client packet (BlockEntityUpdatePacket)
+        INSTANCE.registerMessage(id++, BlockEntityUpdatePacket.class,
+                BlockEntityUpdatePacket::encode, BlockEntityUpdatePacket::decode, BlockEntityUpdatePacket::handleServer);
+        // Register server -> client packet (FetchDataPacket)
+        INSTANCE.registerMessage(id++, FetchDataPacket.class,
+                FetchDataPacket::encode, FetchDataPacket::decode, FetchDataPacket::handleServer);
+        // Register client -> server packet (OpenContainerRequestPacket)
+        INSTANCE.registerMessage(id++, OpenContainerRequestPacket.class,
+                OpenContainerRequestPacket::encode, OpenContainerRequestPacket::decode, OpenContainerRequestPacket::handleServer);
+        // Register client -> server packet (MakeRecipeRequestPacket)
+        INSTANCE.registerMessage(id++, MakeRecipeRequestPacket.class,
+                MakeRecipeRequestPacket::encode, MakeRecipeRequestPacket::decode, MakeRecipeRequestPacket::handleServer);
+        // Register client -> server packet (RecipeManagementRequestPacket)
+        INSTANCE.registerMessage(id++, RecipeManagementRequestPacket.class,
+                RecipeManagementRequestPacket::encode, RecipeManagementRequestPacket::decode, RecipeManagementRequestPacket::handleServer);
+        // Register server -> client packet (RecipeManagementStatePacket)
+        INSTANCE.registerMessage(id++, RecipeManagementStatePacket.class,
+                RecipeManagementStatePacket::encode, RecipeManagementStatePacket::decode, RecipeManagementStatePacket::handleClient);
+        // Register server -> client packet (RecipeFeedbackPacket)
+        INSTANCE.registerMessage(id++, RecipeFeedbackPacket.class,
+                RecipeFeedbackPacket::encode, RecipeFeedbackPacket::decode, RecipeFeedbackPacket::handleClient);
+    }
+
+    private NetworkHandler() {}
+}

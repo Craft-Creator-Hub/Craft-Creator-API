@@ -4,6 +4,7 @@ include("core")
 
 include("forge")
 include("forge:forge-1.18.2")
+include("forge:forge-1.20.1")
 //include("forge:forge-1.20")
 //
 //include("fabric")
