@@ -8,6 +8,10 @@ grid on one face. Models are self-contained (parents resolved) in `models/block/
 | --- | --- | --- |
 | `thermal_*` (12 machines) | The Thermal Expansion machine (front, sides, bottom) | Top panel, cells in the machine's color |
 | `thermal_tree_extractor` | Thermal Tree Extractor | In the opening of the top |
+| `thermal_brewer`, `thermal_crystallizer` | The Thermal Expansion machine | Top panel, cells in the machine's color |
+| `thermal_catalyst` | Machine Frame | Top, gold cells |
+| `thermal_tree_extractor_boost`, `thermal_fisher_boost`, `thermal_potion_diffuser_boost`, `thermal_rock_gen`, `thermal_hive_extractor` | The Thermal device | Top |
+| `thermal_*_fuel` (7 dynamos) | The Thermal dynamo (base and coil) | Front of the base, the coil covers the top |
 | `botania_mana_infusion` | Mana Pool | Pool floor, filled with mana |
 | `botania_elven_trade` | Alfheim Portal | Gold grid on the top |
 | `botania_pure_daisy` | Pure Daisy, standing on a livingrock base | Base top, yellow center |
@@ -23,6 +27,9 @@ grid on one face. Models are self-contained (parents resolved) in `models/block/
 | `create_emptying` | Item Drain | Top |
 | `create_sandpaper_polishing`, `create_sequenced_assembly` | Depot | Top, sand or brass cells |
 | `create_item_application` | Andesite Casing | Top |
+
+The Thermal GUIs (`textures/gui/container/thermal/`) are drawn the same way in Thermal's own style: a vanilla-like gray
+panel with the energy gauge on the left when the recipe uses energy.
 
 The Create GUIs (`textures/gui/container/create/`) are drawn from each type's slot layout: an andesite plate framed in
 brass, recipe slots (fluid slots are blue, outputs have a brass ring) and a light player inventory. Arrows, machines and

@@ -1,0 +1,19 @@
+{
+    "variants": {
+        "facing=north": {
+            "model": "craftcreator:block/thermal_numismatic_fuel"
+        },
+        "facing=east": {
+            "model": "craftcreator:block/thermal_numismatic_fuel",
+            "y": 90
+        },
+        "facing=south": {
+            "model": "craftcreator:block/thermal_numismatic_fuel",
+            "y": 180
+        },
+        "facing=west": {
+            "model": "craftcreator:block/thermal_numismatic_fuel",
+            "y": 270
+        }
+    }
+}

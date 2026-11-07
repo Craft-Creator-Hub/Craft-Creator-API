@@ -1,0 +1,52 @@
+{
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down",
+          "cullface": "down"
+        },
+        "up": {
+          "texture": "#up",
+          "cullface": "up"
+        },
+        "north": {
+          "texture": "#north",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#south",
+          "cullface": "south"
+        },
+        "west": {
+          "texture": "#west",
+          "cullface": "west"
+        },
+        "east": {
+          "texture": "#east",
+          "cullface": "east"
+        }
+      }
+    }
+  ],
+  "textures": {
+    "particle": "craftcreator:block/thermal_tree_extractor_boost/device_tree_extractor_side",
+    "down": "craftcreator:block/thermal_tree_extractor_boost/device_tree_extractor_bottom",
+    "up": "craftcreator:block/thermal_tree_extractor_boost/up",
+    "east": "craftcreator:block/thermal_tree_extractor_boost/device_tree_extractor_side",
+    "west": "craftcreator:block/thermal_tree_extractor_boost/device_tree_extractor_side",
+    "north": "craftcreator:block/thermal_tree_extractor_boost/device_tree_extractor",
+    "south": "craftcreator:block/thermal_tree_extractor_boost/device_tree_extractor_side"
+  }
+}

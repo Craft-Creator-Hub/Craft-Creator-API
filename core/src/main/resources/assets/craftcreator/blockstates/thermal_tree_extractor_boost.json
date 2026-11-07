@@ -1,0 +1,19 @@
+{
+    "variants": {
+        "facing=north": {
+            "model": "craftcreator:block/thermal_tree_extractor_boost"
+        },
+        "facing=east": {
+            "model": "craftcreator:block/thermal_tree_extractor_boost",
+            "y": 90
+        },
+        "facing=south": {
+            "model": "craftcreator:block/thermal_tree_extractor_boost",
+            "y": 180
+        },
+        "facing=west": {
+            "model": "craftcreator:block/thermal_tree_extractor_boost",
+            "y": 270
+        }
+    }
+}
