@@ -31,7 +31,6 @@ import java.util.List;
 
 public class ForgeRegistryAdapter implements RegistryAdapter
 {
-    private static final ForgeRegistryAdapter INSTANCE = new ForgeRegistryAdapter();
 
     public static ForgeRegistryAdapter get()
     {
@@ -43,6 +42,9 @@ public class ForgeRegistryAdapter implements RegistryAdapter
     private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(Registries.MENU, CCReferences.MOD_ID);
     private static final DeferredRegister<CreativeModeTab> CREATIVE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, CCReferences.MOD_ID);
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, CCReferences.MOD_ID);
+
+    // Created after the registers above: its fields register the creative tab, which needs them
+    private static final ForgeRegistryAdapter INSTANCE = new ForgeRegistryAdapter();
 
     public static DeferredHolder<MenuType<?>, MenuType<ForgeRecipeCreatorMenu>> RECIPE_CREATOR_MENU;
     public static DeferredHolder<BlockEntityType<?>, BlockEntityType<ForgeGenericBlockEntity>> GENERIC_BLOCK_ENTITY;
