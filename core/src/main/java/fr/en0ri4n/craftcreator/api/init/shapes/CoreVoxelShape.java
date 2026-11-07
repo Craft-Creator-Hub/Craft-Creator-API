@@ -2,7 +2,9 @@ package fr.en0ri4n.craftcreator.api.init.shapes;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -33,6 +35,28 @@ public class CoreVoxelShape {
 
     public static CoreVoxelShape single(double x1, double y1, double z1, double x2, double y2, double z2) {
         return new CoreVoxelShape(List.of(new Box(x1, y1, z1, x2, y2, z2)));
+    }
+
+    /**
+     * This shape turned 90 degrees clockwise seen from above, like a model rotated with {@code "y": 90} in a blockstate.
+     */
+    public CoreVoxelShape rotateY() {
+        return new CoreVoxelShape(boxes.stream()
+                .map(b -> new Box(16 - b.getZ2(), b.getY1(), b.getX1(), 16 - b.getZ1(), b.getY2(), b.getX2()))
+                .toList());
+    }
+
+    /**
+     * The shape for each horizontal facing, from the shape facing north (the default orientation of block models).
+     */
+    public static Map<CoreFacing, CoreVoxelShape> horizontal(CoreVoxelShape north) {
+        Map<CoreFacing, CoreVoxelShape> shapes = new EnumMap<>(CoreFacing.class);
+        CoreVoxelShape shape = north;
+        for (CoreFacing facing : List.of(CoreFacing.NORTH, CoreFacing.EAST, CoreFacing.SOUTH, CoreFacing.WEST)) {
+            shapes.put(facing, shape);
+            shape = shape.rotateY();
+        }
+        return shapes;
     }
 
     public static class Builder {
