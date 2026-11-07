@@ -3,6 +3,8 @@ pluginManagement {
         gradlePluginPortal()
         // ModDevGradle, for the NeoForge modules
         maven { url = 'https://maven.neoforged.net/releases' }
+        // ModPublisher, to publish to CurseForge and Modrinth
+        maven { url = 'https://maven.firstdark.dev/releases' }
     }
 }
 

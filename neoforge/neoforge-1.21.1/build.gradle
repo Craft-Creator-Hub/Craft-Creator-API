@@ -90,3 +90,6 @@ jar {
         ])
     }
 }
+
+// Publishing to CurseForge and Modrinth
+apply from: rootProject.file('gradle/publishing.gradle')

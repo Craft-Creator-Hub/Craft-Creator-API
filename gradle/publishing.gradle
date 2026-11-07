@@ -1,0 +1,51 @@
+// Uploads a platform module's jar to CurseForge and Modrinth with ModPublisher (https://github.com/firstdarkdev/modpublisher).
+//
+// Applied by every module under forge/ and neoforge/, after their jar is configured. It reads:
+//  - from the root gradle.properties: mod_version, release_type, curseforge_project_id, modrinth_project_id
+//  - from the module's gradle.properties: mc_version, publish_loaders, publish_java, publish_optional_mods
+//  - from the environment: CURSE_TOKEN and MODRINTH_TOKEN (never put them in a file of the repository)
+//
+// Nothing is uploaded unless -Ppublish=true is given: without it ModPublisher runs in debug mode and only checks.
+//   ./gradlew publishMod                    -> checks every module
+//   ./gradlew publishMod -Ppublish=true     -> uploads every module to both sites
+//   ./gradlew :forge:forge-1.20.1:publishModrinth -Ppublish=true -> one module, one site
+
+apply plugin: 'com.hypherionmc.modutils.modpublisher'
+
+def loaders = project.publish_loaders.split(',').collect { it.trim() }
+def optionalMods = project.findProperty('publish_optional_mods')?.split(',')?.collect { it.trim() }?.findAll { !it.isEmpty() } ?: []
+def loaderNames = loaders.collect { it == 'neoforge' ? 'NeoForge' : it.capitalize() }.join('/')
+def uploadForReal = project.findProperty('publish') == 'true'
+
+publisher {
+    apiKeys {
+        curseforge System.getenv("CURSE_TOKEN")
+        modrinth System.getenv("MODRINTH_TOKEN")
+    }
+
+    setDebug(!uploadForReal)
+    setCurseID(rootProject.curseforge_project_id)
+    setModrinthID(rootProject.modrinth_project_id)
+    setVersionType(rootProject.release_type)
+    setChangelog(rootProject.file('CHANGELOG.md'))
+
+    // One version per Minecraft version and loader, e.g. "1.0.0+1.20.1-forge"
+    setProjectVersion("${rootProject.mod_version}+${project.mc_version}-${loaders[0]}")
+    setDisplayName("Craft Creator ${rootProject.mod_version} for ${loaderNames} ${project.mc_version}")
+    setGameVersions([project.mc_version] as String[])
+    setLoaders(loaders as String[])
+    setCurseEnvironment("both")
+    setJavaVersions([JavaVersion.toVersion(project.publish_java)] as Object[])
+
+    setArtifact(tasks.named('jar').get().archiveFile.get().asFile)
+
+    // Create, Botania, Thermal, KubeJS and JEI are optional: Craft Creator shows their recipe creators when they're installed
+    if(!optionalMods.isEmpty())
+    {
+        modrinthDepends { optional(*optionalMods) }
+        curseDepends { optional(*optionalMods) }
+    }
+}
+
+// Upload the finished jar: on ForgeGradle modules, assemble also reobfuscates it
+tasks.matching { it.name.startsWith('publish') && it.group == 'publishing' }.configureEach { dependsOn 'assemble' }

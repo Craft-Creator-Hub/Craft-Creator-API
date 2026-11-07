@@ -1,4 +1,7 @@
-plugins {}
+plugins {
+    // Publishing to CurseForge and Modrinth, applied by each platform module through gradle/publishing.gradle
+    id 'com.hypherionmc.modutils.modpublisher' version '2.2.4' apply false
+}
 
 repositories {}
 
