@@ -36,6 +36,14 @@ public class RecipeCreators
             Map.entry(SlotRecipeTypes.PETAL_APOTHECARY, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_PETAL_APOTHECARY),
             Map.entry(SlotRecipeTypes.RUNIC_ALTAR, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_RUNIC_ALTAR),
             Map.entry(SlotRecipeTypes.TERRA_PLATE, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_TERRA_PLATE),
+            // Thermal
+            Map.entry(SlotRecipeTypes.STIRLING_FUEL, CoreShapes.ThermalRecipeCreatorShapes.SHAPE_DYNAMO),
+            Map.entry(SlotRecipeTypes.COMPRESSION_FUEL, CoreShapes.ThermalRecipeCreatorShapes.SHAPE_DYNAMO),
+            Map.entry(SlotRecipeTypes.MAGMATIC_FUEL, CoreShapes.ThermalRecipeCreatorShapes.SHAPE_DYNAMO),
+            Map.entry(SlotRecipeTypes.NUMISMATIC_FUEL, CoreShapes.ThermalRecipeCreatorShapes.SHAPE_DYNAMO),
+            Map.entry(SlotRecipeTypes.LAPIDARY_FUEL, CoreShapes.ThermalRecipeCreatorShapes.SHAPE_DYNAMO),
+            Map.entry(SlotRecipeTypes.DISENCHANTMENT_FUEL, CoreShapes.ThermalRecipeCreatorShapes.SHAPE_DYNAMO),
+            Map.entry(SlotRecipeTypes.GOURMAND_FUEL, CoreShapes.ThermalRecipeCreatorShapes.SHAPE_DYNAMO),
             // Create
             Map.entry(SlotRecipeTypes.CUTTING, CoreShapes.CreateRecipeCreatorShapes.SHAPE_MECHANICAL_SAW),
             Map.entry(SlotRecipeTypes.MILLING, CoreShapes.CreateRecipeCreatorShapes.SHAPE_MILLSTONE),

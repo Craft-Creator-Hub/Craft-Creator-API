@@ -223,15 +223,34 @@ public class SlotRecipeTypes
             });
 
     /* ---------------- Thermal ---------------- */
-    // Energy 0 means "keep the machine's default energy"
+    // Vanilla-like gray GUIs with Thermal's energy gauge on the left; arrows and machines are decorations drawn by the screen.
+    // Energy 0 means "keep the machine's default energy".
 
-    private static final int[] THERMAL_OUTPUTS = {189, 33, 189, 59, 189, 85, 189, 111};
+    private static final String THERMAL_FIELD = "screen.thermal_recipe_creator.field.";
+    private static final int THERMAL_INPUT_X = 52;
+    private static final int THERMAL_OUTPUT_X = 112;
+    private static final int[] THERMAL_OUTPUTS = {THERMAL_OUTPUT_X, 29, THERMAL_OUTPUT_X + 18, 29, THERMAL_OUTPUT_X, 47, THERMAL_OUTPUT_X + 18, 47};
+    /** Single output, centered on the 2x2 outputs */
+    private static final int THERMAL_SINGLE_X = 121;
+    private static final int THERMAL_FLUID_OUTPUT_X = 152;
 
-    private static SlotRecipeType.Builder thermal(String name, String icon)
+    private static SlotRecipeType.Builder thermalStyle(String name, String icon)
     {
         return SlotRecipeType.builder(SupportedMod.THERMAL, name)
                 .icon(icon)
-                .gui(384, 296, 256, 68, 174)
+                .gui(256, 176, 166, 8, 84)
+                .titleAt(8, 6, 0xFF404040)
+                .arrowColors(0xFF8B8B8B, 0xFF373737);
+    }
+
+    /**
+     * A machine: inputs on the left of an arrow with the machine above it, outputs on the right, and its energy.
+     */
+    private static SlotRecipeType.Builder thermal(String name, String machine)
+    {
+        return thermalStyle(name, machine)
+                .arrow(74, 42, 30)
+                .item(machine, 81, 21)
                 .param(ParamSpec.integer("energy", FIELD + "energy", 0));
     }
 
@@ -243,7 +262,7 @@ public class SlotRecipeTypes
     }
 
     /**
-     * Thermal item results, with "chance" when it's not 100%.
+     * Item results with "chance" when it's not 100% (Create and Thermal both use this format).
      */
     private static JsonArray thermalResults(SlotRecipeContext ctx, String prefix)
     {
@@ -266,22 +285,63 @@ public class SlotRecipeTypes
         if(experience > 0) out.addProperty("experience", experience);
     }
 
-    public static final SlotRecipeType TREE_EXTRACTOR = thermal("tree_extractor", "thermal:device_tree_extractor")
-            .slot(SlotSpec.input("trunk", 22, 98).as(SlotSpec.Kind.BLOCK))
-            .slot(SlotSpec.input("leaves", 83, 98).as(SlotSpec.Kind.BLOCK))
-            .slot(SlotSpec.output("fluid", 189, 72).as(SlotSpec.Kind.FLUID))
-            .param(ParamSpec.integer("amount", FIELD + "fluid_amount", 25))
+    private static ParamSpec experience()
+    {
+        return ParamSpec.decimal("experience", FIELD + "experience", 0);
+    }
+
+    private static ParamSpec fluidAmount(String key, String label, int defaultAmount)
+    {
+        return ParamSpec.integer(key, label, defaultAmount);
+    }
+
+    /** Ingredients of a machine with several inputs: items with their count, fluids with their amount. */
+    private static JsonArray thermalIngredients(SlotRecipeContext ctx, String... slots)
+    {
+        JsonArray ingredients = new JsonArray();
+        for(String slot : slots)
+        {
+            if(!ctx.has(slot)) continue;
+            RecipeEntry entry = ctx.get(slot);
+            ingredients.add(entry.isFluid() ? ctx.fluid(entry, ctx.paramInt("fluid_amount")) : ctx.countedIngredient(entry));
+        }
+        return ingredients;
+    }
+
+    /** Item results with chances, then the fluid output if there is one. */
+    private static JsonArray thermalResultsWithFluid(SlotRecipeContext ctx, String fluidSlot, String amountKey)
+    {
+        JsonArray results = thermalResults(ctx, "output");
+        if(ctx.has(fluidSlot)) results.add(ctx.fluid(ctx.get(fluidSlot), ctx.paramInt(amountKey)));
+        return results;
+    }
+
+    /** One input, 4 outputs with chances */
+    private static SlotRecipeType.Builder thermalSingleToFour(String name, String machine)
+    {
+        return withChances(thermal(name, machine), 4)
+                .slot(SlotSpec.input("input", THERMAL_INPUT_X, 38))
+                .outputs("output", THERMAL_OUTPUTS);
+    }
+
+    public static final SlotRecipeType THERMAL_FURNACE = thermal("furnace", "thermal:machine_furnace")
+            .slot(SlotSpec.input("input", THERMAL_INPUT_X, 38))
+            .slot(SlotSpec.output("output_0", THERMAL_SINGLE_X, 38))
+            .param(experience())
             .writer((ctx, out) ->
             {
-                out.addProperty("trunk", ctx.get("trunk").getId().toString());
-                out.addProperty("leaves", ctx.get("leaves").getId().toString());
-                out.add("result", ctx.fluid(ctx.get("fluid"), ctx.paramInt("amount")));
+                out.add("ingredient", ctx.countedIngredient(ctx.get("input")));
+                out.add("result", ctx.items(ctx.all("output")));
+                addExperience(ctx, out);
+                ctx.addIfPositive(out, "energy", "energy");
             });
 
-    public static final SlotRecipeType PULVERIZER = withChances(thermal("pulverizer", "thermal:machine_pulverizer"), 4)
-            .slot(SlotSpec.input("input", 63, 98))
-            .outputs("output", THERMAL_OUTPUTS)
-            .param(ParamSpec.decimal("experience", FIELD + "experience", 0))
+    /** Pulverizer recipes, or its recycling recipes (same format) */
+    public static final SlotRecipeType PULVERIZER = thermalSingleToFour("pulverizer", "thermal:machine_pulverizer")
+            .variant("pulverizer", "thermal:pulverizer", "Normal", "thermal:machine_pulverizer")
+            .variant("recycle", "thermal:pulverizer_recycle", "Recycle", "thermal:machine_pulverizer")
+            .variantSelector(110, 3, 62, 13, false)
+            .param(experience())
             .writer((ctx, out) ->
             {
                 out.add("ingredient", ctx.countedIngredient(ctx.get("input")));
@@ -290,9 +350,7 @@ public class SlotRecipeTypes
                 ctx.addIfPositive(out, "energy", "energy");
             });
 
-    public static final SlotRecipeType SAWMILL = withChances(thermal("sawmill", "thermal:machine_sawmill"), 4)
-            .slot(SlotSpec.input("input", 63, 98))
-            .outputs("output", THERMAL_OUTPUTS)
+    public static final SlotRecipeType SAWMILL = thermalSingleToFour("sawmill", "thermal:machine_sawmill")
             .writer((ctx, out) ->
             {
                 out.add("ingredient", ctx.countedIngredient(ctx.get("input")));
@@ -300,10 +358,17 @@ public class SlotRecipeTypes
                 ctx.addIfPositive(out, "energy", "energy");
             });
 
-    public static final SlotRecipeType SMELTER = withChances(thermal("smelter", "thermal:machine_smelter"), 4)
-            .inputs("input", 14, 44, 14, 62, 14, 80, 14, 98, 44, 44, 44, 62, 44, 80, 44, 98, 74, 44, 74, 62, 74, 80, 74, 98)
+    /** Induction smelter: up to 3 inputs; also its recycling recipes */
+    public static final SlotRecipeType SMELTER = withChances(thermalStyle("smelter", "thermal:machine_smelter"), 4)
+            .inputs("input", 28, 38, 46, 38, 64, 38)
+            .arrow(85, 42, 22)
+            .item("thermal:machine_smelter", 88, 21)
             .outputs("output", THERMAL_OUTPUTS)
-            .param(ParamSpec.decimal("experience", FIELD + "experience", 0))
+            .variant("smelter", "thermal:smelter", "Normal", "thermal:machine_smelter")
+            .variant("recycle", "thermal:smelter_recycle", "Recycle", "thermal:machine_smelter")
+            .variantSelector(110, 3, 62, 13, false)
+            .param(ParamSpec.integer("energy", FIELD + "energy", 0))
+            .param(experience())
             .writer((ctx, out) ->
             {
                 out.add("ingredients", ctx.countedIngredients(ctx.all("input")));
@@ -312,9 +377,8 @@ public class SlotRecipeTypes
                 ctx.addIfPositive(out, "energy", "energy");
             });
 
-    public static final SlotRecipeType INSOLATOR = withChances(thermal("insolator", "thermal:machine_insolator"), 4)
-            .slot(SlotSpec.input("input", 63, 98))
-            .outputs("output", THERMAL_OUTPUTS)
+    /** Phytogenic insolator: water use is a multiplier of the default */
+    public static final SlotRecipeType INSOLATOR = thermalSingleToFour("insolator", "thermal:machine_insolator")
             .param(ParamSpec.decimal("water_mod", FIELD + "water_mod", 1.0))
             .writer((ctx, out) ->
             {
@@ -325,122 +389,271 @@ public class SlotRecipeTypes
                 ctx.addIfPositive(out, "energy", "energy");
             });
 
-    public static final SlotRecipeType PRESS = withChances(thermal("press", "thermal:machine_press"), 2)
-            .slot(SlotSpec.input("input", 22, 98))
-            .slot(SlotSpec.input("die", 83, 98))
-            .outputs("output", 189, 41, 189, 103)
-            .writer((ctx, out) ->
-            {
-                JsonArray ingredients = new JsonArray();
-                ingredients.add(ctx.countedIngredient(ctx.get("input")));
-                if(ctx.has("die")) ingredients.add(ctx.ingredient(ctx.get("die")));
-                out.add("ingredients", ingredients);
-                out.add("result", thermalResults(ctx, "output"));
-                ctx.addIfPositive(out, "energy", "energy");
-            });
-
-    public static final SlotRecipeType THERMAL_FURNACE = thermal("furnace", "thermal:machine_furnace")
-            .slot(SlotSpec.input("input", 63, 98))
-            .slot(SlotSpec.output("output_0", 189, 72))
-            .param(ParamSpec.decimal("experience", FIELD + "experience", 0))
+    public static final SlotRecipeType CENTRIFUGE = thermalSingleToFour("centrifuge", "thermal:machine_centrifuge")
+            .slot(SlotSpec.output("fluid_output", THERMAL_FLUID_OUTPUT_X, 38).as(SlotSpec.Kind.FLUID))
+            .param(fluidAmount("fluid_output_amount", THERMAL_FIELD + "fluid_output_amount", 100))
             .writer((ctx, out) ->
             {
                 out.add("ingredient", ctx.countedIngredient(ctx.get("input")));
-                out.add("result", ctx.items(ctx.all("output")));
+                out.add("result", thermalResultsWithFluid(ctx, "fluid_output", "fluid_output_amount"));
+                ctx.addIfPositive(out, "energy", "energy");
+            });
+
+    public static final SlotRecipeType PYROLYZER = thermalSingleToFour("pyrolyzer", "thermal:machine_pyrolyzer")
+            .slot(SlotSpec.output("fluid_output", THERMAL_FLUID_OUTPUT_X, 38).as(SlotSpec.Kind.FLUID))
+            .param(fluidAmount("fluid_output_amount", THERMAL_FIELD + "fluid_output_amount", 100))
+            .param(experience())
+            .writer((ctx, out) ->
+            {
+                out.add("ingredient", ctx.countedIngredient(ctx.get("input")));
+                out.add("result", thermalResultsWithFluid(ctx, "fluid_output", "fluid_output_amount"));
                 addExperience(ctx, out);
                 ctx.addIfPositive(out, "energy", "energy");
             });
 
-    public static final SlotRecipeType CENTRIFUGE = withChances(thermal("centrifuge", "thermal:machine_centrifuge"), 4)
-            .slot(SlotSpec.input("input", 63, 98))
+    /** Multiservo press: the input and a die, giving items and maybe a fluid */
+    public static final SlotRecipeType PRESS = withChances(thermal("press", "thermal:machine_press"), 4)
+            .slot(SlotSpec.input("input", THERMAL_INPUT_X, 29))
+            .slot(SlotSpec.input("die", THERMAL_INPUT_X, 47))
             .outputs("output", THERMAL_OUTPUTS)
-            .slot(SlotSpec.output("fluid", 242, 84).as(SlotSpec.Kind.FLUID))
-            .param(ParamSpec.integer("fluid_amount", FIELD + "fluid_amount", 100))
+            .slot(SlotSpec.output("fluid_output", THERMAL_FLUID_OUTPUT_X, 38).as(SlotSpec.Kind.FLUID))
+            .param(fluidAmount("fluid_output_amount", THERMAL_FIELD + "fluid_output_amount", 100))
             .writer((ctx, out) ->
             {
-                out.add("ingredient", ctx.countedIngredient(ctx.get("input")));
-                JsonArray results = thermalResults(ctx, "output");
-                if(ctx.has("fluid")) results.add(ctx.fluid(ctx.get("fluid"), ctx.paramInt("fluid_amount")));
-                out.add("result", results);
+                out.add("ingredients", thermalIngredients(ctx, "input", "die"));
+                out.add("result", thermalResultsWithFluid(ctx, "fluid_output", "fluid_output_amount"));
                 ctx.addIfPositive(out, "energy", "energy");
             });
 
-    public static final SlotRecipeType CHILLER = thermal("chiller", "thermal:machine_chiller")
-            .slot(SlotSpec.input("fluid", 29, 98).as(SlotSpec.Kind.FLUID))
-            .slot(SlotSpec.input("cast", 83, 98))
-            .slot(SlotSpec.output("output_0", 189, 72))
-            .param(ParamSpec.integer("fluid_amount", FIELD + "fluid_amount", 1000))
-            .writer((ctx, out) ->
-            {
-                JsonArray ingredients = new JsonArray();
-                ingredients.add(ctx.fluid(ctx.get("fluid"), ctx.paramInt("fluid_amount")));
-                if(ctx.has("cast")) ingredients.add(ctx.ingredient(ctx.get("cast")));
-                out.add("ingredients", ingredients);
-                out.add("result", ctx.items(ctx.all("output")));
-                ctx.addIfPositive(out, "energy", "energy");
-            });
-
+    /** Magma crucible: an item melted into a fluid */
     public static final SlotRecipeType CRUCIBLE = thermal("crucible", "thermal:machine_crucible")
-            .slot(SlotSpec.input("input", 63, 98))
-            .slot(SlotSpec.output("fluid", 189, 72).as(SlotSpec.Kind.FLUID))
-            .param(ParamSpec.integer("fluid_amount", FIELD + "fluid_amount", 1000))
+            .slot(SlotSpec.input("input", THERMAL_INPUT_X, 38))
+            .slot(SlotSpec.output("fluid_output", THERMAL_SINGLE_X, 38).as(SlotSpec.Kind.FLUID))
+            .param(fluidAmount("fluid_output_amount", FIELD + "fluid_amount", 1000))
             .writer((ctx, out) ->
             {
                 out.add("ingredient", ctx.countedIngredient(ctx.get("input")));
                 JsonArray results = new JsonArray();
-                results.add(ctx.fluid(ctx.get("fluid"), ctx.paramInt("fluid_amount")));
+                if(ctx.has("fluid_output")) results.add(ctx.fluid(ctx.get("fluid_output"), ctx.paramInt("fluid_output_amount")));
                 out.add("result", results);
                 ctx.addIfPositive(out, "energy", "energy");
             });
 
-    public static final SlotRecipeType REFINERY = withChances(thermal("refinery", "thermal:machine_refinery"), 1)
-            .slot(SlotSpec.input("fluid", 63, 98).as(SlotSpec.Kind.FLUID))
-            .slot(SlotSpec.output("output_0", 189, 33))
-            .slot(SlotSpec.output("fluid_output_0", 189, 72).as(SlotSpec.Kind.FLUID))
-            .slot(SlotSpec.output("fluid_output_1", 189, 111).as(SlotSpec.Kind.FLUID))
-            .param(ParamSpec.integer("fluid_amount", FIELD + "input_fluid_amount", 100))
-            .param(ParamSpec.integer("output_amount_0", FIELD + "output_fluid_amount_0", 50))
-            .param(ParamSpec.integer("output_amount_1", FIELD + "output_fluid_amount_1", 50))
+    /** Blast chiller: a fluid, maybe shaped by a cast */
+    public static final SlotRecipeType CHILLER = thermal("chiller", "thermal:machine_chiller")
+            .slot(SlotSpec.input("fluid", THERMAL_INPUT_X, 29).as(SlotSpec.Kind.FLUID))
+            .slot(SlotSpec.input("cast", THERMAL_INPUT_X, 47))
+            .slot(SlotSpec.output("output_0", THERMAL_SINGLE_X, 38))
+            .param(fluidAmount("fluid_amount", FIELD + "fluid_amount", 1000))
             .writer((ctx, out) ->
             {
-                out.add("ingredient", ctx.fluid(ctx.get("fluid"), ctx.paramInt("fluid_amount")));
-                JsonArray results = thermalResults(ctx, "output");
-                if(ctx.has("fluid_output_0")) results.add(ctx.fluid(ctx.get("fluid_output_0"), ctx.paramInt("output_amount_0")));
-                if(ctx.has("fluid_output_1")) results.add(ctx.fluid(ctx.get("fluid_output_1"), ctx.paramInt("output_amount_1")));
-                out.add("result", results);
-                ctx.addIfPositive(out, "energy", "energy");
-            });
-
-    public static final SlotRecipeType BOTTLER = thermal("bottler", "thermal:machine_bottler")
-            .slot(SlotSpec.input("fluid", 29, 98).as(SlotSpec.Kind.FLUID))
-            .slot(SlotSpec.input("input", 83, 98))
-            .slot(SlotSpec.output("output_0", 189, 72))
-            .param(ParamSpec.integer("fluid_amount", FIELD + "fluid_amount", 1000))
-            .writer((ctx, out) ->
-            {
-                JsonArray ingredients = new JsonArray();
-                ingredients.add(ctx.countedIngredient(ctx.get("input")));
-                ingredients.add(ctx.fluid(ctx.get("fluid"), ctx.paramInt("fluid_amount")));
-                out.add("ingredients", ingredients);
+                out.add("ingredients", thermalIngredients(ctx, "fluid", "cast"));
                 out.add("result", ctx.items(ctx.all("output")));
                 ctx.addIfPositive(out, "energy", "energy");
             });
 
-    public static final SlotRecipeType PYROLYZER = withChances(thermal("pyrolyzer", "thermal:machine_pyrolyzer"), 4)
-            .slot(SlotSpec.input("input", 63, 98))
-            .outputs("output", THERMAL_OUTPUTS)
-            .slot(SlotSpec.output("fluid", 259, 86).as(SlotSpec.Kind.FLUID))
-            .param(ParamSpec.integer("fluid_amount", FIELD + "fluid_amount", 100))
-            .param(ParamSpec.decimal("experience", FIELD + "experience", 0))
+    /** Fractionating still: a fluid into up to 2 fluids and an item */
+    public static final SlotRecipeType REFINERY = withChances(thermal("refinery", "thermal:machine_refinery"), 1)
+            .slot(SlotSpec.input("fluid", THERMAL_INPUT_X, 38).as(SlotSpec.Kind.FLUID))
+            .slot(SlotSpec.output("fluid_output_0", THERMAL_OUTPUT_X, 29).as(SlotSpec.Kind.FLUID))
+            .slot(SlotSpec.output("fluid_output_1", THERMAL_OUTPUT_X + 18, 29).as(SlotSpec.Kind.FLUID))
+            .slot(SlotSpec.output("output_0", THERMAL_SINGLE_X, 51))
+            .param(fluidAmount("fluid_amount", FIELD + "input_fluid_amount", 100))
+            .param(fluidAmount("output_amount_0", FIELD + "output_fluid_amount_0", 50))
+            .param(fluidAmount("output_amount_1", FIELD + "output_fluid_amount_1", 50))
             .writer((ctx, out) ->
             {
-                out.add("ingredient", ctx.countedIngredient(ctx.get("input")));
-                JsonArray results = thermalResults(ctx, "output");
-                if(ctx.has("fluid")) results.add(ctx.fluid(ctx.get("fluid"), ctx.paramInt("fluid_amount")));
+                if(ctx.has("fluid")) out.add("ingredient", ctx.fluid(ctx.get("fluid"), ctx.paramInt("fluid_amount")));
+                JsonArray results = new JsonArray();
+                for(int i = 0; i < 2; i++)
+                    if(ctx.has("fluid_output_" + i)) results.add(ctx.fluid(ctx.get("fluid_output_" + i), ctx.paramInt("output_amount_" + i)));
+                results.addAll(thermalResults(ctx, "output"));
                 out.add("result", results);
-                addExperience(ctx, out);
                 ctx.addIfPositive(out, "energy", "energy");
             });
+
+    /** Fluid encapsulator: an item filled with a fluid */
+    public static final SlotRecipeType BOTTLER = thermal("bottler", "thermal:machine_bottler")
+            .slot(SlotSpec.input("fluid", THERMAL_INPUT_X, 29).as(SlotSpec.Kind.FLUID))
+            .slot(SlotSpec.input("input", THERMAL_INPUT_X, 47))
+            .slot(SlotSpec.output("output_0", THERMAL_SINGLE_X, 38))
+            .param(fluidAmount("fluid_amount", FIELD + "fluid_amount", 1000))
+            .writer((ctx, out) ->
+            {
+                out.add("ingredients", thermalIngredients(ctx, "input", "fluid"));
+                out.add("result", ctx.items(ctx.all("output")));
+                ctx.addIfPositive(out, "energy", "energy");
+            });
+
+    /** Alchemical imbuer: a fluid and an item brewed into another fluid */
+    public static final SlotRecipeType BREWER = thermal("brewer", "thermal:machine_brewer")
+            .slot(SlotSpec.input("fluid", THERMAL_INPUT_X, 29).as(SlotSpec.Kind.FLUID))
+            .slot(SlotSpec.input("input", THERMAL_INPUT_X, 47))
+            .slot(SlotSpec.output("fluid_output", THERMAL_SINGLE_X, 38).as(SlotSpec.Kind.FLUID))
+            .param(fluidAmount("fluid_amount", FIELD + "input_fluid_amount", 1000))
+            .param(fluidAmount("fluid_output_amount", THERMAL_FIELD + "fluid_output_amount", 1000))
+            .writer((ctx, out) ->
+            {
+                out.add("ingredients", thermalIngredients(ctx, "fluid", "input"));
+                JsonArray results = new JsonArray();
+                if(ctx.has("fluid_output")) results.add(ctx.fluid(ctx.get("fluid_output"), ctx.paramInt("fluid_output_amount")));
+                out.add("result", results);
+                ctx.addIfPositive(out, "energy", "energy");
+            });
+
+    /** Crystallizer: a fluid and up to 2 items grown into a crystal */
+    public static final SlotRecipeType CRYSTALLIZER = thermal("crystallizer", "thermal:machine_crystallizer")
+            .slot(SlotSpec.input("fluid", 32, 38).as(SlotSpec.Kind.FLUID))
+            .slot(SlotSpec.input("input_0", THERMAL_INPUT_X, 29))
+            .slot(SlotSpec.input("input_1", THERMAL_INPUT_X, 47))
+            .slot(SlotSpec.output("output_0", THERMAL_SINGLE_X, 38))
+            .param(fluidAmount("fluid_amount", FIELD + "fluid_amount", 1000))
+            .writer((ctx, out) ->
+            {
+                out.add("ingredients", thermalIngredients(ctx, "fluid", "input_0", "input_1"));
+                out.add("result", ctx.items(ctx.all("output")));
+                ctx.addIfPositive(out, "energy", "energy");
+            });
+
+    /**
+     * Catalysts: items boosting the outputs of the pulverizer, smelter or insolator. The button picks the machine.
+     */
+    public static final SlotRecipeType CATALYST = thermalStyle("catalyst", "thermal:machine_pulverizer")
+            .slot(SlotSpec.input("input", THERMAL_INPUT_X, 38))
+            .arrow(74, 42, 30)
+            .variant("pulverizer", "thermal:pulverizer_catalyst", "Pulverizer", "thermal:machine_pulverizer")
+            .variant("smelter", "thermal:smelter_catalyst", "Induction Smelter", "thermal:machine_smelter")
+            .variant("insolator", "thermal:insolator_catalyst", "Phytogenic Insolator", "thermal:machine_insolator")
+            .variantSelector(THERMAL_SINGLE_X - 3, 35, 22, 22, true)
+            .param(ParamSpec.decimal("primary_mod", THERMAL_FIELD + "primary_mod", 1.0))
+            .param(ParamSpec.decimal("secondary_mod", THERMAL_FIELD + "secondary_mod", 1.0))
+            .param(ParamSpec.decimal("energy_mod", THERMAL_FIELD + "energy_mod", 1.0))
+            .param(ParamSpec.decimal("min_chance", THERMAL_FIELD + "min_chance", 0.0))
+            .param(ParamSpec.decimal("use_chance", THERMAL_FIELD + "use_chance", 1.0))
+            .writer((ctx, out) ->
+            {
+                out.add("ingredient", ctx.ingredient(ctx.get("input")));
+                for(String key : List.of("primary_mod", "secondary_mod", "energy_mod", "min_chance", "use_chance"))
+                    out.addProperty(key, ctx.paramDouble(key));
+            });
+
+    /* Devices */
+
+    /** An item given to a device (shown after the arrow) with values describing its effect */
+    private static SlotRecipeType.Builder thermalBoost(String name, String device)
+    {
+        return thermalStyle(name, device)
+                .slot(SlotSpec.input("input", THERMAL_INPUT_X, 38))
+                .arrow(74, 42, 30)
+                .item(device, THERMAL_SINGLE_X, 38);
+    }
+
+    /** Arboreal extractor: which trunk and leaves give which fluid */
+    public static final SlotRecipeType TREE_EXTRACTOR = thermalStyle("tree_extractor", "thermal:device_tree_extractor")
+            .slot(SlotSpec.input("leaves", THERMAL_INPUT_X, 29).as(SlotSpec.Kind.BLOCK))
+            .slot(SlotSpec.input("trunk", THERMAL_INPUT_X, 47).as(SlotSpec.Kind.BLOCK))
+            .arrow(74, 42, 30)
+            .item("thermal:device_tree_extractor", 81, 21)
+            .slot(SlotSpec.output("fluid", THERMAL_SINGLE_X, 38).as(SlotSpec.Kind.FLUID))
+            .param(fluidAmount("amount", FIELD + "fluid_amount", 25))
+            .writer((ctx, out) ->
+            {
+                if(ctx.has("trunk")) out.addProperty("trunk", ctx.get("trunk").getId().toString());
+                if(ctx.has("leaves")) out.addProperty("leaves", ctx.get("leaves").getId().toString());
+                if(ctx.has("fluid")) out.add("result", ctx.fluid(ctx.get("fluid"), ctx.paramInt("amount")));
+            });
+
+    public static final SlotRecipeType TREE_EXTRACTOR_BOOST = thermalBoost("tree_extractor_boost", "thermal:device_tree_extractor")
+            .param(ParamSpec.decimal("output_mod", THERMAL_FIELD + "output_mod", 1.0))
+            .param(ParamSpec.integer("cycles", THERMAL_FIELD + "cycles", 8))
+            .writer((ctx, out) ->
+            {
+                out.add("ingredient", ctx.ingredient(ctx.get("input")));
+                out.addProperty("output_mod", ctx.paramDouble("output_mod"));
+                out.addProperty("cycles", ctx.paramInt("cycles"));
+            });
+
+    /** Aquatic entangler bait: more fish, maybe from another loot table */
+    public static final SlotRecipeType FISHER_BOOST = thermalBoost("fisher_boost", "thermal:device_fisher")
+            .param(ParamSpec.decimal("output_mod", THERMAL_FIELD + "output_mod", 1.0))
+            .param(ParamSpec.decimal("use_chance", THERMAL_FIELD + "use_chance", 1.0))
+            .param(ParamSpec.text("loot_table", THERMAL_FIELD + "loot_table", ""))
+            .writer((ctx, out) ->
+            {
+                out.add("ingredient", ctx.ingredient(ctx.get("input")));
+                if(!ctx.param("loot_table").isEmpty()) out.addProperty("loot_table", ctx.param("loot_table"));
+                out.addProperty("output_mod", ctx.paramDouble("output_mod"));
+                out.addProperty("use_chance", ctx.paramDouble("use_chance"));
+            });
+
+    /** Decoctive diffuser boost: stronger or longer potion effects */
+    public static final SlotRecipeType POTION_DIFFUSER_BOOST = thermalBoost("potion_diffuser_boost", "thermal:device_potion_diffuser")
+            .param(ParamSpec.integer("amplifier", THERMAL_FIELD + "amplifier", 0))
+            .param(ParamSpec.decimal("duration_mod", THERMAL_FIELD + "duration_mod", 0.0))
+            .writer((ctx, out) ->
+            {
+                out.add("ingredient", ctx.ingredient(ctx.get("input")));
+                if(ctx.paramInt("amplifier") != 0) out.addProperty("amplifier", ctx.paramInt("amplifier"));
+                if(ctx.paramDouble("duration_mod") != 0) out.addProperty("duration_mod", ctx.paramDouble("duration_mod"));
+            });
+
+    /** Igneous extruder: the block next to it (and maybe below it) decides what it makes */
+    public static final SlotRecipeType ROCK_GEN = thermalStyle("rock_gen", "thermal:device_rock_gen")
+            .slot(SlotSpec.input("adjacent", THERMAL_INPUT_X, 29).as(SlotSpec.Kind.BLOCK))
+            .slot(SlotSpec.input("below", THERMAL_INPUT_X, 47).as(SlotSpec.Kind.BLOCK))
+            .arrow(74, 42, 30)
+            .item("thermal:device_rock_gen", 81, 21)
+            .slot(SlotSpec.output("output", THERMAL_SINGLE_X, 38))
+            .writer((ctx, out) ->
+            {
+                if(ctx.has("adjacent")) out.addProperty("adjacent", ctx.get("adjacent").getId().toString());
+                if(ctx.has("below")) out.addProperty("below", ctx.get("below").getId().toString());
+                if(ctx.has("output")) out.add("result", ctx.item(ctx.get("output")));
+            });
+
+    /** Apiary extractor: what a hive gives */
+    public static final SlotRecipeType HIVE_EXTRACTOR = thermalStyle("hive_extractor", "thermal:device_hive_extractor")
+            .slot(SlotSpec.input("hive", THERMAL_INPUT_X, 38).as(SlotSpec.Kind.BLOCK))
+            .arrow(74, 42, 30)
+            .item("thermal:device_hive_extractor", 81, 21)
+            .slot(SlotSpec.output("output", THERMAL_SINGLE_X, 29))
+            .slot(SlotSpec.output("fluid", THERMAL_SINGLE_X, 47).as(SlotSpec.Kind.FLUID))
+            .param(fluidAmount("amount", FIELD + "fluid_amount", 250))
+            .writer((ctx, out) ->
+            {
+                if(ctx.has("hive")) out.addProperty("hive", ctx.get("hive").getId().toString());
+                if(ctx.has("output")) out.add("item", ctx.item(ctx.get("output")));
+                if(ctx.has("fluid")) out.add("fluid", ctx.fluid(ctx.get("fluid"), ctx.paramInt("amount")));
+            });
+
+    /* Dynamo fuels */
+
+    /**
+     * A fuel burnt by a dynamo (shown after the arrow) for an amount of energy.
+     */
+    private static SlotRecipeType thermalFuel(String name, String dynamo, boolean fluid, int defaultEnergy)
+    {
+        SlotRecipeType.Builder builder = thermalStyle(name, dynamo)
+                .slot(fluid ? SlotSpec.input("fuel", THERMAL_INPUT_X, 38).as(SlotSpec.Kind.FLUID) : SlotSpec.input("fuel", THERMAL_INPUT_X, 38))
+                .arrow(74, 42, 30)
+                .item(dynamo, THERMAL_SINGLE_X, 38)
+                .param(ParamSpec.integer("energy", THERMAL_FIELD + "fuel_energy", defaultEnergy));
+        if(fluid) builder.param(fluidAmount("fluid_amount", FIELD + "fluid_amount", 1000));
+        return builder.writer((ctx, out) ->
+        {
+            if(ctx.has("fuel"))
+                out.add("ingredient", fluid ? ctx.fluid(ctx.get("fuel"), ctx.paramInt("fluid_amount")) : ctx.ingredient(ctx.get("fuel")));
+            out.addProperty("energy", ctx.paramInt("energy"));
+        });
+    }
+
+    public static final SlotRecipeType STIRLING_FUEL = thermalFuel("stirling_fuel", "thermal:dynamo_stirling", false, 24000);
+    public static final SlotRecipeType COMPRESSION_FUEL = thermalFuel("compression_fuel", "thermal:dynamo_compression", true, 100000);
+    public static final SlotRecipeType MAGMATIC_FUEL = thermalFuel("magmatic_fuel", "thermal:dynamo_magmatic", true, 100000);
+    public static final SlotRecipeType NUMISMATIC_FUEL = thermalFuel("numismatic_fuel", "thermal:dynamo_numismatic", false, 40000);
+    public static final SlotRecipeType LAPIDARY_FUEL = thermalFuel("lapidary_fuel", "thermal:dynamo_lapidary", false, 40000);
+    public static final SlotRecipeType DISENCHANTMENT_FUEL = thermalFuel("disenchantment_fuel", "thermal:dynamo_disenchantment", false, 32000);
+    public static final SlotRecipeType GOURMAND_FUEL = thermalFuel("gourmand_fuel", "thermal:dynamo_gourmand", false, 16000);
 
     /* ---------------- Create ---------------- */
     // The GUI textures hold the panel and the slots; arrows and machines are decorations drawn by the screen
@@ -778,7 +991,9 @@ public class SlotRecipeTypes
     public static final List<SlotRecipeType> ALL = List.of(
             CRAFTING_TABLE, FURNACE, STONECUTTING, SMITHING,
             MANA_INFUSION, ELVEN_TRADE, PURE_DAISY, BREWERY, PETAL_APOTHECARY, RUNIC_ALTAR, TERRA_PLATE,
-            TREE_EXTRACTOR, PULVERIZER, SAWMILL, SMELTER, INSOLATOR, PRESS, THERMAL_FURNACE, CENTRIFUGE, CHILLER, CRUCIBLE, REFINERY, BOTTLER, PYROLYZER,
+            THERMAL_FURNACE, PULVERIZER, SAWMILL, SMELTER, INSOLATOR, CENTRIFUGE, PYROLYZER, PRESS, CRUCIBLE, CHILLER, REFINERY, BOTTLER, BREWER, CRYSTALLIZER, CATALYST,
+            TREE_EXTRACTOR, TREE_EXTRACTOR_BOOST, FISHER_BOOST, POTION_DIFFUSER_BOOST, ROCK_GEN, HIVE_EXTRACTOR,
+            STIRLING_FUEL, COMPRESSION_FUEL, MAGMATIC_FUEL, NUMISMATIC_FUEL, LAPIDARY_FUEL, DISENCHANTMENT_FUEL, GOURMAND_FUEL,
             CRUSHING, MILLING, CUTTING, PRESSING, SPLASHING, HAUNTING, SANDPAPER_POLISHING, DEPLOYING, ITEM_APPLICATION,
             FILLING, EMPTYING, MIXING, COMPACTING, MECHANICAL_CRAFTING, SEQUENCED_ASSEMBLY);
 }

@@ -40,6 +40,14 @@ public class CoreShapes
         public static final CoreVoxelShape SHAPE_TERRA_PLATE = CoreVoxelShape.single(0.0D, 0.0D, 0.0D, 16.0D, 3.0D, 16.0D);
     }
 
+    public static class ThermalRecipeCreatorShapes {
+        /** Dynamos: the base, then the coil on top */
+        public static final CoreVoxelShape SHAPE_DYNAMO = CoreVoxelShape.builder()
+                .add(0.0D, 0.0D, 0.0D, 16.0D, 10.0D, 16.0D)
+                .add(4.0D, 10.0D, 4.0D, 12.0D, 16.0D, 12.0D)
+                .build();
+    }
+
     public static class CreateRecipeCreatorShapes {
         /** The casing only: the blade sticking out at the back has no collision, like Create's saw */
         public static final CoreVoxelShape SHAPE_MECHANICAL_SAW = CoreVoxelShape.single(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 12.0D);
