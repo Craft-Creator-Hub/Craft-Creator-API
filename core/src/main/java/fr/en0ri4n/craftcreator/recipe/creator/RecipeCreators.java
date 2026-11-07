@@ -4,6 +4,8 @@ package fr.en0ri4n.craftcreator.recipe.creator;
 import fr.en0ri4n.craftcreator.api.blockentity.CoreBlockEntityDefinition;
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockDef;
 import fr.en0ri4n.craftcreator.api.init.definitions.FacingType;
+import fr.en0ri4n.craftcreator.api.init.shapes.CoreShapes;
+import fr.en0ri4n.craftcreator.api.init.shapes.CoreVoxelShape;
 import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeType;
 import fr.en0ri4n.craftcreator.impl.InitManager;
 import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.CraftingTableRCBehavior;
@@ -21,6 +23,7 @@ import fr.en0ri4n.craftcreator.utils.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class RecipeCreators
 {
@@ -31,6 +34,23 @@ public class RecipeCreators
     public static final RecipeCreator<FurnaceRCBehavior> FURNACE_RECIPE_CREATOR;
 
     public static final List<RecipeCreator<?>> ALL_RECIPE_CREATORS = new ArrayList<>();
+
+    /**
+     * Shape (collision and outline) of slot recipe blocks whose model isn't a full cube, given facing north:
+     * it is rotated with the block. Types not listed here are full blocks.
+     */
+    private static final Map<SlotRecipeType, CoreVoxelShape> SLOT_RECIPE_SHAPES = Map.of(
+            // Minecraft
+            SlotRecipeTypes.STONECUTTING, CoreShapes.MinecraftRecipeCreatorShapes.SHAPE_STONECUTTER,
+            // Botania
+            SlotRecipeTypes.MANA_INFUSION, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_MANA_POOL,
+            SlotRecipeTypes.PURE_DAISY, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_PURE_DAISY,
+            SlotRecipeTypes.BREWERY, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_BREWERY,
+            SlotRecipeTypes.PETAL_APOTHECARY, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_PETAL_APOTHECARY,
+            SlotRecipeTypes.RUNIC_ALTAR, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_RUNIC_ALTAR,
+            SlotRecipeTypes.TERRA_PLATE, CoreShapes.BotaniaRecipeCreatorShapes.SHAPE_TERRA_PLATE,
+            // Create
+            SlotRecipeTypes.CUTTING, CoreShapes.CreateRecipeCreatorShapes.SHAPE_MECHANICAL_SAW);
 
     static {
         CRAFTING_TABLE_RECIPE_CREATOR = new RecipeCreator.Builder<>(CRAFTING_TABLE_RECIPE_CREATOR_ID, CraftingTableRCBehavior::new)
@@ -64,7 +84,7 @@ public class RecipeCreators
         return new RecipeCreator.Builder<>(type.getId(), () -> new SlotRecipeBehavior(type))
                 .setMod(type.getMod())
                 .setRecipeTypeIds(type.getRecipeTypeId())
-                .setRecipeCreatorBlock(CoreBlockDef.builder(type.getId()).facing(FacingType.HORIZONTAL).build())
+                .setRecipeCreatorBlock(slotRecipeBlock(type))
                 .setBlockEntityDefinition(CoreBlockEntityDefinition.builder(type.getId())
                                                   .inventorySize(type.getSlots().size())
                                                   .setBehavior(type.getId())
@@ -72,6 +92,14 @@ public class RecipeCreators
                 .setContainerModel(new SlotRecipeContainerModel(type))
                 .setSerializer(new SlotRecipeSerializer(type))
                 .build();
+    }
+
+    private static CoreBlockDef slotRecipeBlock(SlotRecipeType type)
+    {
+        CoreBlockDef.Builder block = CoreBlockDef.builder(type.getId()).facing(FacingType.HORIZONTAL);
+        CoreVoxelShape shape = SLOT_RECIPE_SHAPES.get(type);
+        if(shape != null) block.facingShapes(CoreVoxelShape.horizontal(shape));
+        return block.build();
     }
 
     public static RecipeCreator<?> getRecipeCreator(SupportedRecipeType recipeType)

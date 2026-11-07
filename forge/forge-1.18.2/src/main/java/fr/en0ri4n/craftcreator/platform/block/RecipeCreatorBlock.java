@@ -59,7 +59,8 @@ public class RecipeCreatorBlock extends Block implements EntityBlock
     @Override
     public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext)
     {
-        CoreVoxelShape coreShape = coreBlockDef.getFacingShapes().getOrDefault(Forge1182Platform.get().getFacingAdapter().toCore(pState.getValue(BlockStateProperties.HORIZONTAL_FACING)), CoreShapes.FULL);
+        CoreVoxelShape defaultShape = coreBlockDef.getBlockShape() != null ? coreBlockDef.getBlockShape() : CoreShapes.FULL;
+        CoreVoxelShape coreShape = coreBlockDef.getFacingShapes().getOrDefault(Forge1182Platform.get().getFacingAdapter().toCore(pState.getValue(BlockStateProperties.HORIZONTAL_FACING)), defaultShape);
 
         return Forge1182Platform.get().getBlockShapeAdapter().toPlatformShape(coreShape);
     }
