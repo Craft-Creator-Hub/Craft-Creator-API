@@ -1,7 +1,6 @@
 package fr.en0ri4n.craftcreator.recipe.serialize;
 
 import fr.en0ri4n.craftcreator.CraftCreatorAPI;
-import fr.en0ri4n.craftcreator.api.mod.SupportedRecipeType;
 import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreator;
 import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreators;
 import fr.en0ri4n.craftcreator.utils.Identifier;
@@ -17,28 +16,24 @@ public class RecipeSerializerRegistry
     private static final RecipeSerializerRegistry INSTANCE = new RecipeSerializerRegistry();
     public static RecipeSerializerRegistry get() { return INSTANCE; }
 
+    /** Serializers by recipe creator id and by recipe type id */
     private final Map<String, RecipeSerializer> idToSerializerMap = new HashMap<>();
-    private final Map<SupportedRecipeType, RecipeSerializer> recipeTypeToSerializerMap = new HashMap<>();
 
-    public void register(Identifier id, List<SupportedRecipeType> recipeType, RecipeSerializer serializer)
+    /**
+     * @param id           the recipe creator id
+     * @param recipeTypes  the recipe types it makes
+     */
+    public void register(Identifier id, List<Identifier> recipeTypes, RecipeSerializer serializer)
     {
         idToSerializerMap.put(id.toString(), serializer);
-        for(SupportedRecipeType type : recipeType)
-            recipeTypeToSerializerMap.put(type, serializer);
+        recipeTypes.forEach(typeId -> idToSerializerMap.putIfAbsent(typeId.toString(), serializer));
     }
 
-    public RecipeSerializer getByRecipeType(SupportedRecipeType recipeType)
-    {
-        return recipeTypeToSerializerMap.get(recipeType);
-    }
-
+    /**
+     * @param recipeTypeId a recipe type (e.g. "minecraft:smelting") or a recipe creator id
+     */
     public RecipeSerializer getByRecipeTypeId(Identifier recipeTypeId)
     {
-        for(SupportedRecipeType type : recipeTypeToSerializerMap.keySet())
-        {
-            if(type.getId().equals(recipeTypeId.toString()))
-                return getByRecipeType(type);
-        }
         return idToSerializerMap.get(recipeTypeId.toString());
     }
 
@@ -47,8 +42,7 @@ public class RecipeSerializerRegistry
         for(RecipeCreator<?> creator : RecipeCreators.ALL_RECIPE_CREATORS)
         {
             CraftCreatorAPI.LOGGER.info("Registering recipe serializer for recipe creator: " + creator.getId());
-            get().register(creator.getId(), creator.getRecipeTypes(), creator.getSerializer());
-            creator.getRecipeTypeIds().forEach(typeId -> get().idToSerializerMap.putIfAbsent(typeId.toString(), creator.getSerializer()));
+            get().register(creator.getId(), creator.getRecipeTypeIds(), creator.getSerializer());
         }
     }
 }

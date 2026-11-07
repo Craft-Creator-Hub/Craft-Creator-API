@@ -2,10 +2,6 @@ package fr.en0ri4n.craftcreator.impl.model;
 
 import fr.en0ri4n.craftcreator.api.init.definitions.CoreBlockPos;
 import fr.en0ri4n.craftcreator.api.ui.container.ContainerModel;
-import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.CraftingTableRCBehavior;
-import fr.en0ri4n.craftcreator.impl.blockentity.behaviors.FurnaceRCBehavior;
-import fr.en0ri4n.craftcreator.impl.model.container.minecraft.CraftingTableRCContainerModel;
-import fr.en0ri4n.craftcreator.impl.model.container.minecraft.FurnaceRCContainerModel;
 import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreator;
 import fr.en0ri4n.craftcreator.recipe.creator.RecipeCreators;
 import fr.en0ri4n.craftcreator.utils.Identifier;
@@ -23,9 +19,6 @@ public class ContainerModels
     {
         return INSTANCE;
     }
-
-    public static final ContainerModel<CraftingTableRCBehavior> CRAFTING_TABLE_RC_CONTAINER_MODEL = new CraftingTableRCContainerModel();
-    public static final ContainerModel<FurnaceRCBehavior> FURNACE_RC_CONTAINER_MODEL = new FurnaceRCContainerModel();
 
     private final Map<String, ContainerModel<?>> containerModels = new HashMap<>();
 

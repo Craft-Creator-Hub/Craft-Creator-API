@@ -1,12 +1,16 @@
 package fr.en0ri4n.craftcreator.recipe.slot;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import fr.en0ri4n.craftcreator.api.mod.SupportedMod;
+import fr.en0ri4n.craftcreator.recipe.model.CraftingGrid;
+import fr.en0ri4n.craftcreator.recipe.serialize.RecipeSerializer;
 import fr.en0ri4n.craftcreator.recipe.utils.RecipeEntry;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,6 +23,92 @@ public class SlotRecipeTypes
     private static final String FIELD = "screen.slot_recipe.field.";
 
     /* ---------------- Minecraft ---------------- */
+
+    private static final int GRID_SIZE = 3;
+
+    /** Crafting table: shaped (the grid layout is kept) or shapeless recipes. */
+    public static final SlotRecipeType CRAFTING_TABLE = SlotRecipeType.builder(SupportedMod.MINECRAFT, "crafting")
+            .id("crafting_table_recipe_creator")
+            .icon("minecraft:crafting_table")
+            .inputs("input", 30, 17, 48, 17, 66, 17, 30, 35, 48, 35, 66, 35, 30, 53, 48, 53, 66, 53)
+            .slot(SlotSpec.output("output", 124, 35))
+            .variant("shaped", "minecraft:crafting_shaped", "Shaped", "minecraft:crafting_table")
+            .variant("shapeless", "minecraft:crafting_shapeless", "Shapeless", "minecraft:crafting_table")
+            .variantSelector(100, 60, 50, 19, false)
+            .inputReader(SlotRecipeTypes::readCraftingInputs)
+            .writer((ctx, out) ->
+            {
+                List<RecipeEntry> inputs = ctx.all("input");
+                if(ctx.getVariant().name().equals("shaped"))
+                {
+                    CraftingGrid grid = new CraftingGrid(GRID_SIZE, GRID_SIZE);
+                    inputs.forEach(input -> grid.set(input.getSlot() % GRID_SIZE, input.getSlot() / GRID_SIZE, input));
+                    RecipeSerializer.PatternAndKey patternAndKey = RecipeSerializer.buildPatternAndKey(grid);
+                    out.add("pattern", patternAndKey.pattern());
+                    out.add("key", patternAndKey.key());
+                }
+                else
+                {
+                    out.add("ingredients", ctx.ingredients(inputs));
+                }
+                out.add("result", ctx.result(ctx.get("output")));
+            });
+
+    /**
+     * Inputs of a crafting recipe with their grid slot: from the pattern for shaped recipes, in order for shapeless ones.
+     */
+    private static List<RecipeEntry> readCraftingInputs(JsonObject json)
+    {
+        List<RecipeEntry> inputs = new ArrayList<>();
+        if(json.has("pattern"))
+        {
+            JsonArray pattern = json.getAsJsonArray("pattern");
+            JsonObject key = json.has("key") ? json.getAsJsonObject("key") : new JsonObject();
+            for(int row = 0; row < Math.min(pattern.size(), GRID_SIZE); row++)
+            {
+                String line = pattern.get(row).getAsString();
+                for(int col = 0; col < Math.min(line.length(), GRID_SIZE); col++)
+                    addInput(inputs, key.get(String.valueOf(line.charAt(col))), row * GRID_SIZE + col);
+            }
+        }
+        else if(json.has("ingredients"))
+        {
+            JsonArray ingredients = json.getAsJsonArray("ingredients");
+            for(int i = 0; i < Math.min(ingredients.size(), GRID_SIZE * GRID_SIZE); i++)
+                addInput(inputs, ingredients.get(i), i);
+        }
+        return inputs;
+    }
+
+    private static void addInput(List<RecipeEntry> inputs, JsonElement ingredient, int slot)
+    {
+        RecipeEntry entry = ingredient == null ? null : RecipeSerializer.parseIngredient(ingredient);
+        if(entry == null) return;
+        entry.setSlot(slot);
+        inputs.add(entry);
+    }
+
+    /** Furnace, blast furnace, smoker and campfire share the same layout and values. */
+    public static final SlotRecipeType FURNACE = SlotRecipeType.builder(SupportedMod.MINECRAFT, "smelting")
+            .id("furnace_recipe_creator")
+            .texture("textures/gui/container/minecraft/furnace_recipe_creator.png")
+            .icon("minecraft:furnace")
+            .slot(SlotSpec.input("input", 56, 35))
+            .slot(SlotSpec.output("output", 116, 35))
+            .variant("smelting", "minecraft:smelting", "Furnace", "minecraft:furnace")
+            .variant("blasting", "minecraft:blasting", "Blast Furnace", "minecraft:blast_furnace")
+            .variant("smoking", "minecraft:smoking", "Smoker", "minecraft:smoker")
+            .variant("campfire_cooking", "minecraft:campfire_cooking", "Campfire", "minecraft:campfire")
+            .variantSelector(176 - 22, 0, 22, 22, true)
+            .param(ParamSpec.integer("cookingtime", "screen.minecraft_recipe_creator.smelting.field.cooking_time", 200))
+            .param(ParamSpec.decimal("experience", "screen.minecraft_recipe_creator.smelting.field.experience", 0.1))
+            .writer((ctx, out) ->
+            {
+                out.add("ingredient", ctx.ingredient(ctx.get("input")));
+                out.addProperty("result", ctx.get("output").getId().toString());
+                out.addProperty("experience", ctx.paramDouble("experience"));
+                out.addProperty("cookingtime", ctx.paramInt("cookingtime"));
+            });
 
     public static final SlotRecipeType STONECUTTING = SlotRecipeType.builder(SupportedMod.MINECRAFT, "stonecutting")
             .icon("minecraft:stonecutter")
@@ -375,7 +465,7 @@ public class SlotRecipeTypes
     public static final SlotRecipeType CUTTING = create("cutting", "create:mechanical_saw", 100);
 
     public static final List<SlotRecipeType> ALL = List.of(
-            STONECUTTING, SMITHING,
+            CRAFTING_TABLE, FURNACE, STONECUTTING, SMITHING,
             MANA_INFUSION, ELVEN_TRADE, PURE_DAISY, BREWERY, PETAL_APOTHECARY, RUNIC_ALTAR, TERRA_PLATE,
             TREE_EXTRACTOR, PULVERIZER, SAWMILL, SMELTER, INSOLATOR, PRESS, THERMAL_FURNACE, CENTRIFUGE, CHILLER, CRUCIBLE, REFINERY, BOTTLER, PYROLYZER,
             CRUSHING, CUTTING);
