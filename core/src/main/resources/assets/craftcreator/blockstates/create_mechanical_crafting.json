@@ -1,0 +1,19 @@
+{
+    "variants": {
+        "facing=north": {
+            "model": "craftcreator:block/create_mechanical_crafting"
+        },
+        "facing=east": {
+            "model": "craftcreator:block/create_mechanical_crafting",
+            "y": 90
+        },
+        "facing=south": {
+            "model": "craftcreator:block/create_mechanical_crafting",
+            "y": 180
+        },
+        "facing=west": {
+            "model": "craftcreator:block/create_mechanical_crafting",
+            "y": 270
+        }
+    }
+}

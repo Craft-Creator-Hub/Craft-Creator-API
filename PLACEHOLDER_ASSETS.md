@@ -17,6 +17,16 @@ grid on one face. Models are self-contained (parents resolved) in `models/block/
 | `botania_terra_plate` | Terrestrial Agglomeration Plate | Green grid on the top |
 | `create_crushing` | Crushing Wheel (OBJ model in `models/block/create_crushing/`) | Wooden grid on the wheel face, axis in the center |
 | `create_cutting` | Mechanical Saw | Casing top |
+| `create_milling`, `create_pressing`, `create_mixing`, `create_deploying`, `create_filling`, `create_mechanical_crafting` | Millstone, Mechanical Press, Mechanical Mixer, Deployer, Spout, Mechanical Crafter (item models; parts sticking out of the block are removed or scaled in) | Top of the highest part |
+| `create_compacting` | Basin | Basin floor |
+| `create_splashing`, `create_haunting` | Encased Fan | Top, blue (water) or cyan (soul fire) cells |
+| `create_emptying` | Item Drain | Top |
+| `create_sandpaper_polishing`, `create_sequenced_assembly` | Depot | Top, sand or brass cells |
+| `create_item_application` | Andesite Casing | Top |
+
+The Create GUIs (`textures/gui/container/create/`) are drawn from each type's slot layout: an andesite plate framed in
+brass, recipe slots (fluid slots are blue, outputs have a brass ring) and a light player inventory. Arrows, machines and
+titles are drawn by the screen.
 | `minecraft_stonecutting` | Stonecutter (the saw stays the vanilla animated texture) | Top |
 | `minecraft_smithing` | Smithing Table (other faces use the vanilla textures) | Top |
 

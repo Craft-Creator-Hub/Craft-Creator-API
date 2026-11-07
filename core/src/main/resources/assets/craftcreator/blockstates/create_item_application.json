@@ -1,0 +1,19 @@
+{
+    "variants": {
+        "facing=north": {
+            "model": "craftcreator:block/create_item_application"
+        },
+        "facing=east": {
+            "model": "craftcreator:block/create_item_application",
+            "y": 90
+        },
+        "facing=south": {
+            "model": "craftcreator:block/create_item_application",
+            "y": 180
+        },
+        "facing=west": {
+            "model": "craftcreator:block/create_item_application",
+            "y": 270
+        }
+    }
+}

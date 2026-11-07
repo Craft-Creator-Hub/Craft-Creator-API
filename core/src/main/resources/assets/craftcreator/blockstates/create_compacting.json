@@ -1,0 +1,19 @@
+{
+    "variants": {
+        "facing=north": {
+            "model": "craftcreator:block/create_compacting"
+        },
+        "facing=east": {
+            "model": "craftcreator:block/create_compacting",
+            "y": 90
+        },
+        "facing=south": {
+            "model": "craftcreator:block/create_compacting",
+            "y": 180
+        },
+        "facing=west": {
+            "model": "craftcreator:block/create_compacting",
+            "y": 270
+        }
+    }
+}

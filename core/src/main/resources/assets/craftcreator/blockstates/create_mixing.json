@@ -1,0 +1,19 @@
+{
+    "variants": {
+        "facing=north": {
+            "model": "craftcreator:block/create_mixing"
+        },
+        "facing=east": {
+            "model": "craftcreator:block/create_mixing",
+            "y": 90
+        },
+        "facing=south": {
+            "model": "craftcreator:block/create_mixing",
+            "y": 180
+        },
+        "facing=west": {
+            "model": "craftcreator:block/create_mixing",
+            "y": 270
+        }
+    }
+}

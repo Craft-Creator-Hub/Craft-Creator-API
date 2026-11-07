@@ -1,0 +1,19 @@
+{
+    "variants": {
+        "facing=north": {
+            "model": "craftcreator:block/create_sandpaper_polishing"
+        },
+        "facing=east": {
+            "model": "craftcreator:block/create_sandpaper_polishing",
+            "y": 90
+        },
+        "facing=south": {
+            "model": "craftcreator:block/create_sandpaper_polishing",
+            "y": 180
+        },
+        "facing=west": {
+            "model": "craftcreator:block/create_sandpaper_polishing",
+            "y": 270
+        }
+    }
+}

@@ -1,0 +1,72 @@
+{
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down",
+          "cullface": "down"
+        },
+        "up": {
+          "texture": "#craftcreator_grid",
+          "cullface": "up"
+        },
+        "north": {
+          "texture": "#north",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#south",
+          "cullface": "south"
+        },
+        "west": {
+          "texture": "#west",
+          "cullface": "west"
+        },
+        "east": {
+          "texture": "#east",
+          "cullface": "east"
+        }
+      }
+    }
+  ],
+  "textures": {
+    "down": "craftcreator:block/create_item_application/andesite_casing",
+    "up": "craftcreator:block/create_item_application/andesite_casing",
+    "north": "craftcreator:block/create_item_application/andesite_casing",
+    "south": "craftcreator:block/create_item_application/andesite_casing",
+    "west": "craftcreator:block/create_item_application/andesite_casing",
+    "east": "craftcreator:block/create_item_application/andesite_casing",
+    "particle": "craftcreator:block/create_item_application/andesite_casing",
+    "craftcreator_grid": "craftcreator:block/create_item_application/craftcreator_grid"
+  },
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.625,
+        0.625,
+        0.625
+      ]
+    }
+  }
+}
