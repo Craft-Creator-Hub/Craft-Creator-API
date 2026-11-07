@@ -106,6 +106,14 @@ public abstract class RecipeSerializer
 
     protected String getIdIdentifier()
     {
+        return resultIdKey();
+    }
+
+    /**
+     * Key of the item id in results: "id" in 1.21.2+, "item" before.
+     */
+    public static String resultIdKey()
+    {
         return usesNewIngredientFormat() ? "id" : "item";
     }
 
@@ -118,7 +126,7 @@ public abstract class RecipeSerializer
      *
      * @return the parsed RecipeEntry, or null if parsing failed
      */
-    protected RecipeEntry parseIngredient(JsonElement element)
+    public static RecipeEntry parseIngredient(JsonElement element)
     {
         if(element == null) return null;
         if(element.isJsonPrimitive()) return parseIngredientString(element.getAsString());
@@ -131,7 +139,7 @@ public abstract class RecipeSerializer
     /**
      * Supports forms like {"item":"mod:item","count":n} or {"tag":"mod:tag","count":n}
      */
-    protected RecipeEntry parseIngredientObject(JsonObject obj)
+    public static RecipeEntry parseIngredientObject(JsonObject obj)
     {
         if(obj == null) return null;
 
@@ -157,7 +165,7 @@ public abstract class RecipeSerializer
         return null;
     }
 
-    private RecipeEntry parseIngredientString(String str)
+    private static RecipeEntry parseIngredientString(String str)
     {
         if(str == null || str.isEmpty()) return null;
 
@@ -207,21 +215,24 @@ public abstract class RecipeSerializer
         return obj;
     }
 
-    protected JsonObject resultJson(RecipeEntry entry)
+    /**
+     * {"item": id, "count": n}, with the item key of the current Minecraft version.
+     */
+    public static JsonObject resultJson(RecipeEntry entry)
     {
         JsonObject result = new JsonObject();
-        result.addProperty(getIdIdentifier(), entry.getId().toString());
+        result.addProperty(resultIdKey(), entry.getId().toString());
         result.addProperty("count", entry.getCount());
         return result;
     }
 
-    protected record PatternAndKey(JsonArray pattern, JsonObject key) {}
+    public record PatternAndKey(JsonArray pattern, JsonObject key) {}
 
     /**
      * Build the "pattern" and "key" of a shaped recipe.
      * Empty rows and columns on the borders are trimmed, inner ones are kept so the shape stays the same.
      */
-    protected static PatternAndKey buildPatternAndKey(CraftingGrid grid)
+    public static PatternAndKey buildPatternAndKey(CraftingGrid grid)
     {
         // Map each distinct ingredient to a single character symbol
         Map<RecipeEntryKey, Character> symbolMap = new HashMap<>();
